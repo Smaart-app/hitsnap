@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { supabase } from '../../lib/supabaseServerClient'; // ← ΔΙΟΡΘΩΘΗΚΕ
+import { supabase } from '../../lib/supabaseClient';
 
 export const prerender = false;
 
@@ -38,7 +38,9 @@ const pageUrl = `https://hitlift.gr/blog/${slug}`;
         <img src={article.cover_image} alt="Εικόνα άρθρου" class="mb-6 rounded-lg shadow" />
       )}
 
-      <div innerHTML={article.content} />
+      <p class="leading-relaxed whitespace-pre-line">
+        {article.content}
+      </p>
 
       <div class="mt-12 text-center mb-24">
         <a href="/blog" class="inline-block text-[#50c7c2] hover:underline">
