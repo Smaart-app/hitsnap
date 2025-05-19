@@ -1,9 +1,4 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-const supabase = createClient(
-  'https://ighqljuycyjfwgysmaaa.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnaHFsanV5Y3lqZndneXNtYWFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczOTY0MzMsImV4cCI6MjA2Mjk3MjQzM30.RgqMPgS96y7dUdKX5s-MR2KbqJqiMbDtf1l6_i-PXD8'
-);
+import { supabase } from '../lib/supabaseClient';
 
 const form = document.getElementById('articleForm');
 const output = document.getElementById('output');
