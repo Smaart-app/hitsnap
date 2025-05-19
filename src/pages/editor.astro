@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { supabase } from '../../lib/supabaseClient';
 ---
 
 <html lang="el">
@@ -68,7 +69,40 @@ import Layout from '../layouts/Layout.astro';
       <div id="output" class="text-sm text-zinc-700 whitespace-pre-wrap mt-6 hidden"></div>
     </main>
 
-    <!-- 👉 Αυτό φορτώνει τον εξωτερικό JS -->
-    <script type="module" src="/scripts/editor.js"></script>
+    <script type="module">
+      const form = document.getElementById('articleForm');
+      const output = document.getElementById('output');
+      const excerptField = document.getElementById('excerpt');
+      const countLabel = document.getElementById('excerptCount');
+      const dateField = document.getElementById('created_at');
+      dateField.value = new Date().toISOString().split('T')[0];
+
+      excerptField?.addEventListener('input', () => {
+        countLabel.textContent = `${excerptField.value.length}/160`;
+      });
+
+      form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const article = {
+          slug: document.getElementById('slug').value,
+          title: document.getElementById('title').value,
+          excerpt: document.getElementById('excerpt').value,
+          content: document.getElementById('content').value,
+          created_at: document.getElementById('created_at').value,
+          cover_image: document.getElementById('cover_image').value,
+          published: document.getElementById('published').value === 'true'
+        };
+
+        const { data, error } = await import('../../lib/supabaseClient').then(({ supabase }) =>
+          supabase.from('articles').insert([article])
+        );
+
+        output.classList.remove('hidden');
+        output.textContent = error
+          ? `❌ Σφάλμα: ${error.message}`
+          : `✅ Το άρθρο καταχωρήθηκε με ID: ${data[0].id}`;
+      });
+    </script>
   </body>
 </html>
