@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabaseServerClient';
 
 const url = new URL(Astro.request.url);
 const tab = url.searchParams.get('tab') ?? 'all';
@@ -26,63 +27,3 @@ if (tab === 'published') {
 
 <Layout title="📋 Πίνακας Άρθρων">
   <main class="max-w-6xl mx-auto px-6 py-12">
-    <h1 class="text-3xl font-bold mb-8">📋 Όλα τα Άρθρα</h1>
-
-    <!-- Tabs -->
-    <div class="mb-6 flex gap-4 text-sm font-medium">
-      <a href="/dashboard" class={tab === 'all' ? 'underline text-[#50c7c2]' : 'hover:underline'}>
-        Όλα
-      </a>
-      <a href="/dashboard?tab=published" class={tab === 'published' ? 'underline text-green-600' : 'hover:underline'}>
-        Δημοσιευμένα
-      </a>
-      <a href="/dashboard?tab=drafts" class={tab === 'drafts' ? 'underline text-yellow-600' : 'hover:underline'}>
-        Πρόχειρα
-      </a>
-    </div>
-
-    {error && (
-      <p class="text-red-600 font-medium">❌ Σφάλμα φόρτωσης άρθρων: {error.message}</p>
-    )}
-
-    {visible.length > 0 ? (
-      <table class="w-full table-auto border-collapse text-sm">
-        <thead>
-          <tr class="bg-zinc-100 dark:bg-zinc-800 text-left">
-            <th class="p-3">Τίτλος</th>
-            <th class="p-3">Ημερομηνία</th>
-            <th class="p-3">Κατάσταση</th>
-            <th class="p-3">Ενέργειες</th>
-          </tr>
-        </thead>
-        <tbody>
-          {visible.map((article) => (
-            <tr class="border-b dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition">
-              <td class="p-3">{article.title}</td>
-              <td class="p-3">
-                {new Date(article.created_at).toLocaleDateString('el-GR')}
-              </td>
-              <td class="p-3">
-                {article.published ? (
-                  <span class="text-green-600 font-medium">Δημοσιευμένο</span>
-                ) : (
-                  <span class="text-yellow-600 font-medium">Πρόχειρο</span>
-                )}
-              </td>
-              <td class="p-3 flex gap-3">
-                <a href={`/blog/${article.slug}`} class="text-[#50c7c2] hover:underline">Προβολή</a>
-                <a href={`/editor?edit=${article.slug}`} class="text-blue-500 hover:underline">Επεξεργασία</a>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    ) : (
-      <p class="text-gray-600">Δεν υπάρχουν άρθρα σε αυτή την κατηγορία.</p>
-    )}
-
-    <div class="mt-8">
-      <a href="/editor" class="text-sm text-[#50c7c2] hover:underline">➕ Δημιουργία νέου άρθρου</a>
-    </div>
-  </main>
-</Layout>

@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabaseServerClient';
 
 const url = new URL(Astro.request.url);
 const tab = url.searchParams.get('tab') ?? 'all';
@@ -26,56 +27,3 @@ const visible = tab === 'drafts'
     ? articles?.filter(a => a.published && a.created_at <= now)
     : tab === 'scheduled'
       ? articles?.filter(a => a.published && a.created_at > now)
-      : articles ?? [];
----
-
-<Layout title="🎛️ Διαχείριση Άρθρων">
-  <main class="max-w-6xl mx-auto px-6 py-12">
-    <h1 class="text-3xl font-bold mb-6">🎛️ Backstage: Άρθρα</h1>
-
-    <div class="mb-6 flex gap-4 text-sm font-medium">
-      <a href="/backstage?key=my-secret-key" class={tab === 'all' ? 'underline text-[#50c7c2]' : 'hover:underline'}>Όλα</a>
-      <a href="/backstage?tab=published&key=my-secret-key" class={tab === 'published' ? 'underline text-green-600' : 'hover:underline'}>Δημοσιευμένα</a>
-      <a href="/backstage?tab=drafts&key=my-secret-key" class={tab === 'drafts' ? 'underline text-yellow-600' : 'hover:underline'}>Πρόχειρα</a>
-      <a href="/backstage?tab=scheduled&key=my-secret-key" class={tab === 'scheduled' ? 'underline text-blue-600' : 'hover:underline'}>Προγραμματισμένα</a>
-    </div>
-
-    {error && <p class="text-red-600">❌ Σφάλμα: {error.message}</p>}
-
-    {visible.length > 0 ? (
-      <table class="w-full table-auto border-collapse text-sm">
-        <thead>
-          <tr class="bg-zinc-100 dark:bg-zinc-800 text-left">
-            <th class="p-3">Τίτλος</th>
-            <th class="p-3">Ημερομηνία</th>
-            <th class="p-3">Κατάσταση</th>
-            <th class="p-3">Ενέργειες</th>
-          </tr>
-        </thead>
-        <tbody>
-          {visible.map(article => (
-            <tr class="border-b hover:bg-zinc-50">
-              <td class="p-3">{article.title}</td>
-              <td class="p-3">{new Date(article.created_at).toLocaleDateString('el-GR')}</td>
-              <td class="p-3">
-                {article.published
-                  ? article.created_at > now
-                    ? <span class="text-blue-600">Αναμένεται</span>
-                    : <span class="text-green-600">Δημοσιευμένο</span>
-                  : <span class="text-yellow-600">Πρόχειρο</span>}
-              </td>
-              <td class="p-3 flex gap-3">
-                <a href={`/blog/${article.slug}`} class="text-[#50c7c2] hover:underline">Προβολή</a>
-                <a href={`/editor?edit=${article.slug}`} class="text-blue-500 hover:underline">Επεξεργασία</a>
-                <!-- Διαγραφή: μόνο UI placeholder -->
-                <button class="text-red-500 hover:underline" onclick={`alert('Η διαγραφή δεν υλοποιήθηκε ακόμα.')`}>Διαγραφή</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    ) : (
-      <p class="text-gray-600">Δεν υπάρχουν άρθρα σε αυτή την κατηγορία.</p>
-    )}
-  </main>
-</Layout>
