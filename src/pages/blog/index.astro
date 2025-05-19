@@ -17,16 +17,6 @@ if (!isDev) {
 }
 
 const posts = await getPublishedArticles();
-
-const today = new Date().toISOString();
-
-const upcoming = posts
-  .filter(post => post.created_at > today)
-  .sort((a, b) => b.created_at.localeCompare(a.created_at));
-
-const visibleArticles = posts
-  .filter(post => post.created_at <= today)
-  .sort((a, b) => b.created_at.localeCompare(a.created_at));
 ---
 
 <Layout>
@@ -41,12 +31,12 @@ const visibleArticles = posts
   </header>
 
   <main class="max-w-3xl mx-auto px-4 space-y-16 pb-32">
-    {visibleArticles.length > 0 ? (
-      visibleArticles.map((post) => (
+    {posts.length > 0 ? (
+      posts.map((post) => (
         <ArticleCard 
           title={post.title} 
-          content={post.content} 
-          href={`/blog/${post.slug}`} 
+          excerpt={post.excerpt} 
+          slug={post.slug} 
         />
       ))
     ) : (

@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '../lib/supabaseClient';
 
 export interface Article {
   id: string;
@@ -17,6 +17,9 @@ export async function getPublishedArticles(): Promise<Article[]> {
     .select('id, title, slug, excerpt, content, created_at, published, cover_image')
     .eq('published', true)
     .order('created_at', { ascending: false });
+
+  console.log("🧪 Supabase data:", data);
+  console.log("⚠️ Supabase error:", error);
 
   if (error) {
     console.error('Error fetching articles:', error.message);

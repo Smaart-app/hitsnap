@@ -1,6 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { supabase } from '../../lib/supabaseClient';
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY
 ---
 
 <html lang="el">
@@ -70,6 +72,13 @@ import { supabase } from '../../lib/supabaseClient';
     </main>
 
     <script type="module">
+      import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+      const supabase = createClient(
+        `${import.meta.env.PUBLIC_SUPABASE_URL}`,
+        `${import.meta.env.PUBLIC_SUPABASE_ANON_KEY}`
+      )
+
       const form = document.getElementById('articleForm');
       const output = document.getElementById('output');
       const excerptField = document.getElementById('excerpt');
@@ -94,9 +103,7 @@ import { supabase } from '../../lib/supabaseClient';
           published: document.getElementById('published').value === 'true'
         };
 
-        const { data, error } = await import('../../lib/supabaseClient').then(({ supabase }) =>
-          supabase.from('articles').insert([article])
-        );
+        const { data, error } = await supabase.from('articles').insert([article]);
 
         output.classList.remove('hidden');
         output.textContent = error
