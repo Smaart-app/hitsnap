@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseServerClient';
+import { supabase } from '../lib/supabaseClient'
 
 export interface Article {
   id: string;
