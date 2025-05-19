@@ -1,0 +1,74 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<html lang="el">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Νέο Άρθρο | Hitlift</title>
+  </head>
+
+  <body class="bg-[#f4f3f0] text-[#1a1a1a] font-serif leading-relaxed p-6">
+    <main class="max-w-3xl mx-auto bg-white shadow-md rounded-xl p-6 space-y-6">
+      <a href="/" class="inline-block text-sm text-[#50c7c2] hover:underline">← Επιστροφή στην αρχική</a>
+
+      <h1 class="text-2xl font-bold mb-4">📝 Δημιουργία Άρθρου</h1>
+
+      <form id="articleForm" class="space-y-4">
+        <div>
+          <label class="block mb-1 font-semibold">Slug (URL)</label>
+          <input type="text" id="slug" class="w-full p-2 border rounded" placeholder="π.χ. my-first-article" required />
+        </div>
+
+        <div>
+          <label class="block mb-1 font-semibold">Τίτλος</label>
+          <input type="text" id="title" class="w-full p-2 border rounded" required />
+        </div>
+
+        <div>
+          <label class="block mb-1 font-semibold flex justify-between">
+            Απόσπασμα
+            <span id="excerptCount" class="text-sm text-gray-500">0/160</span>
+          </label>
+          <textarea id="excerpt" maxlength="160" rows="3" class="w-full p-2 border rounded" placeholder="Προαιρετικό απόσπασμα για λίστα άρθρων"></textarea>
+        </div>
+
+        <div>
+          <label class="block mb-1 font-semibold">Πλήρες Κείμενο</label>
+          <textarea id="content" rows="8" class="w-full p-2 border rounded" placeholder="Το κυρίως κείμενο του άρθρου" required></textarea>
+        </div>
+
+        <div>
+          <label class="block mb-1 font-semibold">Ημερομηνία Δημοσίευσης</label>
+          <input type="date" id="created_at" class="w-full p-2 border rounded" />
+        </div>
+
+        <div>
+          <label class="block mb-1 font-semibold">Εικόνα Εξωφύλλου (URL)</label>
+          <input type="url" id="cover_image" class="w-full p-2 border rounded" />
+        </div>
+
+        <div>
+          <label class="block mb-1 font-semibold">Δημοσιευμένο</label>
+          <select id="published" class="w-full p-2 border rounded">
+            <option value="true">Ναι</option>
+            <option value="false" selected>Όχι</option>
+          </select>
+        </div>
+
+        <button
+          type="submit"
+          class="bg-[#50c7c2] text-white px-6 py-2 rounded hover:bg-[#3db2b0] transition font-semibold"
+        >
+          Αποθήκευση
+        </button>
+      </form>
+
+      <div id="output" class="text-sm text-zinc-700 whitespace-pre-wrap mt-6 hidden"></div>
+    </main>
+
+    <!-- 👉 Αυτό φορτώνει τον εξωτερικό JS -->
+    <script type="module" src="/scripts/editor.js"></script>
+  </body>
+</html>

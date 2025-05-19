@@ -1,0 +1,24 @@
+---
+---
+
+<button id="toggle-theme" class="text-sm px-3 py-1 rounded border hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+  🌓 Εναλλαγή θέματος
+</button>
+
+<script is:client>
+  const html = document.documentElement;
+
+  // Ανίχνευση αρχικής προτίμησης
+  if (
+    localStorage.getItem('theme') === 'dark' ||
+    (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  ) {
+    html.classList.add('dark');
+  }
+
+  // Εναλλαγή θέματος με click
+  document.getElementById('toggle-theme')?.addEventListener('click', () => {
+    html.classList.toggle('dark');
+    localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+  });
+</script>

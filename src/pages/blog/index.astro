@@ -1,0 +1,56 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import BackgroundSketch from '../../components/BackgroundSketch.astro';
+import ArticleCard from '../../components/ArticleCard.jsx';
+import { getPublishedArticles } from '../../utils/getArticles';
+
+const url = new URL(Astro.request.url);
+const tab = url.searchParams.get('tab') ?? 'all';
+const isDev = import.meta.env.MODE === 'development';
+
+if (!isDev) {
+  const key = url.searchParams.get('key');
+  const allowedKey = 'my-secret-key';
+  if (key !== allowedKey) {
+    return Astro.redirect('/');
+  }
+}
+
+const posts = await getPublishedArticles();
+
+const today = new Date().toISOString();
+
+const upcoming = posts
+  .filter(post => post.created_at > today)
+  .sort((a, b) => b.created_at.localeCompare(a.created_at));
+
+const visibleArticles = posts
+  .filter(post => post.created_at <= today)
+  .sort((a, b) => b.created_at.localeCompare(a.created_at));
+---
+
+<Layout>
+  <BackgroundSketch />
+
+  <header class="text-center max-w-3xl mx-auto py-32 px-4">
+    <h1 class="text-4xl sm:text-5xl font-serif mb-6">Η Κατοικία Ως Επιλογή</h1>
+    <p class="text-lg text-gray-600">
+      Σκέψεις και ερωτήματα για εκείνους που δεν θέλουν να αγοράσουν απλώς ένα ακίνητο,
+      αλλά να καταλάβουν τι σημαίνει.
+    </p>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 space-y-16 pb-32">
+    {visibleArticles.length > 0 ? (
+      visibleArticles.map((post) => (
+        <ArticleCard 
+          title={post.title} 
+          content={post.content} 
+          href={`/blog/${post.slug}`} 
+        />
+      ))
+    ) : (
+      <p class="text-center text-gray-500">Δεν υπάρχουν διαθέσιμα άρθρα προς το παρόν.</p>
+    )}
+  </main>
+</Layout>

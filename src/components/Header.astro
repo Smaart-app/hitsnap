@@ -1,0 +1,25 @@
+---
+const cookie = Astro.cookies.get("auth");
+const isAuthenticated = cookie?.value === "ok";
+---
+
+<header class="w-full border-b border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm px-6 py-4">
+  <div class="flex justify-between items-center max-w-screen-xl mx-auto">
+    <!-- Λογότυπο -->
+    <h1 class="text-3xl tracking-tight flex items-center leading-none" style="font-family: 'Lora', serif;">
+      <span class="font-bold text-black">Hit</span>
+      <span class="font-normal text-[#50c7c2] ml-1">lift</span>
+    </h1>
+
+    <!-- Desktop Navigation -->
+    <nav class="hidden md:flex gap-8 text-base font-medium">
+      <a href="/" class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">Αρχική</a>
+      <a href="/blog" class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">Άρθρα</a>
+      <a href="/contact" class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">Επικοινωνία</a>
+
+      {isAuthenticated && (
+        <a href="/editor" class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">Επεξεργασία Άρθρων</a>
+      )}
+    </nav>
+  </div>
+</header>

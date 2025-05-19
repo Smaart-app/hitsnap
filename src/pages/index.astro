@@ -1,0 +1,18 @@
+---
+import Layout from '../layouts/Layout.astro';
+import BackgroundSketch from '../components/BackgroundSketch.astro';
+import HeroSection from '../components/HeroSection.astro';
+
+const lang = 'el';
+---
+
+<Layout title="Hitlift – Η Κατοικία Ως Επιλογή" lang={lang}>
+  <BackgroundSketch />
+  <HeroSection />
+
+  <main class="max-w-6xl mx-auto px-4 py-16 text-center text-gray-600">
+    <p class="text-lg">
+      Ένα μέρος για όσους αναζητούν ουσία – όχι απλώς τετραγωνικά.  
+    </p>
+  </main>
+</Layout>

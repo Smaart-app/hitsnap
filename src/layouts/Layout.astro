@@ -1,0 +1,29 @@
+---
+const title = Astro.props?.title || 'Hitlift';
+const lang = Astro.props?.lang || 'el';
+
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.jsx';
+---
+
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <!-- ✨ Playfair Display για Hero -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
+  </head>
+
+  <body class="bg-[#f4f3f0] text-[#1a1a1a] leading-relaxed relative overflow-x-hidden min-h-[2000px]">
+    <Header />
+
+    <main class="px-6 py-12">
+      <slot />
+    </main>
+
+    <Footer client:load lang={lang} />
+  </body>
+</html>
