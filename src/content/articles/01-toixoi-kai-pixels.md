@@ -2,7 +2,6 @@
 title: "Ανάμεσα σε τοίχους και pixels"
 excerpt: "Το ταξίδι μου στα ακίνητα ξεκίνησε με την εσωτερική διακόσμηση και εξελίχθηκε με την τεχνολογία."
 date: "2025-05-22"
-slug: "01-toixoi-kai-pixels"
 lang: "el"
 published: true
 image: "/images/01-toixoi-kai-pixels.png"

@@ -4,7 +4,7 @@ const articleSchema = z.object({
   title: z.string(),
   excerpt: z.string(),
   date: z.string(),
-  slug: z.string(),
+  slug: z.string().optional(),
   lang: z.enum(["el", "en"]),
   published: z.boolean(),
   image: z.string().optional()
