@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import ArticleCard from '../components/ArticleCard.jsx';
 import { getCollection } from 'astro:content';
 
-const lang = 'el';
+const { lang } = Astro.params;
 
 const allArticles = await getCollection('articles');
 
