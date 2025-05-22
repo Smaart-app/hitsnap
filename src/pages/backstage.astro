@@ -1,6 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { supabase } from '../lib/supabaseClient';
+import { createServerClient } from '@supabase/ssr';
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+const { supabase } = createServerClient(supabaseUrl, supabaseAnonKey, {
+  cookies: Astro.cookies
+});
 
 const url = new URL(Astro.request.url);
 const tab = url.searchParams.get('tab') ?? 'all';
