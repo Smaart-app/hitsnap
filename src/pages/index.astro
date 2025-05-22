@@ -1,18 +1,29 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import BackgroundSketch from '../components/BackgroundSketch.astro';
-import HeroSection from '../components/HeroSection.astro';
+import ArticleCard from '../components/ArticleCard.jsx'; // ✅ σωστό
+import { getCollection } from 'astro:content';
 
 const lang = 'el';
+
+const allArticles = await getCollection('articles');
+const filteredArticles = allArticles.filter(
+  (article) => article.data.published && article.data.lang === lang
+);
 ---
 
-<Layout title="Hitlift – Η Κατοικία Ως Επιλογή" lang={lang}>
-  <BackgroundSketch />
-  <HeroSection />
+<Layout title="Άρθρα | Hitlift" lang={lang}>
+  <main class="max-w-6xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-center mb-8">Άρθρα</h1>
 
-  <main class="max-w-6xl mx-auto px-4 py-16 text-center text-gray-600">
-    <p class="text-lg">
-      Ένα μέρος για όσους αναζητούν ουσία – όχι απλώς τετραγωνικά.  
-    </p>
+    <section class="grid md:grid-cols-2 gap-8">
+      {filteredArticles.map(({ data, slug }) => (
+        <ArticleCard 
+          title={data.title}
+          excerpt={data.excerpt}
+          image={data.image}
+          href={`/${lang}/blog/${slug}`} 
+        />
+      ))}
+    </section>
   </main>
 </Layout>
