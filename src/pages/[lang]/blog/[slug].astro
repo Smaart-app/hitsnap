@@ -45,14 +45,16 @@ const pageUrl = `https://hitlift.gr/blog/${slug}`;
       {article.data.image && (
         <div class="flex justify-center">
           <img
-            src={article.data.image}
+            src={`/${article.data.image}`}
             alt="Εικόνα άρθρου"
             class="mb-6 max-h-[400px] w-auto max-w-full object-contain rounded-lg shadow"
           />
         </div>
       )}
 
-      {@html article.body}
+      <div class="article-body">
+        {@html article.body}
+      </div>
 
       <div class="mt-12 text-center mb-24">
         <a href={`/blog`} class="inline-block text-[#50c7c2] hover:underline">
@@ -60,7 +62,6 @@ const pageUrl = `https://hitlift.gr/blog/${slug}`;
         </a>
       </div>
 
-      <!-- 👇 DEBUG BLOCK -->
       <details class="mt-8 bg-zinc-100 text-xs p-4 rounded shadow text-black">
         <summary class="cursor-pointer">🛠 Δείτε τα δεδομένα του άρθρου (debug)</summary>
         <pre class="overflow-auto whitespace-pre-wrap">
