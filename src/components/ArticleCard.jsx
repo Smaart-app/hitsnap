@@ -1,8 +1,8 @@
 export default function ArticleCard({ title, excerpt, image, href }) {
   return (
-    <article className="rounded-xl overflow-hidden bg-white shadow-md transition hover:shadow-lg flex flex-col h-full">
+    <article className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden flex flex-col md:flex-row">
       {image && (
-        <div className="w-full h-48 overflow-hidden">
+        <div className="md:w-1/3 w-full h-48 md:h-auto overflow-hidden">
           <img
             src={image}
             alt={title}
@@ -11,10 +11,10 @@ export default function ArticleCard({ title, excerpt, image, href }) {
         </div>
       )}
 
-      <div className="flex flex-col flex-1 p-4 justify-between">
+      <div className="flex flex-col justify-between p-4 md:w-2/3">
         <div>
-          <h2 className="text-lg font-semibold mb-2">{title}</h2>
-          <p className="text-sm text-zinc-600 line-clamp-3">{excerpt}</p>
+          <h2 className="text-lg font-bold mb-2">{title}</h2>
+          <p className="text-sm text-zinc-600 line-clamp-4">{excerpt}</p>
         </div>
         <a
           href={href}

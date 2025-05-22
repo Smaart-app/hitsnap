@@ -1,6 +1,5 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { getArticle } from '../../../utils/getArticles';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -16,7 +15,11 @@ export async function getStaticPaths() {
 export const prerender = false;
 
 const { slug, lang } = Astro.params;
-const article = await getArticle(slug, lang);
+
+const articles = await getCollection('articles');
+const article = articles.find(
+  (a) => a.slug === slug && a.data.lang === lang
+);
 
 const pageTitle = article?.data.title ?? 'Άγνωστο άρθρο';
 const pageDescription = article?.data.excerpt ?? 'Μάλλον το άρθρο μετακόμισε...';
@@ -36,7 +39,7 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
     <article class="prose prose-zinc dark:prose-invert max-w-3xl mx-auto py-12 px-4">
       <h1 class="mb-4">{article.data.title}</h1>
       <p class="text-sm text-zinc-500 mb-4">
-        {new Date(article.data.date).toLocaleDateString('el-GR')}
+        {new Date(article.data.date).toLocaleDateString(lang === "en" ? "en-GB" : "el-GR")}
       </p>
 
       {article.data.image && (
