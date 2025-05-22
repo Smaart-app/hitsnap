@@ -2,10 +2,10 @@
 title: "Ανάμεσα σε τοίχους και pixels"
 excerpt: "Το ταξίδι μου στα ακίνητα ξεκίνησε με την εσωτερική διακόσμηση και εξελίχθηκε με την τεχνολογία."
 date: "2025-05-22"
-slug: "toixoi-kai-pixels"
+slug: "01-toixoi-kai-pixels"
 lang: "el"
 published: true
-image: "/images/toixoi-kai-pixels.png"
+image: "/images/01-toixoi-kai-pixels.png"
 ---
 
 Πώς ξεκίνησε αυτό το ταξίδι — ή “Ανάμεσα σε τοίχους και pixels”; Πες μου την γνώμη σου και για τον τίτλο, αλλά και για το πρώτο άρθρο που λέω να είναι αυτό:
