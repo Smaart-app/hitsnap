@@ -18,7 +18,7 @@ export default function ArticleCard({ title, excerpt, image, href }) {
         </div>
 
         <a
-          href={`/blog/${href}`}
+          href={href}
           className="mt-4 inline-block text-[#50c7c2] font-semibold hover:underline text-sm"
         >
           Διάβασε περισσότερα →

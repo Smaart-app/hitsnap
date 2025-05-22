@@ -12,7 +12,7 @@ const isAuthenticated = cookie?.value === "ok";
     </h1>
 
     <!-- Desktop Navigation -->
-    <nav class="hidden md:flex gap-8 text-base font-medium">
+    <nav class="hidden md:flex items-center gap-8 text-base font-medium">
       <a href="/" class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">Αρχική</a>
       <a href="/blog" class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">Άρθρα</a>
       <a href="/contact" class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">Επικοινωνία</a>
@@ -20,6 +20,13 @@ const isAuthenticated = cookie?.value === "ok";
       {isAuthenticated && (
         <a href="/editor" class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">Επεξεργασία Άρθρων</a>
       )}
+
+      <!-- Language Switcher -->
+      <div class="ml-6 flex items-center gap-2 text-sm">
+        <a href="/blog" class="hover:text-[#50c7c2] transition">🇬🇷 EL</a>
+        <span class="text-zinc-400">|</span>
+        <a href="/en/blog" class="hover:text-[#50c7c2] transition">🇬🇧 EN</a>
+      </div>
     </nav>
   </div>
 </header>
