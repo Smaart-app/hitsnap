@@ -1,0 +1,65 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { supabase } from '../../lib/supabaseClient';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+const { data: article, error } = await supabase
+  .from('articles')
+  .select('*')
+  .eq('slug', slug)
+  .eq('published', true)
+  .single();
+
+const pageTitle = article?.title ?? 'Άγνωστο άρθρο';
+const pageDescription = article?.excerpt ?? 'Μάλλον το άρθρο μετακόμισε...';
+const pageUrl = `https://hitlift.gr/blog/${slug}`;
+---
+
+<Layout title={pageTitle}>
+  <head slot="head">
+    <meta name="description" content={pageDescription} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={pageUrl} />
+  </head>
+
+  {article ? (
+    <article class="prose prose-zinc dark:prose-invert max-w-3xl mx-auto py-12 px-4">
+      <h1 class="mb-4">{article.title}</h1>
+      <p class="text-sm text-zinc-500 mb-4">
+        {new Date(article.created_at).toLocaleDateString('el-GR')}
+      </p>
+
+      {article.cover_image && (
+        <img src={article.cover_image} alt="Εικόνα άρθρου" class="mb-6 rounded-lg shadow" />
+      )}
+
+      <p class="leading-relaxed whitespace-pre-line">
+        {article.content}
+      </p>
+
+      <div class="mt-12 text-center mb-24">
+        <a href="/blog" class="inline-block text-[#50c7c2] hover:underline">
+          ← Επιστροφή στο blog
+        </a>
+      </div>
+    </article>
+  ) : (
+    <section class="text-center py-24">
+      <h1 class="text-4xl font-bold mb-4">Το άρθρο χάθηκε στα τετραγωνικά 🏚️</h1>
+      <p class="text-gray-600 dark:text-gray-400 mb-8">
+        Ή δεν υπήρξε ποτέ, ή κάποιος το έβαλε κάτω από το χαλί.
+      </p>
+      <a
+        href="/"
+        class="inline-block bg-[#50c7c2] text-white px-6 py-3 rounded-lg shadow hover:bg-[#3db2b0] transition"
+      >
+        🏠 Επιστροφή στην αρχική
+      </a>
+    </section>
+  )}
+</Layout>
