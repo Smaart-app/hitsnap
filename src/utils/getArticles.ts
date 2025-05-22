@@ -1,29 +1,29 @@
-import { supabase } from '../lib/supabaseClient';
+import { getCollection, type CollectionEntry } from "astro:content";
 
-export interface Article {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  content: string;
-  created_at: string;
-  published: boolean;
-  cover_image?: string;
+type ArticleEntry = CollectionEntry<"articles">;
+
+// ✅ Φέρνει όλα τα άρθρα μιας γλώσσας (el ή en)
+export async function getArticles(
+  lang: "el" | "en"
+): Promise<ArticleEntry[]> {
+  const allArticles = await getCollection("articles");
+
+  return allArticles
+    .filter((a: ArticleEntry) => a.data.lang === lang && a.data.published)
+    .sort(
+      (a: ArticleEntry, b: ArticleEntry) =>
+        new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+    );
 }
 
-export async function getPublishedArticles(): Promise<Article[]> {
-  const { data, error } = await supabase
-    .from('articles')
-    .select('id, title, slug, excerpt, content, created_at, published, cover_image')
-    .order('created_at', { ascending: false });
+// ✅ Φέρνει ένα άρθρο συγκεκριμένο με βάση slug και lang
+export async function getArticle(
+  slug: string,
+  lang: "el" | "en"
+): Promise<ArticleEntry | undefined> {
+  const allArticles = await getCollection("articles");
 
-  console.log('🧪 Supabase data:', data);
-  console.log('⚠️ Supabase error:', error);
-
-  if (error) {
-    console.error('Error fetching articles:', error.message);
-    return [];
-  }
-
-  return data ?? [];
+  return allArticles.find(
+    (a: ArticleEntry) => a.slug === slug && a.data.lang === lang
+  );
 }

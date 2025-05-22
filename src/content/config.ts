@@ -4,10 +4,10 @@ const articleSchema = z.object({
   title: z.string(),
   excerpt: z.string(),
   date: z.string(),
-  slug: z.string(), // ✅ Εδώ ήταν το πρόβλημα
+  slug: z.string(),
 });
 
+// Χρησιμοποίησε μόνο αυτήν ή προσαρμόσου αργότερα για περισσότερες γλώσσες
 export const collections = {
-  el: defineCollection({ schema: articleSchema }),
-  en: defineCollection({ schema: articleSchema }),
+  articles: defineCollection({ schema: articleSchema })
 };
