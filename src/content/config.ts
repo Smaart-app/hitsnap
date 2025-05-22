@@ -5,9 +5,11 @@ const articleSchema = z.object({
   excerpt: z.string(),
   date: z.string(),
   slug: z.string(),
+  lang: z.enum(["el", "en"]),
+  published: z.boolean(),
+  image: z.string().optional()
 });
 
-// Χρησιμοποίησε μόνο αυτήν ή προσαρμόσου αργότερα για περισσότερες γλώσσες
 export const collections = {
   articles: defineCollection({ schema: articleSchema })
 };
