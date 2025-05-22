@@ -1,29 +1,38 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import ArticleCard from '../components/ArticleCard.jsx'; // ✅ σωστό
+import ArticleCard from '../components/ArticleCard.jsx';
 import { getCollection } from 'astro:content';
 
-const lang = 'el';
-
 const allArticles = await getCollection('articles');
-const filteredArticles = allArticles.filter(
-  (article) => article.data.published && article.data.lang === lang
-);
+
+const filteredArticles = allArticles.filter((article) => {
+  const { published, publish_date, lang } = article.data;
+  const isPublished = published === true;
+  const isVisible = new Date(publish_date) <= new Date();
+  const isGreek = lang === 'el'; // ή 'en' αν χρειαστεί εναλλαγή
+  return isPublished && isVisible && isGreek;
+});
 ---
 
-<Layout title="Άρθρα | Hitlift" lang={lang}>
+<Layout title="Άρθρα | Hitlift">
   <main class="max-w-6xl mx-auto px-4 py-16">
-    <h1 class="text-3xl font-bold text-center mb-8">Άρθρα</h1>
+    <h1 class="text-3xl font-bold text-center mb-10">Άρθρα</h1>
 
-    <section class="grid md:grid-cols-2 gap-8">
-      {filteredArticles.map(({ data, slug }) => (
-        <ArticleCard 
-          title={data.title}
-          excerpt={data.excerpt}
-          image={data.image}
-          href={`/${lang}/blog/${slug}`} 
-        />
-      ))}
-    </section>
+    {filteredArticles.length > 0 ? (
+      <section class="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {filteredArticles.map(({ data, slug }) => (
+          <ArticleCard
+            title={data.title}
+            excerpt={data.excerpt}
+            image={data.image}
+            href={`/blog/${slug}`}
+          />
+        ))}
+      </section>
+    ) : (
+      <p class="text-center text-gray-500 mt-12">
+        Δεν υπάρχουν ακόμη άρθρα προς προβολή.
+      </p>
+    )}
   </main>
 </Layout>

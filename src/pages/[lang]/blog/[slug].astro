@@ -23,7 +23,7 @@ const article = articles.find(
 
 const pageTitle = article?.data.title ?? 'Άγνωστο άρθρο';
 const pageDescription = article?.data.excerpt ?? 'Μάλλον το άρθρο μετακόμισε...';
-const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
+const pageUrl = `https://hitlift.gr/blog/${slug}`;
 ---
 
 <Layout title={pageTitle}>
@@ -55,7 +55,7 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
       {@html article.body}
 
       <div class="mt-12 text-center mb-24">
-        <a href={`/${lang}/blog`} class="inline-block text-[#50c7c2] hover:underline">
+        <a href={`/blog`} class="inline-block text-[#50c7c2] hover:underline">
           ← Επιστροφή στο blog
         </a>
       </div>
@@ -67,7 +67,7 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
         Ή δεν υπήρξε ποτέ, ή κάποιος το έβαλε κάτω από το χαλί.
       </p>
       <a
-        href={`/${lang}/blog`}
+        href={`/blog`}
         class="inline-block bg-[#50c7c2] text-white px-6 py-3 rounded-lg shadow hover:bg-[#3db2b0] transition"
       >
         🏠 Επιστροφή στο blog
