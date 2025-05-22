@@ -2,11 +2,11 @@ export default function ArticleCard({ title, excerpt, image, href }) {
   return (
     <article className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden flex flex-col md:flex-row max-w-xl mx-auto">
       {image && (
-        <div className="md:w-1/2 w-full h-48 md:h-auto overflow-hidden">
+        <div className="md:w-1/2 w-full max-h-64 md:max-h-full overflow-hidden">
           <img
             src={image}
             alt={title}
-            className="w-full h-full object-cover"
+            className="w-full h-64 md:h-full object-cover object-center"
           />
         </div>
       )}
@@ -20,7 +20,7 @@ export default function ArticleCard({ title, excerpt, image, href }) {
           href={href}
           className="mt-4 text-[#50c7c2] font-semibold hover:underline text-sm"
         >
-          Διαβάσε περισσότερα →
+          Διάβασε περισσότερα →
         </a>
       </div>
     </article>
