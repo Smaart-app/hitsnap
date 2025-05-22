@@ -2,11 +2,11 @@ export default function ArticleCard({ title, excerpt, image, href }) {
   return (
     <article className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden max-w-xl mx-auto flex flex-col">
       {image && (
-        <div className="w-full max-h-56 overflow-hidden">
+        <div className="w-full max-h-[250px] overflow-hidden">
           <img
             src={image}
             alt={title}
-            className="w-full h-56 object-cover object-center"
+            className="w-full h-[250px] object-cover object-center"
           />
         </div>
       )}
