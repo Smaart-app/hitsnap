@@ -8,7 +8,7 @@ const articleSchema = z.object({
   lang: z.enum(["el", "en"]),
   published: z.boolean(),
   image: z.string().optional()
-}).strict(); // <-- ΑΥΤΟ είναι το magic fix
+}).strict(); // ← αυτό είναι κλειδί
 
 export const collections = {
   articles: defineCollection({ schema: articleSchema })
