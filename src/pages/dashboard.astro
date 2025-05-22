@@ -33,3 +33,51 @@ if (tab === 'published') {
 
 <Layout title="📋 Πίνακας Άρθρων">
   <main class="max-w-6xl mx-auto px-6 py-12">
+    <h1 class="text-3xl font-bold mb-8">📋 Διαχείριση Άρθρων</h1>
+
+    <div class="mb-6 flex gap-4 text-sm">
+      <a href="/dashboard" class={tab === 'all' ? 'text-[#50c7c2] font-bold' : 'text-gray-500 hover:text-[#50c7c2]'}>
+        Όλα
+      </a>
+      <a href="/dashboard?tab=published" class={tab === 'published' ? 'text-[#50c7c2] font-bold' : 'text-gray-500 hover:text-[#50c7c2]'}>
+        Δημοσιευμένα
+      </a>
+      <a href="/dashboard?tab=drafts" class={tab === 'drafts' ? 'text-[#50c7c2] font-bold' : 'text-gray-500 hover:text-[#50c7c2]'}>
+        Πρόχειρα
+      </a>
+    </div>
+
+    {visible.length > 0 ? (
+      <table class="w-full text-sm border-t border-gray-200">
+        <thead class="text-left border-b border-gray-200">
+          <tr>
+            <th class="py-2">Slug</th>
+            <th class="py-2">Τίτλος</th>
+            <th class="py-2">Κατάσταση</th>
+            <th class="py-2">Ημερομηνία</th>
+          </tr>
+        </thead>
+        <tbody>
+          {visible.map((article) => (
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+              <td class="py-2">{article.slug}</td>
+              <td class="py-2">{article.title}</td>
+              <td class="py-2">
+                {article.published ? (
+                  <span class="text-green-600">✓ Δημοσιευμένο</span>
+                ) : (
+                  <span class="text-yellow-600">✎ Πρόχειρο</span>
+                )}
+              </td>
+              <td class="py-2">
+                {new Date(article.created_at).toLocaleDateString("el-GR")}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ) : (
+      <p class="text-gray-500">Δεν υπάρχουν διαθέσιμα άρθρα.</p>
+    )}
+  </main>
+</Layout>

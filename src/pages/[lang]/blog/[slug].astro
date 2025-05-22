@@ -59,6 +59,14 @@ const pageUrl = `https://hitlift.gr/blog/${slug}`;
           ← Επιστροφή στο blog
         </a>
       </div>
+
+      <!-- 👇 DEBUG BLOCK -->
+      <details class="mt-8 bg-zinc-100 text-xs p-4 rounded shadow text-black">
+        <summary class="cursor-pointer">🛠 Δείτε τα δεδομένα του άρθρου (debug)</summary>
+        <pre class="overflow-auto whitespace-pre-wrap">
+{JSON.stringify(article, null, 2)}
+        </pre>
+      </details>
     </article>
   ) : (
     <section class="text-center py-24">
