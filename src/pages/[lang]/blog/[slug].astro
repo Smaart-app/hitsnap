@@ -2,6 +2,7 @@
 import Layout from '../../../layouts/Layout.astro';
 import { getArticle } from '../../../utils/getArticles';
 import { getCollection } from 'astro:content';
+import Markdown from '@astrojs/markdown-remark/runtime';
 
 export async function getStaticPaths() {
   const articles = await getCollection('articles');
@@ -43,7 +44,7 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
         <img src={article.data.image} alt="Εικόνα άρθρου" class="mb-6 rounded-lg shadow" />
       )}
 
-      <article.body />
+      <Markdown content={article.body} />
 
       <div class="mt-12 text-center mb-24">
         <a href={`/${lang}/blog`} class="inline-block text-[#50c7c2] hover:underline">

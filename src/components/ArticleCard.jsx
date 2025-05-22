@@ -1,31 +1,28 @@
 export default function ArticleCard({ title, excerpt, image, href }) {
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-md p-4 flex flex-col hover:shadow-lg transition">
+    <article className="rounded-xl overflow-hidden bg-white shadow-md transition hover:shadow-lg flex flex-col h-full">
       {image && (
-        <img
-          src={image}
-          alt={title}
-          className="w-full h-64 object-cover rounded-md mb-4"
-        />
+        <div className="w-full h-48 overflow-hidden">
+          <img
+            src={image}
+            alt={title}
+            className="w-full h-full object-cover"
+          />
+        </div>
       )}
 
-      <div className="flex-1 flex flex-col justify-between">
+      <div className="flex flex-col flex-1 p-4 justify-between">
         <div>
-          <h2 className="text-xl font-bold mb-2 text-[#1a1a1a] dark:text-white leading-snug">
-            {title}
-          </h2>
-          <p className="text-base text-zinc-600 dark:text-zinc-400 line-clamp-4">
-            {excerpt}
-          </p>
+          <h2 className="text-lg font-semibold mb-2">{title}</h2>
+          <p className="text-sm text-zinc-600 line-clamp-3">{excerpt}</p>
         </div>
-
         <a
           href={href}
-          className="mt-4 inline-block text-[#50c7c2] font-semibold hover:underline"
+          className="mt-4 text-[#50c7c2] font-semibold hover:underline text-sm"
         >
-          Διάβασε περισσότερα →
+          Διαβάσε περισσότερα →
         </a>
       </div>
-    </div>
+    </article>
   );
 }
