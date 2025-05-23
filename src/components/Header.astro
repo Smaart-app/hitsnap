@@ -1,6 +1,10 @@
 ---
 const cookie = Astro.cookies.get("auth");
 const isAuthenticated = cookie?.value === "ok";
+const lang = Astro.props?.lang || "el";
+
+const isGreek = lang === "el";
+const base = isGreek ? "" : "/en";
 ---
 
 <header class="w-full border-b border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm px-6 py-4">
@@ -13,19 +17,27 @@ const isAuthenticated = cookie?.value === "ok";
 
     <!-- Desktop Navigation -->
     <nav class="hidden md:flex items-center gap-8 text-base font-medium">
-      <a href="/" class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">Αρχική</a>
-      <a href="/blog" class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">Άρθρα</a>
-      <a href="/contact" class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">Επικοινωνία</a>
+      <a href={`${base}/`} class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">
+        {isGreek ? "Αρχική" : "Home"}
+      </a>
+      <a href={`${base}/blog`} class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">
+        {isGreek ? "Άρθρα" : "Articles"}
+      </a>
+      <a href={`${base}/contact`} class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">
+        {isGreek ? "Επικοινωνία" : "Contact"}
+      </a>
 
       {isAuthenticated && (
-        <a href="/editor" class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">Επεξεργασία Άρθρων</a>
+        <a href="/editor" class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">
+          {isGreek ? "Επεξεργασία Άρθρων" : "Edit Articles"}
+        </a>
       )}
 
       <!-- Language Switcher -->
       <div class="ml-6 flex items-center gap-2 text-sm">
-        <a href="/blog" class="hover:text-[#50c7c2] transition">🇬🇷 EL</a>
+        <a href="/blog" class={isGreek ? "text-[#50c7c2] font-semibold" : "hover:text-[#50c7c2]"}>🇬🇷 EL</a>
         <span class="text-zinc-400">|</span>
-        <a href="/en/blog" class="hover:text-[#50c7c2] transition">🇬🇧 EN</a>
+        <a href="/en/blog" class={!isGreek ? "text-[#50c7c2] font-semibold" : "hover:text-[#50c7c2]"}>🇬🇧 EN</a>
       </div>
     </nav>
   </div>

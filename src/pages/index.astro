@@ -3,34 +3,27 @@ import Layout from '../layouts/Layout.astro';
 import ArticleCard from '../components/ArticleCard.jsx';
 import { createServerClient } from '@supabase/ssr';
 
-const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
-
-const supabase = createServerClient(supabaseUrl, supabaseKey, {
-  cookies: Astro.cookies,
-});
+const supabase = createServerClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+  { cookies: Astro.cookies }
+);
 
 const { data: allArticles, error } = await supabase
   .from('articles')
   .select('*')
+  .eq('lang', 'el')
+  .eq('published', true)
   .order('publish_date', { ascending: false });
-
-const filteredArticles = allArticles?.filter((article) => {
-  const { published, publish_date, lang } = article;
-  const isPublished = published === true;
-  const isVisible = new Date(publish_date) <= new Date();
-  const isGreek = lang === 'el';
-  return isPublished && isVisible && isGreek;
-}) ?? [];
 ---
 
-<Layout title="Άρθρα | Hitlift">
+<Layout title="Άρθρα | Hitlift" lang="el">
   <main class="max-w-6xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-center mb-10">Άρθρα</h1>
 
-    {filteredArticles.length > 0 ? (
+    {allArticles?.length > 0 ? (
       <section class="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {filteredArticles.map((article) => (
+        {allArticles.map((article) => (
           <ArticleCard
             title={article.title}
             excerpt={article.excerpt}
