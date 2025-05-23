@@ -1,0 +1,81 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { createServerClient } from '@supabase/ssr';
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+const isProd = import.meta.env.MODE === 'production';
+
+const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+  cookies: Astro.cookies
+});
+
+const url = new URL(Astro.request.url);
+const tab = url.searchParams.get('tab') ?? 'all';
+const accessKey = url.searchParams.get('key');
+const allowedKey = 'my-secret-key'; // μπορείς να το αλλάξεις
+
+if (isProd && accessKey !== allowedKey) {
+  return Astro.redirect('/');
+}
+
+const { data: articles, error } = await supabase
+  .from('articles')
+  .select('*')
+  .order('publish_date', { ascending: false });
+
+let visible = [];
+
+if (tab === 'published') {
+  visible = articles?.filter((a) => a.published) ?? [];
+} else if (tab === 'drafts') {
+  visible = articles?.filter((a) => !a.published) ?? [];
+} else {
+  visible = articles ?? [];
+}
+---
+
+<Layout title="📋 Πίνακας Άρθρων">
+  <main class="max-w-6xl mx-auto px-6 py-12">
+    <h1 class="text-3xl font-bold mb-8">📋 Διαχείριση Άρθρων</h1>
+
+    <div class="mb-6 flex gap-4 text-sm">
+      <a href="/dashboard?key=my-secret-key" class={tab === 'all' ? 'text-[#50c7c2] font-bold' : 'text-gray-500 hover:text-[#50c7c2]'}>Όλα</a>
+      <a href="/dashboard?tab=published&key=my-secret-key" class={tab === 'published' ? 'text-[#50c7c2] font-bold' : 'text-gray-500 hover:text-[#50c7c2]'}>Δημοσιευμένα</a>
+      <a href="/dashboard?tab=drafts&key=my-secret-key" class={tab === 'drafts' ? 'text-[#50c7c2] font-bold' : 'text-gray-500 hover:text-[#50c7c2]'}>Πρόχειρα</a>
+    </div>
+
+    {error ? (
+      <p class="text-red-600 font-semibold">⚠️ Σφάλμα: {error.message}</p>
+    ) : visible.length > 0 ? (
+      <table class="w-full text-sm border-t border-gray-200">
+        <thead class="text-left border-b border-gray-200 bg-zinc-50">
+          <tr>
+            <th class="py-2 px-2">Slug</th>
+            <th class="py-2 px-2">Τίτλος</th>
+            <th class="py-2 px-2">Γλώσσα</th>
+            <th class="py-2 px-2">Κατάσταση</th>
+            <th class="py-2 px-2">Ημερομηνία</th>
+          </tr>
+        </thead>
+        <tbody>
+          {visible.map((article) => (
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+              <td class="py-2 px-2 font-mono">{article.slug}</td>
+              <td class="py-2 px-2">{article.title}</td>
+              <td class="py-2 px-2 uppercase">{article.lang}</td>
+              <td class="py-2 px-2">
+                {article.published
+                  ? <span class="text-green-600 font-medium">✓ Δημοσιευμένο</span>
+                  : <span class="text-yellow-600 font-medium">✎ Πρόχειρο</span>}
+              </td>
+              <td class="py-2 px-2">{new Date(article.publish_date).toLocaleDateString('el-GR')}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ) : (
+      <p class="text-gray-500">Δεν υπάρχουν διαθέσιμα άρθρα.</p>
+    )}
+  </main>
+</Layout>

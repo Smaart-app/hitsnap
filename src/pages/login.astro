@@ -1,0 +1,52 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const url = new URL(Astro.request.url);
+const submitted = url.searchParams.get("submitted") === "true";
+const wrong = url.searchParams.get("error") === "true";
+
+const form = await Astro.request.formData?.();
+const password = form?.get("password");
+const expectedPassword = "hitlift2025";
+
+if (submitted && password === expectedPassword) {
+  return new Response(null, {
+    status: 302,
+    headers: {
+      "Set-Cookie": `auth=ok; Path=/; HttpOnly; Max-Age=43200`, // 12 ώρες
+      Location: "/dashboard"
+    }
+  });
+}
+
+---
+
+<Layout title="🔐 Είσοδος Διαχειριστή">
+  <main class="max-w-md mx-auto mt-24 p-6 bg-white rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">🔐 Είσοδος Διαχειριστή</h1>
+
+    {wrong && (
+      <p class="text-red-600 mb-4">⚠️ Λάθος κωδικός. Προσπάθησε ξανά.</p>
+    )}
+
+    <form method="POST" action="/login?submitted=true" class="space-y-4">
+      <div>
+        <label class="block font-semibold mb-1">Κωδικός</label>
+        <input
+          type="password"
+          name="password"
+          class="w-full p-2 border rounded"
+          placeholder="Enter admin password"
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="bg-[#50c7c2] text-white px-6 py-2 rounded hover:bg-[#3db2b0] transition font-semibold"
+      >
+        Είσοδος
+      </button>
+    </form>
+  </main>
+</Layout>
