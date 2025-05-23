@@ -1,17 +1,27 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ArticleCard from '../components/ArticleCard.jsx';
-import { getCollection } from 'astro:content';
+import { createServerClient } from '@supabase/ssr';
 
-const allArticles = await getCollection('articles');
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
-const filteredArticles = allArticles.filter((article) => {
-  const { published, publish_date, lang } = article.data;
+const supabase = createServerClient(supabaseUrl, supabaseKey, {
+  cookies: Astro.cookies,
+});
+
+const { data: allArticles, error } = await supabase
+  .from('articles')
+  .select('*')
+  .order('publish_date', { ascending: false });
+
+const filteredArticles = allArticles?.filter((article) => {
+  const { published, publish_date, lang } = article;
   const isPublished = published === true;
   const isVisible = new Date(publish_date) <= new Date();
-  const isGreek = lang === 'el'; // ή 'en' αν χρειαστεί εναλλαγή
+  const isGreek = lang === 'el';
   return isPublished && isVisible && isGreek;
-});
+}) ?? [];
 ---
 
 <Layout title="Άρθρα | Hitlift">
@@ -20,12 +30,12 @@ const filteredArticles = allArticles.filter((article) => {
 
     {filteredArticles.length > 0 ? (
       <section class="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {filteredArticles.map(({ data, slug }) => (
+        {filteredArticles.map((article) => (
           <ArticleCard
-            title={data.title}
-            excerpt={data.excerpt}
-            image={data.image}
-            href={`/blog/${slug}`}
+            title={article.title}
+            excerpt={article.excerpt}
+            image={article.cover_image}
+            href={`/blog/${article.slug}`}
           />
         ))}
       </section>
