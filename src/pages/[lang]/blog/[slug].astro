@@ -1,29 +1,29 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { getCollection } from 'astro:content';
-
-export async function getStaticPaths() {
-  const articles = await getCollection('articles');
-  return articles.map((article) => ({
-    params: {
-      lang: article.data.lang,
-      slug: article.slug,
-    },
-  }));
-}
+import { createServerClient } from '@supabase/ssr';
 
 export const prerender = false;
 
 const { slug, lang } = Astro.params;
 
-const articles = await getCollection('articles');
-const article = articles.find(
-  (a) => a.slug === slug && a.data.lang === lang
+const supabase = createServerClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+  { cookies: Astro.cookies }
 );
 
-const pageTitle = article?.data.title ?? 'Άγνωστο άρθρο';
-const pageDescription = article?.data.excerpt ?? 'Μάλλον το άρθρο μετακόμισε...';
-const pageUrl = `https://hitlift.gr/blog/${slug}`;
+const { data: articles, error } = await supabase
+  .from('articles')
+  .select('*')
+  .eq('slug', slug)
+  .eq('lang', lang)
+  .limit(1);
+
+const article = articles?.[0];
+
+const pageTitle = article?.title ?? 'Unknown Article';
+const pageDescription = article?.excerpt ?? 'This article may have moved or never existed.';
+const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
 ---
 
 <Layout title={pageTitle}>
@@ -37,33 +37,33 @@ const pageUrl = `https://hitlift.gr/blog/${slug}`;
 
   {article ? (
     <article class="prose prose-zinc dark:prose-invert max-w-3xl mx-auto py-12 px-4">
-      <h1 class="mb-4">{article.data.title}</h1>
+      <h1 class="mb-4">{article.title}</h1>
       <p class="text-sm text-zinc-500 mb-4">
-        {new Date(article.data.date).toLocaleDateString(lang === "en" ? "en-GB" : "el-GR")}
+        {new Date(article.publish_date).toLocaleDateString(lang === "en" ? "en-GB" : "el-GR")}
       </p>
 
-      {article.data.image && (
+      {article.cover_image && (
         <div class="flex justify-center">
           <img
-            src={`/${article.data.image}`}
-            alt="Εικόνα άρθρου"
+            src={article.cover_image}
+            alt="Cover image"
             class="mb-6 max-h-[400px] w-auto max-w-full object-contain rounded-lg shadow"
           />
         </div>
       )}
 
-      <div class="article-body">
-        {@html article.body}
+      <div class="article-body whitespace-pre-line">
+        {@html article.content}
       </div>
 
       <div class="mt-12 text-center mb-24">
-        <a href={`/blog`} class="inline-block text-[#50c7c2] hover:underline">
-          ← Επιστροφή στο blog
+        <a href={`/${lang}/blog`} class="inline-block text-[#50c7c2] hover:underline">
+          ← Back to blog
         </a>
       </div>
 
       <details class="mt-8 bg-zinc-100 text-xs p-4 rounded shadow text-black">
-        <summary class="cursor-pointer">🛠 Δείτε τα δεδομένα του άρθρου (debug)</summary>
+        <summary class="cursor-pointer">🛠 View raw article data</summary>
         <pre class="overflow-auto whitespace-pre-wrap">
 {JSON.stringify(article, null, 2)}
         </pre>
@@ -71,15 +71,15 @@ const pageUrl = `https://hitlift.gr/blog/${slug}`;
     </article>
   ) : (
     <section class="text-center py-24">
-      <h1 class="text-4xl font-bold mb-4">Το άρθρο χάθηκε στα τετραγωνικά 🏚️</h1>
+      <h1 class="text-4xl font-bold mb-4">404 — Article Not Found</h1>
       <p class="text-gray-600 dark:text-gray-400 mb-8">
-        Ή δεν υπήρξε ποτέ, ή κάποιος το έβαλε κάτω από το χαλί.
+        It may have been moved, unpublished, or never existed.
       </p>
       <a
-        href={`/blog`}
+        href={`/${lang}/blog`}
         class="inline-block bg-[#50c7c2] text-white px-6 py-3 rounded-lg shadow hover:bg-[#3db2b0] transition"
       >
-        🏠 Επιστροφή στο blog
+        🏠 Back to blog
       </a>
     </section>
   )}
