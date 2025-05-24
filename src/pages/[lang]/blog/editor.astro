@@ -86,54 +86,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
       <div id="output" class="text-sm text-zinc-700 whitespace-pre-wrap mt-6 hidden"></div>
     </main>
 
-    <script type="module">
-      import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-      import { marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
-
-      const supabase = createClient(
-        import.meta.env.PUBLIC_SUPABASE_URL,
-        import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-      );
-
-      const form = document.getElementById('articleForm');
-      const output = document.getElementById('output');
-      const excerptField = document.getElementById('excerpt');
-      const countLabel = document.getElementById('excerptCount');
-      const dateField = document.getElementById('publish_date');
-      const contentField = document.getElementById('content');
-      const preview = document.getElementById('preview');
-
-      dateField.value = new Date().toISOString().split('T')[0];
-
-      excerptField?.addEventListener('input', () => {
-        countLabel.textContent = `${excerptField.value.length}/160`;
-      });
-
-      contentField?.addEventListener('input', () => {
-        preview.innerHTML = marked.parse(contentField.value);
-      });
-
-      form?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const article = {
-          slug: document.getElementById('slug').value,
-          title: document.getElementById('title').value,
-          excerpt: document.getElementById('excerpt').value,
-          content: document.getElementById('content').value,
-          lang: document.getElementById('lang').value,
-          publish_date: document.getElementById('publish_date').value,
-          cover_image: document.getElementById('cover_image').value,
-          published: document.getElementById('published').value === 'true'
-        };
-
-        const { data, error } = await supabase.from('articles').insert([article]);
-
-        output.classList.remove('hidden');
-        output.textContent = error
-          ? `❌ Σφάλμα: ${error.message}`
-          : `✅ Το άρθρο καταχωρήθηκε με ID: ${data[0].id}`;
-      });
-    </script>
+    <!-- Εδώ φορτώνεται ο JS που έφτιαξες -->
+    <script src="/scripts/editor.js" type="module"></script>
   </body>
 </html>
