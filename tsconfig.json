@@ -17,5 +17,5 @@
   },
   "include": [
     "src"
-, "public/scripts/editor.js"  ]
+  ]
 }
