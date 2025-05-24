@@ -1,6 +1,6 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import ArticleCard from '../components/ArticleCard.jsx';
+import Layout from '../../layouts/Layout.astro';
+import ArticleCard from '../../components/ArticleCard.jsx';
 import { createServerClient } from '@supabase/ssr';
 
 const supabase = createServerClient(
@@ -28,7 +28,7 @@ const { data: allArticles, error } = await supabase
             title={article.title}
             excerpt={article.excerpt}
             image={article.cover_image}
-            href={`/blog/${article.slug}`}
+            href={`/el/blog/${article.slug}`}
           />
         ))}
       </section>
