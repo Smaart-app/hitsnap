@@ -12,7 +12,6 @@ const supabase = createServerClient(
   { cookies: Astro.cookies }
 );
 
-// 🔍 Φέρνουμε το άρθρο με slug και γλώσσα
 const { data: articles, error } = await supabase
   .from('articles')
   .select('*')
@@ -22,11 +21,9 @@ const { data: articles, error } = await supabase
 
 const article = articles?.[0];
 
-// 🌍 Εντοπίζουμε τη "δίδυμη" γλώσσα
 const altLang = lang === 'el' ? 'en' : 'el';
 const altSlug = slug.replace(`-${lang}`, `-${altLang}`);
 
-// ❓ Ψάχνουμε αν υπάρχει μετάφραση
 const { data: altArticles } = await supabase
   .from('articles')
   .select('slug')
@@ -42,7 +39,7 @@ const pageDescription = article?.excerpt ?? 'This article may have moved or neve
 const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
 ---
 
-<Layout title={pageTitle}>
+<Layout title={pageTitle} lang={lang}>
   <head slot="head">
     <meta name="description" content={pageDescription} />
     <meta property="og:title" content={pageTitle} />
