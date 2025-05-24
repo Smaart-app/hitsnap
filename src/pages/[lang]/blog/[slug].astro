@@ -49,7 +49,7 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
   </head>
 
   {article ? (
-    <article class="prose prose-zinc dark:prose-invert max-w-3xl mx-auto py-12 px-4">
+    <section class="prose prose-zinc dark:prose-invert max-w-3xl mx-auto py-12 px-4">
       <h1 class="mb-4">{article.title}</h1>
       <p class="text-sm text-zinc-500 mb-4">
         {new Date(article.publish_date).toLocaleDateString(lang === "en" ? "en-GB" : "el-GR")}
@@ -92,7 +92,7 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
 {JSON.stringify(article, null, 2)}
         </pre>
       </details>
-    </article>
+    </section>
   ) : (
     <section class="text-center py-24">
       <h1 class="text-4xl font-bold mb-4">404 — Article Not Found</h1>
