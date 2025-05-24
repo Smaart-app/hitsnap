@@ -12,6 +12,7 @@ const supabase = createServerClient(
   { cookies: Astro.cookies }
 );
 
+// 🔍 Φέρνουμε το άρθρο με slug και γλώσσα
 const { data: articles, error } = await supabase
   .from('articles')
   .select('*')
@@ -20,6 +21,21 @@ const { data: articles, error } = await supabase
   .limit(1);
 
 const article = articles?.[0];
+
+// 🌍 Εντοπίζουμε τη "δίδυμη" γλώσσα
+const altLang = lang === 'el' ? 'en' : 'el';
+const altSlug = slug.replace(`-${lang}`, `-${altLang}`);
+
+// ❓ Ψάχνουμε αν υπάρχει μετάφραση
+const { data: altArticles } = await supabase
+  .from('articles')
+  .select('slug')
+  .eq('slug', altSlug)
+  .eq('lang', altLang)
+  .eq('published', true)
+  .limit(1);
+
+const hasAltVersion = altArticles?.length > 0;
 
 const pageTitle = article?.title ?? 'Unknown Article';
 const pageDescription = article?.excerpt ?? 'This article may have moved or never existed.';
@@ -56,9 +72,20 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
         {@html article.content}
       </div>
 
+      {hasAltVersion && (
+        <div class="text-right mt-8 text-sm">
+          <a
+            href={`/${altLang}/blog/${altSlug}`}
+            class="text-[#50c7c2] hover:underline"
+          >
+            {lang === 'el' ? 'Δες στα Αγγλικά →' : 'View in Greek →'}
+          </a>
+        </div>
+      )}
+
       <div class="mt-12 text-center mb-24">
         <a href={`/${lang}/blog`} class="inline-block text-[#50c7c2] hover:underline">
-          ← Back to blog
+          ← {lang === 'el' ? 'Επιστροφή στα άρθρα' : 'Back to blog'}
         </a>
       </div>
 
@@ -73,13 +100,15 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
     <section class="text-center py-24">
       <h1 class="text-4xl font-bold mb-4">404 — Article Not Found</h1>
       <p class="text-gray-600 dark:text-gray-400 mb-8">
-        It may have been moved, unpublished, or never existed.
+        {lang === 'el'
+          ? 'Το άρθρο δεν βρέθηκε ή δεν έχει δημοσιευτεί.'
+          : 'This article may have been moved or unpublished.'}
       </p>
       <a
         href={`/${lang}/blog`}
         class="inline-block bg-[#50c7c2] text-white px-6 py-3 rounded-lg shadow hover:bg-[#3db2b0] transition"
       >
-        🏠 Back to blog
+        {lang === 'el' ? '🏠 Επιστροφή στα άρθρα' : '🏠 Back to blog'}
       </a>
     </section>
   )}

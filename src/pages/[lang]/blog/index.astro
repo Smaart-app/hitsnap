@@ -1,6 +1,6 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import ArticleCard from '../components/ArticleCard.jsx';
+import Layout from '../../../layouts/Layout.astro';
+import ArticleCard from '../../../components/ArticleCard.jsx';
 import { createServerClient } from '@supabase/ssr';
 
 const { lang } = Astro.params;
@@ -17,9 +17,15 @@ const { data: articles, error } = await supabase
   .eq('lang', lang)
   .eq('published', true)
   .order('publish_date', { ascending: false });
----
 
-<Layout title="Άρθρα | Hitlift" lang={lang}>
+// helper για αντίστροφη γλώσσα
+function getAltLang(current) {
+  if (current === 'el') return 'en';
+  if (current === 'en') return 'el';
+  return 'en';
+}
+---
+<Layout title={lang === 'en' ? 'Articles | Hitlift' : 'Άρθρα | Hitlift'} lang={lang}>
   <main class="max-w-6xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-center mb-10">
       {lang === 'en' ? 'Articles' : 'Άρθρα'}
@@ -27,14 +33,29 @@ const { data: articles, error } = await supabase
 
     {articles?.length > 0 ? (
       <section class="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {articles.map((article) => (
-          <ArticleCard
-            title={article.title}
-            excerpt={article.excerpt}
-            image={article.cover_image}
-            href={`/${lang}/blog/${article.slug}`}
-          />
-        ))}
+        {articles.map((article) => {
+          const altLang = getAltLang(lang);
+          const translatedSlug = article.slug.replace(`-${lang}`, `-${altLang}`);
+          const hasTranslation = true; // εδώ μπορούμε μελλοντικά να ελέγξουμε πραγματικά
+
+          return (
+            <div class="space-y-2">
+              <ArticleCard
+                title={article.title}
+                excerpt={article.excerpt}
+                image={article.cover_image}
+                href={`/${lang}/blog/${article.slug}`}
+              />
+              {hasTranslation && (
+                <p class="text-sm text-right">
+                  <a href={`/${altLang}/blog/${translatedSlug}`} class="text-[#50c7c2] hover:underline">
+                    {lang === 'el' ? 'Δες και στα Αγγλικά →' : 'View in Greek →'}
+                  </a>
+                </p>
+              )}
+            </div>
+          );
+        })}
       </section>
     ) : (
       <p class="text-center text-gray-500 mt-12">
