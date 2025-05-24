@@ -56,6 +56,7 @@ if (tab === 'published') {
             <th class="py-2 px-2">Γλώσσα</th>
             <th class="py-2 px-2">Κατάσταση</th>
             <th class="py-2 px-2">Ημερομηνία</th>
+            <th class="py-2 px-2">Ενέργειες</th>
           </tr>
         </thead>
         <tbody>
@@ -69,7 +70,17 @@ if (tab === 'published') {
                   ? <span class="text-green-600 font-medium">✓ Δημοσιευμένο</span>
                   : <span class="text-yellow-600 font-medium">✎ Πρόχειρο</span>}
               </td>
-              <td class="py-2 px-2">{new Date(article.publish_date).toLocaleDateString('el-GR')}</td>
+              <td class="py-2 px-2">
+                {new Date(article.publish_date).toLocaleDateString('el-GR')}
+              </td>
+              <td class="py-2 px-2">
+                <a
+                  href={`/blog/editor?slug=${article.slug}`}
+                  class="text-[#50c7c2] hover:underline text-sm"
+                >
+                  ✏️ Επεξεργασία
+                </a>
+              </td>
             </tr>
           ))}
         </tbody>
