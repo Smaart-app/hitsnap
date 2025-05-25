@@ -60,29 +60,40 @@ if (tab === 'published') {
           </tr>
         </thead>
         <tbody>
-          {visible.map((article) => (
-            <tr class="border-b border-gray-100 hover:bg-gray-50">
-              <td class="py-2 px-2 font-mono">{article.slug}</td>
-              <td class="py-2 px-2">{article.title}</td>
-              <td class="py-2 px-2 uppercase">{article.lang}</td>
-              <td class="py-2 px-2">
-                {article.published
-                  ? <span class="text-green-600 font-medium">✓ Δημοσιευμένο</span>
-                  : <span class="text-yellow-600 font-medium">✎ Πρόχειρο</span>}
-              </td>
-              <td class="py-2 px-2">
-                {new Date(article.publish_date).toLocaleDateString('el-GR')}
-              </td>
-              <td class="py-2 px-2">
-                <a
-                  href={`/blog/editor?slug=${article.slug}`}
-                  class="text-[#50c7c2] hover:underline text-sm"
-                >
-                  ✏️ Επεξεργασία
-                </a>
-              </td>
-            </tr>
-          ))}
+          {visible.map((article) => {
+            const locale = article.lang === 'en' ? 'en-GB' : 'el-GR';
+            const formattedDate = article.publish_date
+              ? new Date(article.publish_date).toLocaleDateString(locale)
+              : '—';
+
+            return (
+              <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="py-2 px-2 font-mono">{article.slug}</td>
+                <td class="py-2 px-2">{article.title}</td>
+                <td class="py-2 px-2 uppercase">{article.lang}</td>
+                <td class="py-2 px-2">
+                  {article.published
+                    ? <span class="text-green-600 font-medium">✓ Δημοσιευμένο</span>
+                    : <span class="text-yellow-600 font-medium">✎ Πρόχειρο</span>}
+                </td>
+                <td class="py-2 px-2">{formattedDate}</td>
+                <td class="py-2 px-2 space-x-2">
+                  <a
+                    href={`/${article.lang}/blog/editor?slug=${article.slug}`}
+                    class="text-[#50c7c2] hover:underline text-sm"
+                  >
+                    ✏️ Επεξεργασία
+                  </a>
+                  <a
+                    href={`/${article.lang}/blog/editor?slug=${article.slug}&base_lang=${article.lang}&lang=${article.lang === 'el' ? 'en' : 'el'}`}
+                    class="text-[#777] hover:text-[#50c7c2] hover:underline text-sm"
+                  >
+                    🌍 Μετάφραση
+                  </a>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     ) : (
