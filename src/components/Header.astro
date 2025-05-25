@@ -4,7 +4,7 @@ const isAuthenticated = cookie?.value === "ok";
 const lang = Astro.props?.lang || "el";
 
 const isGreek = lang === "el";
-const base = isGreek ? "" : "/en";
+const base = isGreek ? \"/el\" : \"/en\";
 ---
 
 <header class="w-full border-b border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm px-6 py-4">
