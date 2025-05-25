@@ -12,6 +12,7 @@ const supabase = createServerClient(
   { cookies: Astro.cookies }
 );
 
+// 🔍 Βρες το άρθρο στη σωστή γλώσσα
 const { data: articles, error } = await supabase
   .from('articles')
   .select('*')
@@ -22,17 +23,18 @@ const { data: articles, error } = await supabase
 const article = articles?.[0];
 
 const altLang = lang === 'el' ? 'en' : 'el';
-const altSlug = slug.replace(`-${lang}`, `-${altLang}`);
 
+// 🔁 Βρες μετάφραση, αν υπάρχει
 const { data: altArticles } = await supabase
   .from('articles')
   .select('slug')
-  .eq('slug', altSlug)
+  .eq('translation_of', article?.translation_of || article?.id)
   .eq('lang', altLang)
   .eq('published', true)
   .limit(1);
 
-const hasAltVersion = altArticles?.length > 0;
+const altArticle = altArticles?.[0];
+const hasAltVersion = !!altArticle;
 
 const pageTitle = article?.title ?? 'Unknown Article';
 const pageDescription = article?.excerpt ?? 'This article may have moved or never existed.';
@@ -46,6 +48,7 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
     <meta property="og:description" content={pageDescription} />
     <meta property="og:type" content="article" />
     <meta property="og:url" content={pageUrl} />
+    <meta name="language" content={lang === 'el' ? 'Greek' : 'English'} />
   </head>
 
   {article ? (
@@ -72,10 +75,10 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
       {hasAltVersion && (
         <div class="text-right mt-8 text-sm">
           <a
-            href={`/${altLang}/blog/${altSlug}`}
+            href={`/${altLang}/blog/${altArticle.slug}`}
             class="text-[#50c7c2] hover:underline"
           >
-            {lang === 'el' ? 'Δες στα Αγγλικά →' : 'View in Greek →'}
+            {lang === 'el' ? 'Διαθέσιμο και στα Αγγλικά →' : 'Also available in Greek →'}
           </a>
         </div>
       )}

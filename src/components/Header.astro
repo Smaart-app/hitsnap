@@ -4,7 +4,13 @@ const isAuthenticated = cookie?.value === "ok";
 const lang = Astro.props?.lang || "el";
 
 const isGreek = lang === "el";
-const base = isGreek ? \"/el\" : \"/en\";
+const base = isGreek ? "/el" : "/en";
+
+// Για intelligent language switching
+const currentPath = Astro.url.pathname;
+const pathWithoutLang = currentPath.replace(/^\/(el|en)/, '');
+const pathForGreek = `/el${pathWithoutLang}`;
+const pathForEnglish = `/en${pathWithoutLang}`;
 ---
 
 <header class="w-full border-b border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm px-6 py-4">
@@ -33,11 +39,17 @@ const base = isGreek ? \"/el\" : \"/en\";
         </a>
       )}
 
-      <!-- Language Switcher -->
+      <!-- 🌍 Νέος Language Switcher -->
       <div class="ml-6 flex items-center gap-2 text-sm">
-        <a href="/blog" class={isGreek ? "text-[#50c7c2] font-semibold" : "hover:text-[#50c7c2]"}>🇬🇷 EL</a>
-        <span class="text-zinc-400">|</span>
-        <a href="/en/blog" class={!isGreek ? "text-[#50c7c2] font-semibold" : "hover:text-[#50c7c2]"}>🇬🇧 EN</a>
+        {isGreek ? (
+          <a href={pathForEnglish} class="hover:text-[#50c7c2]">
+            English <span class="ml-1">🇬🇧</span>
+          </a>
+        ) : (
+          <a href={pathForGreek} class="hover:text-[#50c7c2]">
+            Ελληνικά <span class="ml-1">🇬🇷</span>
+          </a>
+        )}
       </div>
     </nav>
   </div>
