@@ -16,7 +16,7 @@ const { data: articles, error } = await supabase
   .select('*')
   .eq('lang', lang)
   .eq('published', true)
-  .order('publish_date', { ascending: false });
+  .order('created_at', { ascending: false })
 
 // helper για αντίστροφη γλώσσα
 function getAltLang(current) {
