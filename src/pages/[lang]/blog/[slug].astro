@@ -54,7 +54,7 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
         <div class="prose prose-zinc dark:prose-invert">
           <h1 class="mb-4">{article.title}</h1>
           <p class="text-sm text-zinc-500 mb-4">
-            {new Date(article.publish_date).toLocaleDateString(lang === 'en' ? 'en-GB' : 'el-GR')}
+            {new Date(article.publish_date).toLocaleDateString(lang === "en" ? "en-GB" : "el-GR")}
           </p>
 
           {article.cover_image && (
