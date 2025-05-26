@@ -16,7 +16,7 @@ const { data: articles, error } = await supabase
   .select('*')
   .eq('lang', lang)
   .eq('published', true)
-  .order('publish_date', { ascending: false });
+  .order('publish_date', { ascending: false }); // ή 'created_at' αν δεν έχεις πεδίο publish_date
 
 // helper για αντίστροφη γλώσσα
 function getAltLang(current) {
@@ -25,18 +25,19 @@ function getAltLang(current) {
   return 'en';
 }
 ---
+
 <Layout title={lang === 'en' ? 'Articles | Hitlift' : 'Άρθρα | Hitlift'} lang={lang}>
   <main class="max-w-6xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-center mb-10">
       {lang === 'en' ? 'Articles' : 'Άρθρα'}
     </h1>
 
-    {articles?.length > 0 ? (
+    {articles && articles.length > 0 ? (
       <section class="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {articles.map((article) => {
           const altLang = getAltLang(lang);
           const translatedSlug = article.slug.replace(`-${lang}`, `-${altLang}`);
-          const hasTranslation = true; // εδώ μπορούμε μελλοντικά να ελέγξουμε πραγματικά
+          const hasTranslation = true; // μελλοντικά έλεγχος Supabase
 
           return (
             <div class="space-y-2">

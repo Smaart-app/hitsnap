@@ -66,27 +66,27 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
               />
             </div>
           )}
+        </div>
 
-          <div class="prose prose-zinc dark:prose-invert whitespace-pre-line">
-            {@html article.content}
-          </div>
+        <div class="prose prose-zinc dark:prose-invert max-w-none">
+          <div set:html={article.content} />
+        </div>
 
-          {hasAltVersion && (
-            <div class="text-right mt-8 text-sm">
-              <a
-                href={`/${altLang}/blog/${altArticle.slug}`}
-                class="text-[#50c7c2] hover:underline"
-              >
-                {lang === 'el' ? 'Διαθέσιμο και στα Αγγλικά →' : 'Also available in Greek →'}
-              </a>
-            </div>
-          )}
-
-          <div class="mt-12 text-center mb-24">
-            <a href={`/${lang}/blog`} class="inline-block text-[#50c7c2] hover:underline">
-              ← {lang === 'el' ? 'Επιστροφή στα άρθρα' : 'Back to blog'}
+        {hasAltVersion && (
+          <div class="text-right mt-8 text-sm">
+            <a
+              href={`/${altLang}/blog/${altArticle.slug}`}
+              class="text-[#50c7c2] hover:underline"
+            >
+              {lang === 'el' ? 'Διαθέσιμο και στα Αγγλικά →' : 'Also available in Greek →'}
             </a>
           </div>
+        )}
+
+        <div class="mt-12 text-center mb-24">
+          <a href={`/${lang}/blog`} class="inline-block text-[#50c7c2] hover:underline">
+            ← {lang === 'el' ? 'Επιστροφή στα άρθρα' : 'Back to blog'}
+          </a>
         </div>
       </section>
 
