@@ -1,0 +1,19 @@
+---
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'el' } },
+    { params: { lang: 'en' } },
+  ];
+}
+
+const { lang } = Astro.params;
+---
+
+<html lang={lang}>
+  <head>
+    <title>Γλώσσα: {lang}</title>
+  </head>
+  <body>
+    <h1>Αυτή είναι η σελίδα στη γλώσσα: {lang}</h1>
+  </body>
+</html>
