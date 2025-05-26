@@ -70,9 +70,10 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
               )
             }
 
-            <div class="whitespace-pre-line">
-              {@html article.content}
+            <div class="prose prose-zinc dark:prose-invert whitespace-pre-line">
+            {@html article.content}
             </div>
+
 
             {
               hasAltVersion && (
