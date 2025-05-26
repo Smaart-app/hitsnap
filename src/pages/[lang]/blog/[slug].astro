@@ -12,8 +12,7 @@ const supabase = createServerClient(
   { cookies: Astro.cookies }
 );
 
-// 🔍 Βρες το άρθρο στη σωστή γλώσσα
-const { data: articles, error } = await supabase
+const { data: articles } = await supabase
   .from('articles')
   .select('*')
   .eq('slug', slug)
@@ -21,10 +20,8 @@ const { data: articles, error } = await supabase
   .limit(1);
 
 const article = articles?.[0];
-
 const altLang = lang === 'el' ? 'en' : 'el';
 
-// 🔁 Βρες μετάφραση, αν υπάρχει
 const { data: altArticles } = await supabase
   .from('articles')
   .select('slug')
