@@ -16,7 +16,7 @@ const { data: articles, error } = await supabase
   .select('*')
   .eq('lang', lang)
   .eq('published', true)
-  .order('publish_date', { ascending: false }); // ή 'created_at' αν δεν έχεις πεδίο publish_date
+  .order('publish_date', { ascending: false });
 
 // helper για αντίστροφη γλώσσα
 function getAltLang(current) {
@@ -49,7 +49,10 @@ function getAltLang(current) {
               />
               {hasTranslation && (
                 <p class="text-sm text-right">
-                  <a href={`/${altLang}/blog/${translatedSlug}`} class="text-[#50c7c2] hover:underline">
+                  <a
+                    href={`/${altLang}/blog/${translatedSlug}`}
+                    class="text-[#50c7c2] hover:underline"
+                  >
                     {lang === 'el' ? 'Δες και στα Αγγλικά →' : 'View in Greek →'}
                   </a>
                 </p>
