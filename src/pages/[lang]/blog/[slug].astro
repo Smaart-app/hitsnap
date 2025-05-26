@@ -49,7 +49,7 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
   </head>
 
   {
-    {article ? (
+    article ? (
       <>
         <section class="max-w-3xl mx-auto py-12 px-4">
           <div class="prose prose-zinc dark:prose-invert">
@@ -58,33 +58,30 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
               {new Date(article.publish_date).toLocaleDateString(lang === "en" ? "en-GB" : "el-GR")}
             </p>
 
-             {article.cover_image && (
-             <div class="flex justify-center">
-             <img
-             src={article.cover_image}
-             alt="Cover image"
-             class="mb-6 max-h-[400px] w-auto max-w-full object-contain rounded-lg shadow"
-             />
-             </div>
-             )}
+            {article.cover_image && (
+              <div class="flex justify-center">
+                <img
+                  src={article.cover_image}
+                  alt="Cover image"
+                  class="mb-6 max-h-[400px] w-auto max-w-full object-contain rounded-lg shadow"
+                />
+              </div>
+            )}
 
             <div class="prose prose-zinc dark:prose-invert whitespace-pre-line">
-            {@html article.content}
+              {@html article.content}
             </div>
 
-
-            {
-              hasAltVersion && (
-                <div class="text-right mt-8 text-sm">
-                  <a
-                    href={`/${altLang}/blog/${altArticle.slug}`}
-                    class="text-[#50c7c2] hover:underline"
-                  >
-                    {lang === 'el' ? 'Διαθέσιμο και στα Αγγλικά →' : 'Also available in Greek →'}
-                  </a>
-                </div>
-              )
-            }
+            {hasAltVersion && (
+              <div class="text-right mt-8 text-sm">
+                <a
+                  href={`/${altLang}/blog/${altArticle.slug}`}
+                  class="text-[#50c7c2] hover:underline"
+                >
+                  {lang === 'el' ? 'Διαθέσιμο και στα Αγγλικά →' : 'Also available in Greek →'}
+                </a>
+              </div>
+            )}
 
             <div class="mt-12 text-center mb-24">
               <a href={`/${lang}/blog`} class="inline-block text-[#50c7c2] hover:underline">
