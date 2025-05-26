@@ -1,0 +1,119 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { createServerClient } from '@supabase/ssr';
+
+export const prerender = false;
+
+const { slug, lang } = Astro.params;
+
+const supabase = createServerClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+  { cookies: Astro.cookies }
+);
+
+// 🔍 Βρες το άρθρο στη σωστή γλώσσα
+const { data: articles, error } = await supabase
+  .from('articles')
+  .select('*')
+  .eq('slug', slug)
+  .eq('lang', lang)
+  .limit(1);
+
+const article = articles?.[0];
+
+const altLang = lang === 'el' ? 'en' : 'el';
+
+// 🔁 Βρες μετάφραση, αν υπάρχει
+const { data: altArticles } = await supabase
+  .from('articles')
+  .select('slug')
+  .eq('translation_of', article?.translation_of || article?.id)
+  .eq('lang', altLang)
+  .eq('published', true)
+  .limit(1);
+
+const altArticle = altArticles?.[0];
+const hasAltVersion = !!altArticle;
+
+const pageTitle = article?.title ?? 'Unknown Article';
+const pageDescription = article?.excerpt ?? 'This article may have moved or never existed.';
+const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
+---
+
+<Layout title={pageTitle} lang={lang}>
+  <head slot="head">
+    <meta name="description" content={pageDescription} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={pageUrl} />
+    <meta name="language" content={lang === 'el' ? 'Greek' : 'English'} />
+  </head>
+
+  {article ? (
+    <>
+      <section class="max-w-3xl mx-auto py-12 px-4">
+        <article class="prose prose-zinc dark:prose-invert">
+          <h1 class="mb-4">{article.title}</h1>
+          <p class="text-sm text-zinc-500 mb-4">
+            {new Date(article.publish_date).toLocaleDateString(lang === "en" ? "en-GB" : "el-GR")}
+          </p>
+
+          {article.cover_image && (
+            <div class="flex justify-center">
+              <img
+                src={article.cover_image}
+                alt="Cover image"
+                class="mb-6 max-h-[400px] w-auto max-w-full object-contain rounded-lg shadow"
+              />
+            </div>
+          )}
+
+          <div class="whitespace-pre-line">
+            {@html article.content}
+          </div>
+
+          {hasAltVersion && (
+            <div class="text-right mt-8 text-sm">
+              <a
+                href={`/${altLang}/blog/${altArticle.slug}`}
+                class="text-[#50c7c2] hover:underline"
+              >
+                {lang === 'el' ? 'Διαθέσιμο και στα Αγγλικά →' : 'Also available in Greek →'}
+              </a>
+            </div>
+          )}
+
+          <div class="mt-12 text-center mb-24">
+            <a href={`/${lang}/blog`} class="inline-block text-[#50c7c2] hover:underline">
+              ← {lang === 'el' ? 'Επιστροφή στα άρθρα' : 'Back to blog'}
+            </a>
+          </div>
+        </article>
+      </section>
+
+      <details class="mt-8 bg-zinc-100 text-xs p-4 rounded shadow text-black max-w-3xl mx-auto">
+        <summary class="cursor-pointer">🛠 View raw article data</summary>
+        <pre class="overflow-auto whitespace-pre-wrap">
+{JSON.stringify(article, null, 2)}
+        </pre>
+      </details>
+    </>
+  ) : (
+    <section class="text-center py-24">
+      <h1 class="text-4xl font-bold mb-4">404 — Article Not Found</h1>
+      <p class="text-gray-600 dark:text-gray-400 mb-8">
+        {lang === 'el'
+          ? 'Το άρθρο δεν βρέθηκε ή δεν έχει δημοσιευτεί.'
+          : 'This article may have been moved or unpublished.'}
+      </p>
+      <a
+        href={`/${lang}/blog`}
+        class="inline-block bg-[#50c7c2] text-white px-6 py-3 rounded-lg shadow hover:bg-[#3db2b0] transition"
+      >
+        {lang === 'el' ? '🏠 Επιστροφή στα άρθρα' : '🏠 Back to blog'}
+      </a>
+    </section>
+  )}
+</Layout>
