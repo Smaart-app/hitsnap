@@ -9,13 +9,24 @@ export async function getStaticPaths() {
 }
 
 const { lang } = Astro.params;
+const isGreek = lang === 'el';
 ---
 
 <html lang={lang}>
   <head>
-    <title>Γλώσσα: {lang}</title>
+    <meta charset="UTF-8" />
+    <title>{isGreek ? 'Αρχική | Hitlift' : 'Home | Hitlift'}</title>
   </head>
-  <body>
-    <h1>Αυτή είναι η σελίδα στη γλώσσα: {lang}</h1>
+  <body style="font-family: sans-serif; padding: 2rem; text-align: center;">
+    <h1>
+      {isGreek
+        ? '🏠 Καλώς ήρθες στη Hitlift — η έξυπνη άνοδος στο real estate!'
+        : '🏠 Welcome to Hitlift — the smart rise in real estate!'}
+    </h1>
+    <p style="margin-top: 1rem;">
+      <a href={`/${lang}/blog`} style="color: #50c7c2; text-decoration: underline;">
+        {isGreek ? 'Προχώρησε στα άρθρα →' : 'Browse articles →'}
+      </a>
+    </p>
   </body>
 </html>
