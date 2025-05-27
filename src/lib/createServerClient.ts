@@ -5,6 +5,18 @@ export function createServerClientWithCookies(cookies: AstroCookies) {
   return createServerClient(
     import.meta.env.PUBLIC_SUPABASE_URL!,
     import.meta.env.PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies } as any
+    {
+      cookies: {
+        get(name) {
+          return cookies.get(name)?.value;
+        },
+        set(name, value, options) {
+          cookies.set(name, value, options);
+        },
+        remove(name, options) {
+          cookies.delete(name, options);
+        }
+      }
+    }
   );
 }
