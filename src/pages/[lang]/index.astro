@@ -1,64 +1,25 @@
 ---
-import BackgroundSketch from '../../components/BackgroundSketch.astro';
-
 export const prerender = true;
 
-const pageTitle = 'Hitlift | The smart rise in real estate';
-const pageDesc = 'Select your language to explore Hitlift.';
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'el' } },
+    { params: { lang: 'en' } },
+  ];
+}
 ---
 
-<html lang="en">
+<script>
+  const { lang } = Astro.params;
+</script>
+
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
-    <title>{pageTitle}</title>
-    <meta name="description" content={pageDesc} />
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: #fdfdfc;
-        margin: 0;
-        padding: 0;
-        position: relative;
-        overflow-x: hidden;
-      }
-      main {
-        position: relative;
-        z-index: 1;
-        text-align: center;
-        padding: 10rem 2rem 4rem;
-      }
-      h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-      }
-      p {
-        font-size: 1.2rem;
-        margin-bottom: 2rem;
-      }
-      .lang-links a {
-        color: #50c7c2;
-        font-weight: 600;
-        margin: 0 1rem;
-        text-decoration: none;
-        font-size: 1.1rem;
-      }
-      .lang-links a:hover {
-        text-decoration: underline;
-      }
-    </style>
+    <title>Redirecting...</title>
+    <meta http-equiv="refresh" content="0; url=/{lang}/blog" />
   </head>
   <body>
-    <BackgroundSketch />
-
-    <main>
-      <h1>🌍 Welcome to Hitlift</h1>
-      <p>Select your language to explore real estate smarter.</p>
-
-      <div class="lang-links">
-        <a href="/el/">🇬🇷 Ελληνικά</a>
-        <a href="/en/">🇬🇧 English</a>
-      </div>
-    </main>
+    <p>Redirecting to blog...</p>
   </body>
 </html>
