@@ -1,0 +1,48 @@
+---
+// src/pages/index.astro
+export const prerender = false;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hitlift | Redirecting</title>
+    <script>
+      const userLang = navigator.language || navigator.userLanguage;
+      const preferredLang = userLang.startsWith('el') ? 'el' : 'en';
+      const url = new URL(window.location.href);
+      const manual = url.searchParams.get('lang');
+
+      if (!manual) {
+        window.location.href = '/' + preferredLang + '/';
+      }
+    </script>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 2rem;
+        text-align: center;
+      }
+      a {
+        color: #50c7c2;
+        text-decoration: underline;
+        display: inline-block;
+        margin: 0.5rem;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🌍 Welcome to Hitlift</h1>
+    <p>Select your language:</p>
+    <p>
+      <a href="/el/?lang=manual">🇬🇷 Ελληνικά</a>
+      <a href="/en/?lang=manual">🇬🇧 English</a>
+    </p>
+    <noscript>
+      <p style="margin-top: 2rem; color: grey;">
+        JavaScript is disabled. Please select your language above.
+      </p>
+    </noscript>
+  </body>
+</html>
