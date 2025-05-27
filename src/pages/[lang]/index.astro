@@ -1,20 +1,17 @@
 ---
-import BackgroundSketch from '../../components/BackgroundSketch.astro';
+import BackgroundSketch from '../components/BackgroundSketch.astro';
 
-export const prerender = true;
+export const prerender = false;
 
-export async function getStaticPaths() {
-  return [
-    { params: { lang: 'el' } },
-    { params: { lang: 'en' } },
-  ];
-}
+const browserLang = typeof window !== 'undefined'
+  ? window.navigator.language
+  : 'en';
 
-const { lang } = Astro.params;
-const isGreek = lang === 'el';
+const htmlLang = browserLang.startsWith('el') ? 'el' : 'en';
+const isGreek = htmlLang === 'el';
 ---
 
-<html lang={lang}>
+<html lang={htmlLang}>
   <head>
     <meta charset="UTF-8" />
     <title>{isGreek ? 'Hitlift | Η έξυπνη άνοδος στο real estate' : 'Hitlift | The smart rise in real estate'}</title>
