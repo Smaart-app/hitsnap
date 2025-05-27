@@ -63,6 +63,7 @@ const pageDesc = lang === 'en'
                 excerpt={article.excerpt}
                 image={article.cover_image}
                 href={`/${lang}/blog/${article.slug}`}
+                lang={lang}
               />
               {hasTranslation && (
                 <p class="text-sm text-right">

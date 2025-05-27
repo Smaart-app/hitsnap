@@ -1,4 +1,6 @@
-export default function ArticleCard({ title, excerpt, image, href }) {
+export default function ArticleCard({ title, excerpt, image, href, lang = 'el' }) {
+  const readMoreText = lang === 'en' ? 'Read more →' : 'Διάβασε περισσότερα →';
+
   return (
     <article className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden max-w-xl mx-auto flex flex-col">
       {image && (
@@ -21,7 +23,7 @@ export default function ArticleCard({ title, excerpt, image, href }) {
           href={href}
           className="mt-4 inline-block text-[#50c7c2] font-semibold hover:underline text-sm"
         >
-          Διάβασε περισσότερα →
+          {readMoreText}
         </a>
       </div>
     </article>
