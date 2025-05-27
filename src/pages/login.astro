@@ -1,54 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { createServerClientWithCookies } from '../lib/createServerClient';
 
-let error = false;
+let error = '';
 let emailAttempted = '';
-
-if (Astro.request.method === 'POST') {
-  const formData = await Astro.request.formData();
-  const email = formData.get('email');
-  const password = formData.get('password');
-  emailAttempted = email;
-
-  const supabase = createServerClientWithCookies(Astro.cookies);
-
-  const { data, error: authError } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (authError || !data.session) {
-    error = true;
-  } else {
-    const { session } = data;
-
-    Astro.cookies.set('sb-access-token', session.access_token, {
-      path: '/',
-      httpOnly: true,
-      maxAge: 60 * 60 * 12, // 12 ώρες
-    });
-
-    Astro.cookies.set('sb-refresh-token', session.refresh_token, {
-      path: '/',
-      httpOnly: true,
-      maxAge: 60 * 60 * 24 * 30, // 30 μέρες
-    });
-
-    return Astro.redirect('/el/blog/editor');
-  }
-}
 ---
 
 <Layout title="🔐 Login">
   <main class="max-w-md mx-auto mt-24 p-6 bg-white rounded shadow">
     <h1 class="text-2xl font-bold mb-4">🔐 Login to Admin</h1>
 
-    {error && (
-      <p class="text-red-600 mb-4">⚠️ Wrong email or password. Try again.</p>
-    )}
+    <div id="errorBox" class="text-red-600 mb-4 hidden"></div>
 
-    <form method="POST" action="/login" class="space-y-4">
+    <form id="loginForm" class="space-y-4">
       <div>
         <label class="block font-semibold mb-1">Email</label>
         <input
@@ -56,7 +19,6 @@ if (Astro.request.method === 'POST') {
           name="email"
           class="w-full p-2 border rounded"
           placeholder="anna@hitlift.com"
-          value={emailAttempted}
           required
         />
       </div>
@@ -80,4 +42,31 @@ if (Astro.request.method === 'POST') {
       </button>
     </form>
   </main>
+
+  <script type="module">
+    const form = document.getElementById('loginForm');
+    const errorBox = document.getElementById('errorBox');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const email = formData.get('email');
+      const password = formData.get('password');
+
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (res.ok) {
+        window.location.href = '/el/blog/editor';
+      } else {
+        const result = await res.json();
+        errorBox.textContent = result.error || 'Login failed';
+        errorBox.classList.remove('hidden');
+      }
+    });
+  </script>
 </Layout>
