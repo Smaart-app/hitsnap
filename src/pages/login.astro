@@ -1,39 +1,41 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { supabase } from '../lib/supabaseClient';
-import { redirect } from 'astro/runtime/server';
+import { createServerClientWithCookies } from '../lib/createServerClient';
 
 let error = false;
+let emailAttempted = '';
 
 if (Astro.request.method === 'POST') {
-  const form = await Astro.request.formData();
-  const email = form.get('email');
-  const password = form.get('password');
+  const formData = await Astro.request.formData();
+  const email = formData.get('email');
+  const password = formData.get('password');
+  emailAttempted = email;
+
+  const supabase = createServerClientWithCookies(Astro.cookies);
 
   const { data, error: authError } = await supabase.auth.signInWithPassword({
     email,
-    password
+    password,
   });
 
-  if (authError) {
+  if (authError || !data.session) {
     error = true;
   } else {
     const { session } = data;
 
-    // Set auth cookie
     Astro.cookies.set('sb-access-token', session.access_token, {
       path: '/',
       httpOnly: true,
-      maxAge: 60 * 60 * 12 // 12 ώρες
+      maxAge: 60 * 60 * 12, // 12 ώρες
     });
 
     Astro.cookies.set('sb-refresh-token', session.refresh_token, {
       path: '/',
       httpOnly: true,
-      maxAge: 60 * 60 * 24 * 30 // 30 ημέρες
+      maxAge: 60 * 60 * 24 * 30, // 30 μέρες
     });
 
-    return redirect('/dashboard');
+    return Astro.redirect('/el/blog/editor');
   }
 }
 ---
@@ -54,6 +56,7 @@ if (Astro.request.method === 'POST') {
           name="email"
           class="w-full p-2 border rounded"
           placeholder="anna@hitlift.com"
+          value={emailAttempted}
           required
         />
       </div>

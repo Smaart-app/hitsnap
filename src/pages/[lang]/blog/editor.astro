@@ -1,8 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import { createServerClientWithCookies } from '../../../lib/createServerClient';
-import { redirect } from 'astro/runtime/server';
-import { marked } from 'marked';
 
 const lang = Astro.params.lang || 'el';
 const isGreek = lang === 'el';
@@ -15,7 +13,7 @@ const {
 } = await supabase.auth.getUser();
 
 if (!user) {
-  return redirect('/login');
+  return Astro.redirect('/login');
 }
 ---
 
@@ -106,6 +104,7 @@ if (!user) {
     </div>
   </main>
 
+  <!-- AUTOSAVE + PREVIEW SCRIPT -->
   <script type="module">
     import { marked } from 'marked';
 
@@ -114,21 +113,76 @@ if (!user) {
     const form = document.getElementById('articleForm');
     const feedback = document.getElementById('feedback');
 
+    const fieldsToTrack = ['slug', 'title', 'excerpt', 'content'];
+    let lastSavedData = {};
+    let idleTimer;
+
     const renderPreview = () => {
       preview.innerHTML = marked.parse(input.value || '');
     };
 
-    input.addEventListener('input', renderPreview);
+    const getCurrentData = () => {
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      data.published = data.published === 'true';
+      data.translation_of = data.translation_of || null;
+      return data;
+    };
+
+    const hasChanged = () => {
+      const current = getCurrentData();
+      return fieldsToTrack.some(field => current[field] !== lastSavedData[field]);
+    };
+
+    const autosave = async () => {
+      if (!hasChanged()) return;
+
+      const data = getCurrentData();
+      data.draft = true;
+
+      try {
+        const res = await fetch('/api/save-article', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (!result.error) {
+          lastSavedData = fieldsToTrack.reduce((acc, key) => {
+            acc[key] = data[key];
+            return acc;
+          }, {});
+          const now = new Date().toLocaleTimeString();
+          feedback.innerHTML = `<div class="text-xs text-zinc-500 mt-2">💾 Autosaved at ${now}</div>`;
+        }
+      } catch (err) {
+        console.warn('Autosave failed', err);
+      }
+    };
+
+    const resetIdleTimer = () => {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(autosave, 5000);
+    };
+
+    input.addEventListener('input', () => {
+      renderPreview();
+      resetIdleTimer();
+    });
+
+    document.querySelectorAll('input, textarea, select').forEach((el) => {
+      el.addEventListener('input', resetIdleTimer);
+    });
+
+    setInterval(autosave, 30000); // 30s
     renderPreview();
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const formData = new FormData(form);
-      const body = Object.fromEntries(formData);
-
-      body.published = body.published === 'true';
-      body.translation_of = body.translation_of || null;
+      const body = getCurrentData();
 
       try {
         const res = await fetch('/api/save-article', {
