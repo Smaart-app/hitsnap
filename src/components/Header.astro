@@ -1,53 +1,66 @@
 ---
-const cookie = Astro.cookies.get("auth");
-const isAuthenticated = cookie?.value === "ok";
-const lang = Astro.props?.lang || "el";
+const user = Astro.props?.user || null;
+const lang = Astro.props?.lang || 'el';
 
-const isGreek = lang === "el";
-const base = isGreek ? "/el" : "/en";
+const isGreek = lang === 'el';
+const base = isGreek ? '/el' : '/en';
 
-// Για intelligent language switching
+// Intelligent language switching
 const currentPath = Astro.url.pathname;
 const pathWithoutLang = currentPath.replace(/^\/(el|en)/, '');
 const pathForGreek = `/el${pathWithoutLang}`;
 const pathForEnglish = `/en${pathWithoutLang}`;
 ---
 
-<header class="w-full border-b border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm px-6 py-4">
+<header class="w-full border-b border-zinc-200 bg-white dark:bg-zinc-950 shadow-sm px-6 py-4">
   <div class="flex justify-between items-center max-w-screen-xl mx-auto">
     <!-- Λογότυπο -->
-    <h1 class="text-3xl tracking-tight flex items-center leading-none" style="font-family: 'Lora', serif;">
+    <a href="/" class="text-3xl tracking-tight flex items-center leading-none" style="font-family: 'Lora', serif;">
       <span class="font-bold text-black">Hit</span>
       <span class="font-normal text-[#50c7c2] ml-1">lift</span>
-    </h1>
+    </a>
 
-    <!-- Desktop Navigation -->
-    <nav class="hidden md:flex items-center gap-8 text-base font-medium">
-      <a href={`${base}/`} class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">
-        {isGreek ? "Αρχική" : "Home"}
+    <!-- Πλοήγηση -->
+    <nav class="flex items-center gap-6 text-base font-medium text-zinc-700 dark:text-zinc-300">
+      <a href={`${base}/`} class="hover:text-[#50c7c2] transition">
+        {isGreek ? 'Αρχική' : 'Home'}
       </a>
-      <a href={`${base}/blog`} class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">
-        {isGreek ? "Άρθρα" : "Articles"}
+      <a href={`${base}/blog`} class="hover:text-[#50c7c2] transition">
+        {isGreek ? 'Άρθρα' : 'Articles'}
       </a>
-      <a href={`${base}/contact`} class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">
-        {isGreek ? "Επικοινωνία" : "Contact"}
+      <a href={`${base}/contact`} class="hover:text-[#50c7c2] transition">
+        {isGreek ? 'Επικοινωνία' : 'Contact'}
       </a>
 
-      {isAuthenticated && (
-        <a href="/editor" class="text-zinc-700 dark:text-zinc-300 hover:text-[#50c7c2] transition">
-          {isGreek ? "Επεξεργασία Άρθρων" : "Edit Articles"}
+      {user && (
+        <>
+          <a href="/dashboard" class="hover:text-[#50c7c2] transition">
+            📋 {isGreek ? 'Πίνακας' : 'Dashboard'}
+          </a>
+          <a href={`${base}/blog/editor`} class="hover:text-[#50c7c2] transition">
+            📝 {isGreek ? 'Επεξεργασία' : 'Editor'}
+          </a>
+          <a href="/api/logout" class="text-red-600 hover:underline">
+            🚪 {isGreek ? 'Αποσύνδεση' : 'Logout'}
+          </a>
+        </>
+      )}
+
+      {!user && (
+        <a href="/login" class="text-[#50c7c2] hover:underline">
+          🔐 {isGreek ? 'Είσοδος' : 'Login'}
         </a>
       )}
 
-      <!-- 🌍 Νέος Language Switcher -->
-      <div class="ml-6 flex items-center gap-2 text-sm">
+      <!-- Γλώσσα -->
+      <div class="ml-2 flex items-center gap-2 text-sm">
         {isGreek ? (
           <a href={pathForEnglish} class="hover:text-[#50c7c2]">
-            English <span class="ml-1">🇬🇧</span>
+            English 🇬🇧
           </a>
         ) : (
           <a href={pathForGreek} class="hover:text-[#50c7c2]">
-            Ελληνικά <span class="ml-1">🇬🇷</span>
+            Ελληνικά 🇬🇷
           </a>
         )}
       </div>

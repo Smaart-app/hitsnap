@@ -5,15 +5,10 @@ const lang = Astro.props?.lang || 'el';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.jsx';
 import BackgroundSketch from '../components/BackgroundSketch.astro';
-
-// Αν θες να ξέρουμε αν είναι logged in
 import { createServerClientWithCookies } from '../lib/createServerClient';
 
 const supabase = createServerClientWithCookies(Astro.cookies);
-const {
-  data: { user },
-} = await supabase.auth.getUser();
-const isLoggedIn = !!user;
+const { data: { user } } = await supabase.auth.getUser();
 ---
 
 <html lang={lang}>
@@ -26,30 +21,7 @@ const isLoggedIn = !!user;
   </head>
 
   <body class="bg-[#f4f3f0] text-[#1a1a1a] leading-relaxed relative overflow-x-hidden min-h-screen">
-    <Header lang={lang} />
-
-    <!-- 🔗 Navigation bar -->
-    <nav class="bg-white shadow-sm py-2 px-4 text-sm border-b border-zinc-100 relative z-20">
-      <div class="max-w-6xl mx-auto flex justify-between items-center">
-        <div class="flex gap-4">
-          <a href="/" class="text-[#50c7c2] font-semibold hover:underline">🏠 Αρχική</a>
-          <a href={`/${lang}/blog`} class="hover:underline">📚 Άρθρα</a>
-          {isLoggedIn && (
-            <>
-              <a href="/dashboard" class="hover:underline">📋 Dashboard</a>
-              <a href={`/${lang}/blog/editor`} class="hover:underline">📝 Editor</a>
-            </>
-          )}
-        </div>
-        <div>
-          {isLoggedIn ? (
-            <a href="/api/logout" class="text-red-600 hover:underline">🚪 Logout</a>
-          ) : (
-            <a href="/login" class="text-[#50c7c2] hover:underline">🔐 Login</a>
-          )}
-        </div>
-      </div>
-    </nav>
+    <Header lang={lang} user={user} />
 
     <BackgroundSketch />
 
