@@ -1,32 +1,49 @@
 ---
-export const prerender = true;
-
-export async function getStaticPaths() {
-  return [
-    { params: { lang: 'el' } },
-    { params: { lang: 'en' } },
-  ];
-}
-
-const { lang } = Astro.params;
-const isGreek = lang === 'el';
+export const prerender = false;
 ---
 
-<html lang={lang}>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>{isGreek ? 'Αρχική | Hitlift' : 'Home | Hitlift'}</title>
+    <title>Hitlift | Redirecting</title>
+    <script>
+      const userLang = navigator.language || navigator.userLanguage;
+      const preferredLang = userLang.startsWith('el') ? 'el' : 'en';
+      const url = new URL(window.location.href);
+      const manual = url.searchParams.get('lang');
+
+      if (!manual) {
+        window.location.href = '/' + preferredLang + '/';
+      }
+    </script>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 2rem;
+        text-align: center;
+      }
+      a {
+        color: #50c7c2;
+        text-decoration: underline;
+        display: inline-block;
+        margin: 0.5rem;
+        font-weight: 500;
+      }
+    </style>
   </head>
-  <body style="font-family: sans-serif; padding: 2rem; text-align: center;">
-    <h1>
-      {isGreek
-        ? '🏠 Καλώς ήρθες στη Hitlift — η έξυπνη άνοδος στο real estate!'
-        : '🏠 Welcome to Hitlift — the smart rise in real estate!'}
-    </h1>
-    <p style="margin-top: 1rem;">
-      <a href={`/${lang}/blog`} style="color: #50c7c2; text-decoration: underline;">
-        {isGreek ? 'Προχώρησε στα άρθρα →' : 'Browse articles →'}
-      </a>
+  <body>
+    <h1>🌍 Welcome to Hitlift</h1>
+    <p style="margin: 1rem 0;">
+      Please choose your language:
     </p>
+    <p>
+      <a href="/el/?lang=manual">🇬🇷 Ελληνικά</a>
+      <a href="/en/?lang=manual">🇬🇧 English</a>
+    </p>
+    <noscript>
+      <p style="margin-top: 2rem; color: grey;">
+        JavaScript is disabled. Please select your language above.
+      </p>
+    </noscript>
   </body>
 </html>
