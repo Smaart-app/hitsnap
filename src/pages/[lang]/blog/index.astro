@@ -6,19 +6,21 @@ export const prerender = true;
 export async function getStaticPaths() {
   return [
     { params: { lang: 'el' } },
-    { params: { lang: 'en' } }
+    { params: { lang: 'en' } },
   ];
 }
 
 const { lang } = Astro.params;
 
-const pageTitle = lang === 'en'
-  ? 'Hitlift | The smart rise in real estate'
-  : 'Hitlift | Η έξυπνη άνοδος στα ακίνητα';
+const pageTitle =
+  lang === 'en'
+    ? 'Hitlift | The smart rise in real estate'
+    : 'Hitlift | Η έξυπνη άνοδος στα ακίνητα';
 
-const pageDesc = lang === 'en'
-  ? 'Select your language to explore Hitlift.'
-  : 'Επίλεξε γλώσσα για να εξερευνήσεις τη Hitlift.';
+const pageDesc =
+  lang === 'en'
+    ? 'Select your language to explore Hitlift.'
+    : 'Επίλεξε γλώσσα για να εξερευνήσεις τη Hitlift.';
 ---
 
 <html lang={lang}>
@@ -34,16 +36,10 @@ const pageDesc = lang === 'en'
       <h1 class="text-4xl font-bold mt-8 mb-4">{pageTitle}</h1>
       <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">{pageDesc}</p>
       <div class="flex space-x-4">
-        <a
-          href="/el/"
-          class="px-4 py-2 rounded bg-[#50c7c2] text-white hover:bg-[#3bbab3] transition"
-        >
+        <a href="/el/" class="px-4 py-2 rounded bg-[#50c7c2] text-white hover:bg-[#3bbab3] transition">
           Ελληνικά
         </a>
-        <a
-          href="/en/"
-          class="px-4 py-2 rounded bg-[#50c7c2] text-white hover:bg-[#3bbab3] transition"
-        >
+        <a href="/en/" class="px-4 py-2 rounded bg-[#50c7c2] text-white hover:bg-[#3bbab3] transition">
           English
         </a>
       </div>
