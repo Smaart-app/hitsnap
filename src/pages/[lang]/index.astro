@@ -7,17 +7,15 @@ export async function getStaticPaths() {
     { params: { lang: 'en' } },
   ];
 }
----
 
-<script>
-  const { lang } = Astro.params;
-</script>
+const { lang } = Astro.params;
+---
 
 <html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <title>Redirecting...</title>
-    <meta http-equiv="refresh" content="0; url=/{lang}/blog" />
+    <meta http-equiv="refresh" content={`0; url=/${lang}/blog`} />
   </head>
   <body>
     <p>Redirecting to blog...</p>
