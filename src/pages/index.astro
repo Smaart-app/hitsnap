@@ -1,5 +1,4 @@
 ---
-// src/pages/index.astro
 export const prerender = false;
 ---
 
@@ -7,16 +6,6 @@ export const prerender = false;
   <head>
     <meta charset="UTF-8" />
     <title>Hitlift | Redirecting</title>
-    <script>
-      const userLang = navigator.language || navigator.userLanguage;
-      const preferredLang = userLang.startsWith('el') ? 'el' : 'en';
-      const url = new URL(window.location.href);
-      const manual = url.searchParams.get('lang');
-
-      if (!manual) {
-        window.location.href = '/' + preferredLang + '/';
-      }
-    </script>
     <style>
       body {
         font-family: sans-serif;
@@ -31,10 +20,23 @@ export const prerender = false;
         font-weight: 500;
       }
     </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const url = new URL(window.location.href);
+        const manual = url.searchParams.get('lang');
+
+        // Αν ΔΕΝ έχει οριστεί γλώσσα χειροκίνητα, κάνε redirect
+        if (!manual) {
+          const userLang = navigator.language || navigator.userLanguage;
+          const preferredLang = userLang.startsWith('el') ? 'el' : 'en';
+          window.location.href = '/' + preferredLang + '/';
+        }
+      });
+    </script>
   </head>
   <body>
     <h1>🌍 Welcome to Hitlift</h1>
-    <p>Select your language:</p>
+    <p>Please choose your language:</p>
     <p>
       <a href="/el/?lang=manual">🇬🇷 Ελληνικά</a>
       <a href="/en/?lang=manual">🇬🇧 English</a>
