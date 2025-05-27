@@ -1,10 +1,10 @@
 import type { APIRoute, APIContext } from 'astro';
-import { createServerClient } from '../../lib/createServerClient';
+import { createServerClientWithCookies } from '../../lib/createServerClient';
 
 export const POST: APIRoute = async (context: APIContext) => {
   const { request, cookies } = context;
 
-  const supabase = createServerClient(cookies);
+  const supabase = createServerClientWithCookies(cookies);
 
   const {
     data: { user },

@@ -1,10 +1,10 @@
-import { createServerClient as supabaseClient } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
 import type { AstroCookies } from 'astro';
 
 export function createServerClientWithCookies(cookies: AstroCookies) {
-  return supabaseClient(
+  return createServerClient(
     import.meta.env.PUBLIC_SUPABASE_URL!,
     import.meta.env.PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies }
+    { cookies } as any
   );
 }
