@@ -1,20 +1,17 @@
 ---
 import BackgroundSketch from '../../components/BackgroundSketch.astro';
 
-export const prerender = false;
+export const prerender = true;
 
-const browserLang = typeof window !== 'undefined'
-  ? window.navigator.language
-  : 'en';
-
-const htmlLang = browserLang.startsWith('el') ? 'el' : 'en';
-const isGreek = htmlLang === 'el';
+const pageTitle = 'Hitlift | The smart rise in real estate';
+const pageDesc = 'Select your language to explore Hitlift.';
 ---
 
-<html lang={htmlLang}>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>{isGreek ? 'Hitlift | Η έξυπνη άνοδος στο real estate' : 'Hitlift | The smart rise in real estate'}</title>
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDesc} />
     <style>
       body {
         font-family: 'Inter', sans-serif;
@@ -55,12 +52,8 @@ const isGreek = htmlLang === 'el';
     <BackgroundSketch />
 
     <main>
-      <h1>🏠 Hitlift</h1>
-      <p>
-        {isGreek
-          ? 'Η έξυπνη άνοδος στο real estate, πέρα από το προφανές.'
-          : 'The smart rise in real estate, beyond the obvious.'}
-      </p>
+      <h1>🌍 Welcome to Hitlift</h1>
+      <p>Select your language to explore real estate smarter.</p>
 
       <div class="lang-links">
         <a href="/el/">🇬🇷 Ελληνικά</a>
