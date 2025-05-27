@@ -18,7 +18,6 @@ const supabase = createServerClient(
   { cookies: Astro.cookies }
 );
 
-// 📅 Scheduler Logic: Εμφανίζουμε μόνο όσα έχουν φτάσει στην ώρα τους
 const todayISO = new Date().toISOString();
 
 const { data: articles, error } = await supabase
