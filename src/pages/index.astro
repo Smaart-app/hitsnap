@@ -21,25 +21,20 @@ export const prerender = false;
       }
     </style>
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const url = new URL(window.location.href);
-        const manual = url.searchParams.get('lang');
-
-        // Αν ΔΕΝ έχει οριστεί γλώσσα χειροκίνητα, κάνε redirect
-        if (!manual) {
-          const userLang = navigator.language || navigator.userLanguage;
-          const preferredLang = userLang.startsWith('el') ? 'el' : 'en';
-          window.location.href = '/' + preferredLang + '/';
-        }
-      });
+      // Κάνε redirect ΜΟΝΟ αν βρίσκεσαι στη ρίζα "/"
+      if (window.location.pathname === '/') {
+        const userLang = navigator.language || navigator.userLanguage;
+        const preferredLang = userLang.startsWith('el') ? 'el' : 'en';
+        window.location.replace('/' + preferredLang + '/');
+      }
     </script>
   </head>
   <body>
     <h1>🌍 Welcome to Hitlift</h1>
     <p>Please choose your language:</p>
     <p>
-      <a href="/el/?lang=manual">🇬🇷 Ελληνικά</a>
-      <a href="/en/?lang=manual">🇬🇧 English</a>
+      <a href="/el/">🇬🇷 Ελληνικά</a>
+      <a href="/en/">🇬🇧 English</a>
     </p>
     <noscript>
       <p style="margin-top: 2rem; color: grey;">
