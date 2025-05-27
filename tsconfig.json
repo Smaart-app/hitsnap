@@ -10,12 +10,16 @@
     "target": "esnext",
     "moduleResolution": "node",
     "jsx": "react-jsx",
+    "jsxImportSource": "react",
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "jsxImportSource": "react"
+    "noEmit": true
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "scripts"
   ]
 }
