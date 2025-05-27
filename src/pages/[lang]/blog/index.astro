@@ -6,7 +6,7 @@ export const prerender = true;
 export async function getStaticPaths() {
   return [
     { params: { lang: 'el' } },
-    { params: { lang: 'en' } },
+    { params: { lang: 'en' } }
   ];
 }
 
@@ -24,19 +24,26 @@ const pageDesc = lang === 'en'
 <html lang={lang}>
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={pageDesc} />
     <title>{pageTitle}</title>
   </head>
-  <body>
+  <body class="bg-white text-gray-900 dark:bg-black dark:text-white">
     <main class="min-h-screen flex flex-col items-center justify-center text-center px-4">
       <BackgroundSketch />
       <h1 class="text-4xl font-bold mt-8 mb-4">{pageTitle}</h1>
-      <p class="text-lg text-gray-600 mb-8">{pageDesc}</p>
+      <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">{pageDesc}</p>
       <div class="flex space-x-4">
-        <a href="/el/" class="px-4 py-2 rounded bg-[#50c7c2] text-white hover:bg-[#3bbab3] transition">
+        <a
+          href="/el/"
+          class="px-4 py-2 rounded bg-[#50c7c2] text-white hover:bg-[#3bbab3] transition"
+        >
           Ελληνικά
         </a>
-        <a href="/en/" class="px-4 py-2 rounded bg-[#50c7c2] text-white hover:bg-[#3bbab3] transition">
+        <a
+          href="/en/"
+          class="px-4 py-2 rounded bg-[#50c7c2] text-white hover:bg-[#3bbab3] transition"
+        >
           English
         </a>
       </div>
