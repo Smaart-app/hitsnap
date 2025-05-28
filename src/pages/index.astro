@@ -1,5 +1,4 @@
 ---
-// src/pages/index.astro
 const lang = (Astro.request.headers.get("accept-language") || "en").slice(0, 2);
 const supported = ["el", "en"];
 const redirectLang = supported.includes(lang) ? lang : "en";
