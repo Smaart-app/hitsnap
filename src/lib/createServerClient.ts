@@ -33,3 +33,6 @@ export function createServerClientFull(cookies: AstroCookies) {
     }
   );
 }
+
+// 🔧 Αυτή είναι η συνάρτηση που σου έλειπε
+export const createServerClientWithCookies = createServerClientFull;
