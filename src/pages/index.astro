@@ -21,10 +21,16 @@ const { data: articles, error } = await supabase
 
 const featured = articles?.[0] || null;
 
-// 📌 Ανίχνευση γλώσσας από browser Accept-Language
+// 📌 Ανίχνευση γλώσσας μόνο αν δεν υπάρχει ρητή επιλογή
 const supportedLangs = ['el', 'en'];
-const browserLang = Astro.request.headers.get('accept-language')?.split(',')[0]?.slice(0, 2) || 'en';
-const lang = supportedLangs.includes(browserLang) ? browserLang : 'en';
+let langParam = Astro.params?.lang || null;
+let browserLang = Astro.request.headers.get('accept-language')?.split(',')[0]?.slice(0, 2) || 'en';
+
+const lang = supportedLangs.includes(langParam)
+  ? langParam
+  : supportedLangs.includes(browserLang)
+  ? browserLang
+  : 'en';
 ---
 
 <Layout title="Hitlift — Η Έξυπνη Άνοδος στο Real Estate" lang={lang} user={user}>
