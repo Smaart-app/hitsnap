@@ -1,0 +1,89 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import ArticleCard from '../../../components/ArticleCard.jsx';
+import { createServerClientReadOnly } from '../../../lib/createServerClient'; // χρήση του safe helper
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'el' } },
+    { params: { lang: 'en' } },
+  ];
+}
+
+const { lang } = Astro.params;
+
+const supabase = createServerClientReadOnly(Astro.cookies);
+
+const todayISO = new Date().toISOString();
+
+const { data: articles, error } = await supabase
+  .from('articles')
+  .select('*')
+  .eq('lang', lang)
+  .eq('published', true)
+  .lte('publish_date', todayISO)
+  .order('publish_date', { ascending: false });
+
+function getAltLang(current) {
+  if (current === 'el') return 'en';
+  if (current === 'en') return 'el';
+  return 'en';
+}
+
+const pageTitle = lang === 'en' ? 'Articles | Hitlift' : 'Άρθρα | Hitlift';
+const pageDesc = lang === 'en'
+  ? 'Explore the latest articles from Hitlift.'
+  : 'Δες τα τελευταία άρθρα από τη Hitlift.';
+---
+
+<Layout title={pageTitle} lang={lang}>
+  <head slot="head">
+    <meta charset="UTF-8" />
+    <meta name="description" content={pageDesc} />
+    <title>{pageTitle}</title>
+  </head>
+
+  <main class="max-w-6xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-center mb-10">
+      {lang === 'en' ? 'Articles' : 'Άρθρα'}
+    </h1>
+
+    {articles && articles.length > 0 ? (
+      <section class="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {articles.map((article) => {
+          const altLang = getAltLang(lang);
+          const translatedSlug = article.slug.replace(`-${lang}`, `-${altLang}`);
+          const hasTranslation = true;
+
+          return (
+            <div class="space-y-2">
+              <ArticleCard
+                title={article.title}
+                excerpt={article.excerpt}
+                image={article.cover_image}
+                href={`/${lang}/blog/${article.slug}`}
+                lang={lang}
+              />
+              {hasTranslation && (
+                <p class="text-sm text-right">
+                  <a
+                    href={`/${altLang}/blog/${translatedSlug}`}
+                    class="text-[#50c7c2] hover:underline"
+                  >
+                    {lang === 'el' ? 'Δες και στα Αγγλικά →' : 'View in Greek →'}
+                  </a>
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </section>
+    ) : (
+      <p class="text-center text-gray-500 mt-12">
+        {lang === 'en'
+          ? 'No articles available.'
+          : 'Δεν υπάρχουν ακόμη άρθρα προς προβολή.'}
+      </p>
+    )}
+  </main>
+</Layout>
