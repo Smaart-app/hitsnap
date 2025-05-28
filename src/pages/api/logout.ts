@@ -1,13 +1,27 @@
 import type { APIRoute } from 'astro';
+import { serialize } from 'cookie';
 
-export const GET: APIRoute = async ({ cookies }) => {
-  cookies.delete('sb-access-token', { path: '/' });
-  cookies.delete('sb-refresh-token', { path: '/' });
+export const GET: APIRoute = async () => {
+  const headers = new Headers();
+
+  headers.append('Set-Cookie', serialize('sb-access-token', '', {
+    path: '/',
+    httpOnly: true,
+    maxAge: 0,
+    sameSite: 'lax',
+  }));
+
+  headers.append('Set-Cookie', serialize('sb-refresh-token', '', {
+    path: '/',
+    httpOnly: true,
+    maxAge: 0,
+    sameSite: 'lax',
+  }));
+
+  headers.append('Location', '/login');
 
   return new Response(null, {
     status: 302,
-    headers: {
-      Location: '/login'
-    }
+    headers,
   });
 };
