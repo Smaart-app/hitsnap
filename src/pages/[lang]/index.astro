@@ -1,23 +1,61 @@
 ---
-export const prerender = true;
-
-export async function getStaticPaths() {
-  return [
-    { params: { lang: 'el' } },
-    { params: { lang: 'en' } },
-  ];
-}
+import Layout from '../../layouts/Layout.astro';
+import BackgroundSketch from '../../components/BackgroundSketch.astro';
+import { createServerClientReadOnly } from '../../lib/createServerClient';
 
 const { lang } = Astro.params;
+const supportedLangs = ['el', 'en'];
+
+if (!supportedLangs.includes(lang)) {
+  throw new Error(`Unsupported language: ${lang}`);
+}
+
+const supabase = createServerClientReadOnly(Astro.cookies);
+
+const {
+  data: { user }
+} = await supabase.auth.getUser();
+
+const todayISO = new Date().toISOString();
+
+const { data: articles } = await supabase
+  .from('articles')
+  .select('*')
+  .eq('published', true)
+  .eq('lang', lang)
+  .lte('publish_date', todayISO)
+  .order('publish_date', { ascending: false })
+  .limit(1);
+
+const featured = articles?.[0] || null;
 ---
 
-<html lang={lang}>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Redirecting...</title>
-    <meta http-equiv="refresh" content={`0; url=/${lang}/blog`} />
-  </head>
-  <body>
-    <p>Redirecting to blog...</p>
-  </body>
-</html>
+<Layout title="Hitlift — Η Έξυπνη Άνοδος στο Real Estate" lang={lang} user={user}>
+  <div class="relative isolate min-h-[80vh] flex flex-col justify-center items-center text-center px-6 py-32 overflow-hidden bg-[#f4f3f0]">
+    <BackgroundSketch class="absolute inset-0 opacity-10 z-0" />
+
+    <h1 class="text-4xl font-bold tracking-tight sm:text-5xl relative z-10">
+      {lang === 'el'
+        ? 'Φαίνεται καλό. Αλλά... όντως συμφέρει;'
+        : 'Looks good. But… does it really pay off?'}
+    </h1>
+    <p class="mt-6 text-lg leading-8 text-gray-600 max-w-xl mx-auto relative z-10">
+      {lang === 'el'
+        ? 'Η ερώτηση που μένει, όταν όλα τα υπόλοιπα μοιάζουν σωστά.'
+        : 'The question that remains, when everything else looks right.'}
+    </p>
+
+    {featured && (
+      <div class="mt-16 max-w-xl w-full bg-white rounded-xl shadow-lg border border-gray-200 p-6 text-left relative z-10">
+        <h2 class="text-xl font-bold mb-2">{featured.title}</h2>
+        <p class="text-gray-700 text-sm mb-4">{featured.excerpt}</p>
+        <a
+          href={`/${featured.lang}/blog/${featured.slug}`}
+          class="text-[#50c7c2] text-sm hover:underline"
+        >
+          {featured.lang === 'el' ? 'Διαβάστε περισσότερα →' : 'Read more →'}
+        </a>
+      </div>
+    )}
+  </div>
+</Layout>
