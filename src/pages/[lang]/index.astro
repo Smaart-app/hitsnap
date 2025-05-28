@@ -35,6 +35,12 @@ const { data: articles, error } = await supabase
   .limit(1);
 
 const featured = articles?.[0] || null;
+
+// 🟡 DEBUGGING OUTPUT στο Terminal σου
+console.log('🔍 DEBUG — index.astro');
+console.log('🔎 lang:', lang);
+console.log('🔎 featured:', featured);
+console.log('🔎 error:', error);
 ---
 
 <Layout title="Hitlift — Η Έξυπνη Άνοδος στο Real Estate" lang={lang} user={user}>
