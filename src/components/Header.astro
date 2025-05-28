@@ -5,8 +5,16 @@ const lang = Astro.props?.lang || 'el';
 const isGreek = lang === 'el';
 const base = isGreek ? '/el' : '/en';
 
-// Intelligent language switching
 const currentPath = Astro.url.pathname;
+
+// Active link detection
+const isHome = currentPath === '/' || currentPath === '/el' || currentPath === '/en';
+const isArticles = currentPath.includes('/blog') && !currentPath.includes('/editor');
+const isContact = currentPath.includes('/contact');
+const isDashboard = currentPath.includes('/dashboard');
+const isEditor = currentPath.includes('/editor');
+
+// Intelligent language switching
 const pathWithoutLang = currentPath.replace(/^\/(el|en)/, '');
 const pathForGreek = `/el${pathWithoutLang}`;
 const pathForEnglish = `/en${pathWithoutLang}`;
@@ -22,22 +30,22 @@ const pathForEnglish = `/en${pathWithoutLang}`;
 
     <!-- Πλοήγηση -->
     <nav class="flex items-center gap-6 text-base font-medium text-zinc-700 dark:text-zinc-300">
-      <a href={`${base}/`} class="hover:text-[#50c7c2] transition">
+      <a href={`${base}/`} class={`${isHome ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'} transition`}>
         {isGreek ? 'Αρχική' : 'Home'}
       </a>
-      <a href={`${base}/blog`} class="hover:text-[#50c7c2] transition">
+      <a href={`${base}/blog`} class={`${isArticles ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'} transition`}>
         {isGreek ? 'Άρθρα' : 'Articles'}
       </a>
-      <a href={`${base}/contact`} class="hover:text-[#50c7c2] transition">
+      <a href={`${base}/contact`} class={`${isContact ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'} transition`}>
         {isGreek ? 'Επικοινωνία' : 'Contact'}
       </a>
 
       {user && (
         <>
-          <a href="/dashboard" class="hover:text-[#50c7c2] transition">
+          <a href="/dashboard" class={`${isDashboard ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'} transition`}>
             📋 {isGreek ? 'Πίνακας' : 'Dashboard'}
           </a>
-          <a href={`${base}/blog/editor`} class="hover:text-[#50c7c2] transition">
+          <a href={`${base}/blog/editor`} class={`${isEditor ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'} transition`}>
             📝 {isGreek ? 'Επεξεργασία' : 'Editor'}
           </a>
           <a href="/api/logout" class="text-red-600 hover:underline">
