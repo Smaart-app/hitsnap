@@ -1,9 +1,7 @@
 ---
-import { Astro } from "astro";
-const lang = (Astro.request.headers.get("accept-language") || "en").slice(0, 2);
-const supported = ["el", "en"];
-const redirectLang = supported.includes(lang) ? lang : "en";
-Astro.redirect("/" + redirectLang);
+export async function get({ redirect }) {
+  return redirect('/en'); // Αν θέλεις ελληνικά by default, βάλε '/el'
+}
 ---
 
 <html lang="en">
