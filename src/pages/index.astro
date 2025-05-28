@@ -1,13 +1,12 @@
 ---
 // src/pages/index.astro
-import { Astro } from 'astro';
 ---
 
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>Redirecting...</title>
-    <script>
+    <script is:inline>
       const lang = (navigator.language || navigator.userLanguage || 'en').slice(0, 2);
       const supported = ['el', 'en'];
       const redirectLang = supported.includes(lang) ? lang : 'en';
