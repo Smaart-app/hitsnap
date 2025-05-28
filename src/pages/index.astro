@@ -1,6 +1,28 @@
 ---
+import { Astro } from "astro";
 const lang = (Astro.request.headers.get("accept-language") || "en").slice(0, 2);
 const supported = ["el", "en"];
 const redirectLang = supported.includes(lang) ? lang : "en";
 Astro.redirect("/" + redirectLang);
 ---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting...</title>
+    <noscript>
+      <meta http-equiv="refresh" content="0; url=/en" />
+    </noscript>
+    <style>
+      html {
+        font-family: sans-serif;
+        text-align: center;
+        padding: 5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Redirecting…</h1>
+    <p>If you're not redirected automatically, <a href="/en">click here</a>.</p>
+  </body>
+</html>
