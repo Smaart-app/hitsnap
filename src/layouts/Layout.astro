@@ -5,9 +5,9 @@ const lang = Astro.props?.lang || 'el';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.jsx';
 import BackgroundSketch from '../components/BackgroundSketch.astro';
-import { createServerClientWithCookies } from '../lib/createServerClient';
+import { createServerClientReadOnly } from '../lib/createServerClient'; // <-- άλλαξε εδώ
 
-const supabase = createServerClientWithCookies(Astro.cookies);
+const supabase = createServerClientReadOnly(Astro.cookies); // <-- και εδώ
 const { data: { user } } = await supabase.auth.getUser();
 ---
 
