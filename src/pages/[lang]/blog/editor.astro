@@ -1,12 +1,12 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { createServerClientWithCookies } from '../../../lib/createServerClient';
+import { createServerClientReadOnly } from '../../../lib/createServerClient';
 
 const lang = Astro.params.lang || 'el';
 const isGreek = lang === 'el';
 const today = new Date().toISOString().split('T')[0];
 
-const supabase = createServerClientWithCookies(Astro.cookies);
+const supabase = createServerClientReadOnly(Astro.cookies);
 
 const {
   data: { user }
@@ -17,7 +17,7 @@ if (!user) {
 }
 ---
 
-<Layout title={isGreek ? 'Δημιουργία Άρθρου | Hitlift' : 'Create Article | Hitlift'} lang={lang}>
+<Layout title={isGreek ? 'Δημιουργία Άρθρου | Hitlift' : 'Create Article | Hitlift'} lang={lang} user={user}>
   <main class="max-w-6xl mx-auto px-4 py-12">
     <a href={`/${lang}/blog`} class="inline-block text-sm text-[#50c7c2] hover:underline mb-4">
       ← {isGreek ? 'Επιστροφή στα άρθρα' : 'Back to blog'}
