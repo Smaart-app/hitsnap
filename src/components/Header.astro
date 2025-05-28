@@ -8,7 +8,7 @@ const base = isGreek ? '/el' : '/en';
 const currentPath = Astro.url.pathname;
 
 // Active link detection
-const isHome = currentPath === '/' || currentPath === '/el' || currentPath === '/en';
+const isHome = currentPath === '/';
 const isArticles = currentPath.includes('/blog') && !currentPath.includes('/editor');
 const isContact = currentPath.includes('/contact');
 const isDashboard = currentPath.includes('/dashboard');
@@ -30,7 +30,7 @@ const pathForEnglish = `/en${pathWithoutLang}`;
 
     <!-- Πλοήγηση -->
     <nav class="flex items-center gap-6 text-base font-medium text-zinc-700 dark:text-zinc-300">
-      <a href={`${base}/`} class={`${isHome ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'} transition`}>
+      <a href="/" class={`${isHome ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'} transition`}>
         {isGreek ? 'Αρχική' : 'Home'}
       </a>
       <a href={`${base}/blog`} class={`${isArticles ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'} transition`}>

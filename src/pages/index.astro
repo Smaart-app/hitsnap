@@ -1,7 +1,7 @@
 ---
-import Layout from './layouts/Layout.astro';
-import BackgroundSketch from './components/BackgroundSketch.astro';
-import { createServerClientReadOnly } from './lib/createServerClient';
+import Layout from '../layouts/Layout.astro';
+import BackgroundSketch from '../components/BackgroundSketch.astro';
+import { createServerClientReadOnly } from '../lib/createServerClient';
 
 const supabase = createServerClientReadOnly(Astro.cookies);
 
