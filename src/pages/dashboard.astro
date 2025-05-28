@@ -1,12 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { createServerClient } from '@supabase/ssr';
+import { createServerClientReadOnly } from '../lib/createServerClient';
 
-const supabase = createServerClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
-  { cookies: Astro.cookies }
-);
+const supabase = createServerClientReadOnly(Astro.cookies);
 
 const {
   data: { user },
@@ -39,7 +35,7 @@ if (tab === 'published') {
 }
 ---
 
-<Layout title="📋 Πίνακας Άρθρων">
+<Layout title="📋 Πίνακας Άρθρων" user={user}>
   <main class="max-w-6xl mx-auto px-6 py-12">
     <div class="flex justify-between items-center mb-8">
       <h1 class="text-3xl font-bold">📋 Διαχείριση Άρθρων</h1>
