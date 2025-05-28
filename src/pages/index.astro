@@ -1,4 +1,6 @@
 ---
+export const prerender = true;
+
 const supportedLangs = ['el', 'en'];
 const browserLang = Astro.request.headers.get('accept-language')?.split(',')[0]?.slice(0, 2) || 'en';
 const lang = supportedLangs.includes(browserLang) ? browserLang : 'en';
