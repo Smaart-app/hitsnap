@@ -20,7 +20,11 @@ const { data: articles, error } = await supabase
   .limit(1);
 
 const featured = articles?.[0] || null;
-const lang = featured?.lang || 'en';
+
+// 📌 Ανίχνευση γλώσσας από browser Accept-Language
+const supportedLangs = ['el', 'en'];
+const browserLang = Astro.request.headers.get('accept-language')?.split(',')[0]?.slice(0, 2) || 'en';
+const lang = supportedLangs.includes(browserLang) ? browserLang : 'en';
 ---
 
 <Layout title="Hitlift — Η Έξυπνη Άνοδος στο Real Estate" lang={lang} user={user}>
