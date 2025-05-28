@@ -1,45 +1,50 @@
 ---
-export const prerender = false;
+import Layout from './layouts/Layout.astro';
+import BackgroundSketch from './components/BackgroundSketch.astro';
+import { createServerClientReadOnly } from './lib/createServerClient';
+
+const supabase = createServerClientReadOnly(Astro.cookies);
+
+const {
+  data: { user }
+} = await supabase.auth.getUser();
+
+const todayISO = new Date().toISOString();
+
+const { data: articles, error } = await supabase
+  .from('articles')
+  .select('*')
+  .eq('published', true)
+  .lte('publish_date', todayISO)
+  .order('publish_date', { ascending: false })
+  .limit(1);
+
+const featured = articles?.[0] || null;
+const lang = featured?.lang || 'en';
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Hitlift | Redirecting</title>
-    <style>
-      body {
-        font-family: sans-serif;
-        padding: 2rem;
-        text-align: center;
-      }
-      a {
-        color: #50c7c2;
-        text-decoration: underline;
-        display: inline-block;
-        margin: 0.5rem;
-        font-weight: 500;
-      }
-    </style>
-    <script>
-      // Κάνε redirect ΜΟΝΟ αν βρίσκεσαι στη ρίζα "/"
-      if (window.location.pathname === '/') {
-        const userLang = navigator.language || navigator.userLanguage;
-        const preferredLang = userLang.startsWith('el') ? 'el' : 'en';
-        window.location.replace('/' + preferredLang + '/');
-      }
-    </script>
-  </head>
-  <body>
-    <h1>🌍 Welcome to Hitlift</h1>
-    <p>Please choose your language:</p>
-    <p>
-      <a href="/el/">🇬🇷 Ελληνικά</a>
-      <a href="/en/">🇬🇧 English</a>
+<Layout title="Hitlift — Η Έξυπνη Άνοδος στο Real Estate" lang={lang} user={user}>
+  <div class="relative isolate min-h-[80vh] flex flex-col justify-center items-center text-center px-6 py-32 overflow-hidden bg-[#f4f3f0]">
+    <BackgroundSketch class="absolute inset-0 opacity-10 z-0" />
+
+    <h1 class="text-4xl font-bold tracking-tight sm:text-5xl relative z-10">
+      Η έξυπνη άνοδος στο real estate, <br /> πέρα από το προφανές.
+    </h1>
+    <p class="mt-6 text-lg leading-8 text-gray-600 max-w-xl mx-auto relative z-10">
+      Ανακάλυψε επενδυτικές ευκαιρίες, άρθρα και σκέψεις που δεν θα βρεις αλλού.
     </p>
-    <noscript>
-      <p style="margin-top: 2rem; color: grey;">
-        JavaScript is disabled. Please select your language above.
-      </p>
-    </noscript>
-  </body>
-</html>
+
+    {featured && (
+      <div class="mt-16 max-w-xl w-full bg-white rounded-xl shadow-lg border border-gray-200 p-6 text-left relative z-10">
+        <h2 class="text-xl font-bold mb-2">{featured.title}</h2>
+        <p class="text-gray-700 text-sm mb-4">{featured.excerpt}</p>
+        <a
+          href={`/${featured.lang}/blog/${featured.slug}`}
+          class="text-[#50c7c2] text-sm hover:underline"
+        >
+          {featured.lang === 'el' ? 'Διαβάστε περισσότερα →' : 'Read more →'}
+        </a>
+      </div>
+    )}
+  </div>
+</Layout>
