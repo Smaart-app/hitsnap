@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import type { AstroCookies } from 'astro';
 
-export function createServerClientWithCookies(cookies: AstroCookies) {
+export function createServerClientReadOnly(cookies: AstroCookies) {
   return createServerClient(
     import.meta.env.PUBLIC_SUPABASE_URL!,
     import.meta.env.PUBLIC_SUPABASE_ANON_KEY!,
@@ -10,12 +10,9 @@ export function createServerClientWithCookies(cookies: AstroCookies) {
         get(name) {
           return cookies.get(name)?.value;
         },
-        set(name, value, options) {
-          cookies.set(name, value, options);
-        },
-        remove(name, options) {
-          cookies.delete(name, options);
-        }
+        // Δεν κάνουμε set/remove για να μην πετάει AstroError
+        set() {},
+        remove() {},
       }
     }
   );
