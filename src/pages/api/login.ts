@@ -1,12 +1,11 @@
 import type { APIRoute } from 'astro';
-import { createServerClientWithCookies } from '../../lib/createServerClient';
+import { createServerClient } from '../../lib/createServerClient'; // Προσαρμοσμένο path
+import { serialize } from 'cookie';
 
-export const POST: APIRoute = async (context) => {
-  const { request, cookies } = context;
-
+export const POST: APIRoute = async ({ request }) => {
   const { email, password } = await request.json();
 
-  const supabase = createServerClientWithCookies(cookies);
+  const supabase = createServerClient();
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -22,22 +21,23 @@ export const POST: APIRoute = async (context) => {
 
   const { session } = data;
 
-  cookies.set('sb-access-token', session.access_token, {
+  const headers = new Headers();
+  headers.append('Set-Cookie', serialize('sb-access-token', session.access_token, {
     path: '/',
     httpOnly: true,
     maxAge: 60 * 60 * 12, // 12 ώρες
-  });
-
-  cookies.set('sb-refresh-token', session.refresh_token, {
+    sameSite: 'lax',
+  }));
+  headers.append('Set-Cookie', serialize('sb-refresh-token', session.refresh_token, {
     path: '/',
     httpOnly: true,
     maxAge: 60 * 60 * 24 * 30, // 30 ημέρες
-  });
+    sameSite: 'lax',
+  }));
+  headers.append('Content-Type', 'application/json');
 
   return new Response(JSON.stringify({ success: true }), {
     status: 200,
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
   });
 };
