@@ -4,6 +4,10 @@ import type { APIRoute } from 'astro';
 export const POST: APIRoute = async ({ request, cookies }) => {
   const supabase = createServerClientFull(cookies);
   const data = await request.json();
+
+  // 👇 Εδώ εμφανίζεις τι έστειλε η φόρμα στο terminal σου
+  console.log('🟡 Νέο μήνυμα από τη φόρμα επικοινωνίας:', data);
+
   const { name, email, message } = data;
 
   if (!email || !message) {
