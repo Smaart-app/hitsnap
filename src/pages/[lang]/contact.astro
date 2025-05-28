@@ -20,13 +20,53 @@ const isGreek = lang === 'el';
         : 'If you have feedback, ideas, or just want to say hello, I’m all ears.'}
     </p>
 
-    <div class="mt-10 relative z-10">
-      <p class="text-base text-zinc-700">
-        {isGreek ? 'Μπορείς να μου στείλεις email στο:' : 'You can email me at:'}
-      </p>
-      <a href="mailto:your@email.com" class="text-[#50c7c2] text-lg font-medium hover:underline">
-        your@email.com
-      </a>
-    </div>
+    <form
+      class="mt-10 space-y-4 max-w-md w-full text-left relative z-10"
+      on:submit|preventDefault={async (e) => {
+        const formData = new FormData(e.target);
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.get('name'),
+            email: formData.get('email'),
+            message: formData.get('message')
+          })
+        });
+
+        if (res.ok) {
+          alert(isGreek ? 'Το μήνυμα εστάλη!' : 'Message sent!');
+          e.target.reset();
+        } else {
+          alert(isGreek ? 'Κάτι πήγε στραβά.' : 'Something went wrong.');
+        }
+      }}
+    >
+      <input
+        name="name"
+        type="text"
+        placeholder={isGreek ? 'Όνομα (προαιρετικό)' : 'Name (optional)'}
+        class="w-full px-4 py-2 border rounded"
+      />
+      <input
+        name="email"
+        type="email"
+        required
+        placeholder={isGreek ? 'Το email σου' : 'Your email'}
+        class="w-full px-4 py-2 border rounded"
+      />
+      <textarea
+        name="message"
+        required
+        placeholder={isGreek ? 'Το μήνυμά σου' : 'Your message'}
+        class="w-full px-4 py-2 border rounded min-h-[120px]"
+      ></textarea>
+      <button
+        type="submit"
+        class="bg-[#50c7c2] text-white px-6 py-2 rounded hover:opacity-90 transition"
+      >
+        {isGreek ? 'Αποστολή' : 'Send'}
+      </button>
+    </form>
   </div>
 </Layout>
