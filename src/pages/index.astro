@@ -2,8 +2,16 @@
 export const prerender = false;
 
 const supportedLangs = ['el', 'en'];
-const browserLang = Astro.request.headers.get('accept-language')?.split(',')[0]?.slice(0, 2) || 'en';
-const lang = supportedLangs.includes(browserLang) ? browserLang : 'en';
+
+// Fallback language
+let lang = 'en';
+
+if (Astro?.request?.headers) {
+  const browserLang = Astro.request.headers.get('accept-language')?.split(',')[0]?.slice(0, 2);
+  if (supportedLangs.includes(browserLang)) {
+    lang = browserLang;
+  }
+}
 
 Astro.redirect(`/${lang}`);
 ---
