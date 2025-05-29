@@ -21,7 +21,7 @@ if (!supportedLangs.includes(lang)) {
 const supabase = createServerClientReadOnly(Astro.cookies);
 const todayISO = new Date().toISOString();
 
-const slugSuffix = `-${lang}`; // υποστηρίζει slug με κατάληξη -el ή -en
+const slugSuffix = `-${lang}`;
 
 const { data: articles } = await supabase
   .from('articles')
@@ -35,21 +35,21 @@ const featured = articles?.find((article) => article.slug.endsWith(slugSuffix)) 
 ---
 
 <Layout title="Hitlift — The smart rise in real estate" lang={lang}>
-  <section class="relative z-10 flex flex-col justify-center items-center text-center pt-12 pb-12">
+  <section class="relative z-10 flex flex-col justify-center items-center text-center px-4 sm:px-6 pt-12 pb-12">
     <BackgroundSketch class="absolute inset-0 opacity-10 z-0" />
 
-    <h1 class="text-4xl sm:text-5xl font-bold text-zinc-800 dark:text-zinc-100" style="font-family: 'Playfair Display', serif;">
+    <h1 class="text-3xl sm:text-5xl font-bold text-zinc-800 dark:text-zinc-100 text-balance" style="font-family: 'Playfair Display', serif;">
       {lang === 'el' ? 'Φαίνεται καλό.' : 'Looks good.'}
     </h1>
 
-    <p class="mt-4 text-lg sm:text-xl text-zinc-600 dark:text-zinc-300 font-light" style="font-family: 'Playfair Display', serif;">
+    <p class="mt-4 text-base sm:text-xl text-zinc-600 dark:text-zinc-300 font-light text-balance" style="font-family: 'Playfair Display', serif;">
       {lang === 'el'
         ? 'Αλλά… συμφέρει τελικά;'
         : 'But… does it really pay off?'}
     </p>
 
     {featured ? (
-      <div class="mt-12 px-4 w-full max-w-3xl">
+      <div class="mt-12 w-full max-w-3xl">
         <ArticleCard
           title={featured.title}
           excerpt={featured.excerpt}
