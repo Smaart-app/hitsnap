@@ -21,13 +21,13 @@ const featured = articles?.[0] || null;
 ---
 
 <Layout>
-  <div class="min-h-[25vh] bg-transparent"></div>
+  <div class="min-h-[35vh] bg-transparent"></div>
 
-  <section class="relative z-10 flex flex-col justify-center items-center min-h-[180vh] text-center bg-zinc-100 dark:bg-zinc-900 pt-10 pb-12">
-    <h1 class="text-4xl sm:text-5xl font-bold text-zinc-800 dark:text-zinc-100">
+  <section class="relative z-10 flex flex-col justify-center items-center min-h-screen text-center bg-zinc-100 dark:bg-zinc-900 pt-6 pb-12">
+    <h1 class="text-4xl sm:text-5xl font-bold text-zinc-800 dark:text-zinc-100" style="font-family: 'Playfair Display', serif;">
       Looks good.
     </h1>
-    <p class="mt-4 text-lg sm:text-xl text-zinc-600 dark:text-zinc-300">
+    <p class="mt-4 text-lg sm:text-xl text-zinc-600 dark:text-zinc-300 font-light" style="font-family: 'Playfair Display', serif;">
       But… does it really pay off?
     </p>
 
@@ -46,7 +46,7 @@ const featured = articles?.[0] || null;
         No featured article available.
       </p>
     )}
-  </section>
 
-  <PuzzleOverlay />
+    <PuzzleOverlay />
+  </section>
 </Layout>
