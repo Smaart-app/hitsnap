@@ -1,5 +1,5 @@
 export default function ArticleCard({ title, excerpt, image, href, lang = 'el' }) {
-  const readMoreText = lang === 'en' ? 'Read more →' : 'Διάβασε περισσότερα →';
+  const readMoreText = lang === 'en' ? 'Read more →' : 'Διαβάστε περισσότερα →';
 
   return (
     <article className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden max-w-xl mx-auto flex flex-col">

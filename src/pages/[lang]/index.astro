@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import BackgroundSketch from '../../components/BackgroundSketch.astro';
+import ArticleCard from '../../components/ArticleCard.jsx';
 import { createServerClientReadOnly } from '../../lib/createServerClient';
 
 export async function getStaticPaths() {
@@ -18,14 +19,9 @@ if (!supportedLangs.includes(lang)) {
 }
 
 const supabase = createServerClientReadOnly(Astro.cookies);
-
-const {
-  data: { user }
-} = await supabase.auth.getUser();
-
 const todayISO = new Date().toISOString();
 
-const { data: articles, error } = await supabase
+const { data: articles } = await supabase
   .from('articles')
   .select('*')
   .eq('lang', lang)
@@ -37,35 +33,36 @@ const { data: articles, error } = await supabase
 const featured = articles?.[0] || null;
 ---
 
-<Layout title="Hitlift — The smart rise in real estate" lang={lang} user={user}>
-  <div class="relative isolate min-h-[80vh] flex flex-col justify-center items-center text-center px-6 py-32 overflow-hidden bg-[#f4f3f0]">
+<Layout title="Hitlift — The smart rise in real estate" lang={lang}>
+  <section class="relative z-10 flex flex-col justify-center items-center text-center pt-12 pb-12">
     <BackgroundSketch class="absolute inset-0 opacity-10 z-0" />
 
-    <h1 class="text-4xl font-bold tracking-tight sm:text-5xl relative z-10">
-      Looks good.
+    <h1 class="text-4xl sm:text-5xl font-bold text-zinc-800 dark:text-zinc-100" style="font-family: 'Playfair Display', serif;">
+      {lang === 'el' ? 'Φαίνεται καλό.' : 'Looks good.'}
     </h1>
 
-    <p class="mt-6 text-lg leading-8 text-gray-600 max-w-xl mx-auto relative z-10">
-      But… does it really pay off?
+    <p class="mt-4 text-lg sm:text-xl text-zinc-600 dark:text-zinc-300 font-light" style="font-family: 'Playfair Display', serif;">
+      {lang === 'el'
+        ? 'Αλλά… συμφέρει τελικά;'
+        : 'But… does it really pay off?'}
     </p>
 
     {featured ? (
-      <div class="mt-16 max-w-xl w-full bg-white rounded-xl shadow-lg border border-gray-200 p-6 text-left relative z-10">
-        <h2 class="text-xl font-bold mb-2">{featured.title}</h2>
-        <p class="text-gray-700 text-sm mb-4">{featured.excerpt}</p>
-        <a
-          href={`/${featured.lang}/blog/${featured.slug}`}
-          class="text-[#50c7c2] text-sm hover:underline"
-        >
-          {featured.lang === 'el' ? 'Διαβάστε περισσότερα →' : 'Read more →'}
-        </a>
+      <div class="mt-12 px-4 w-full max-w-3xl">
+        <ArticleCard
+          title={featured.title}
+          excerpt={featured.excerpt}
+          image={featured.image}
+          href={`/${lang}/blog/${featured.slug}`}
+          lang={lang}
+        />
       </div>
     ) : (
-      <p class="mt-12 text-gray-500 text-sm z-10 relative">
+      <p class="mt-12 text-sm text-gray-500">
         {lang === 'el'
           ? 'Δεν υπάρχει ακόμη προτεινόμενο άρθρο.'
           : 'No featured article available yet.'}
       </p>
     )}
-  </div>
+  </section>
 </Layout>

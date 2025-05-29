@@ -1,47 +1,12 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import { createServerClientReadOnly } from "../lib/createServerClient";
-import ArticleCard from "../components/ArticleCard.jsx";
+export const prerender = false;
 
-const lang = 'en';
-const supabase = createServerClientReadOnly(Astro.cookies);
-const todayISO = new Date().toISOString();
+const acceptLang = Astro.request.headers.get('accept-language') || '';
+const isGreek =
+  acceptLang.toLowerCase().startsWith('el') ||
+  acceptLang.toLowerCase().includes('el-gr');
 
-const { data: articles } = await supabase
-  .from('articles')
-  .select('*')
-  .eq('lang', lang)
-  .eq('published', true)
-  .lte('publish_date', todayISO)
-  .order('publish_date', { ascending: false })
-  .limit(1);
+const lang = isGreek ? 'el' : 'en';
 
-const featured = articles?.[0] || null;
+return Astro.redirect(`/${lang}`, 302);
 ---
-
-<Layout>
-  <section class="relative z-10 flex flex-col justify-center items-center text-center pt-12 pb-12">
-    <h1 class="text-4xl sm:text-5xl font-bold text-zinc-800 dark:text-zinc-100" style="font-family: 'Playfair Display', serif;">
-      Looks good.
-    </h1>
-    <p class="mt-4 text-lg sm:text-xl text-zinc-600 dark:text-zinc-300 font-light" style="font-family: 'Playfair Display', serif;">
-      But… does it really pay off?
-    </p>
-
-    {featured ? (
-      <div class="mt-12 px-4 w-full max-w-3xl">
-        <ArticleCard
-          title={featured.title}
-          excerpt={featured.excerpt}
-          image={featured.image}
-          href={`/${featured.lang}/blog/${featured.slug}`}
-          lang={featured.lang}
-        />
-      </div>
-    ) : (
-      <p class="mt-12 text-sm text-gray-500">
-        No featured article available.
-      </p>
-    )}
-  </section>
-</Layout>
