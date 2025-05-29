@@ -31,7 +31,7 @@ export default function ArticleCard({
           </p>
         </div>
 
-        <div className="mt-2 flex flex-col sm:flex-row sm:justify-between gap-1 text-sm">
+        <div className="mt-2 flex flex-col gap-1 text-sm text-center sm:text-left">
           <a
             href={href}
             className="text-[#50c7c2] font-semibold hover:underline"
