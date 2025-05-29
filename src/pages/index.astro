@@ -1,24 +1,52 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import PuzzleOverlay from "../components/PuzzleOverlay.astro";
+import { createServerClientReadOnly } from "../lib/createServerClient";
+import ArticleCard from "../components/ArticleCard.jsx";
+
+const lang = 'en';
+const supabase = createServerClientReadOnly(Astro.cookies);
+const todayISO = new Date().toISOString();
+
+const { data: articles } = await supabase
+  .from('articles')
+  .select('*')
+  .eq('lang', lang)
+  .eq('published', true)
+  .lte('publish_date', todayISO)
+  .order('publish_date', { ascending: false })
+  .limit(1);
+
+const featured = articles?.[0] || null;
 ---
 
 <Layout>
-  <!-- Visual offset για να φανούν οι στέγες -->
-  <div class="min-h-[10vh] bg-transparent"></div>
+  <div class="min-h-[25vh] bg-transparent"></div>
 
-  <section class="flex flex-col justify-center items-center min-h-screen text-center bg-zinc-100 dark:bg-zinc-900 pt-20 pb-12">
-    <h1 class="text-2xl sm:text-3xl font-semibold mb-8 text-zinc-800 dark:text-zinc-100">
-      Choose your language
+  <section class="relative z-10 flex flex-col justify-center items-center min-h-[180vh] text-center bg-zinc-100 dark:bg-zinc-900 pt-10 pb-12">
+    <h1 class="text-4xl sm:text-5xl font-bold text-zinc-800 dark:text-zinc-100">
+      Looks good.
     </h1>
-    <div class="flex gap-6">
-      <a href="/en" class="px-6 py-3 rounded-md bg-black text-white hover:bg-zinc-700 transition">
-        English
-      </a>
-      <a href="/el" class="px-6 py-3 rounded-md bg-black text-white hover:bg-zinc-700 transition">
-        Ελληνικά
-      </a>
-    </div>
+    <p class="mt-4 text-lg sm:text-xl text-zinc-600 dark:text-zinc-300">
+      But… does it really pay off?
+    </p>
+
+    {featured ? (
+      <div class="mt-12 px-4 w-full max-w-3xl">
+        <ArticleCard
+          title={featured.title}
+          excerpt={featured.excerpt}
+          image={featured.image}
+          href={`/${featured.lang}/blog/${featured.slug}`}
+          lang={featured.lang}
+        />
+      </div>
+    ) : (
+      <p class="mt-12 text-sm text-gray-500">
+        No featured article available.
+      </p>
+    )}
   </section>
+
   <PuzzleOverlay />
 </Layout>
