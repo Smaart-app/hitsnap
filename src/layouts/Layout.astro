@@ -32,5 +32,23 @@ const { data: { user } } = await supabase.auth.getUser();
     </main>
 
     <Footer client:load lang={lang} />
+
+    <script is:client>
+      const html = document.documentElement;
+
+      // Ενεργοποίηση αποθηκευμένου θέματος κατά την αρχική φόρτωση
+      if (
+        localStorage.getItem('theme') === 'dark' ||
+        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+      ) {
+        html.classList.add('dark');
+      }
+
+      // Εναλλαγή θέματος με το κουμπί
+      document.getElementById('toggle-theme')?.addEventListener('click', () => {
+        html.classList.toggle('dark');
+        localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+      });
+    </script>
   </body>
 </html>

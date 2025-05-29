@@ -38,8 +38,8 @@ const pathForEnglish = `/en${pathWithoutLang}`;
         {isGreek ? 'Επικοινωνία' : 'Contact'}
       </a>
 
-      <!-- Γλώσσα -->
-      <div class="ml-1 sm:ml-2 flex items-center gap-2 text-sm sm:text-base">
+      <!-- Γλώσσα & θέμα -->
+      <div class="ml-1 sm:ml-2 flex items-center gap-3 text-sm sm:text-base">
         {isGreek ? (
           <a href={pathForEnglish} aria-label="Switch to English" class="hover:text-[#50c7c2]">
             English 🇬🇧
@@ -49,6 +49,14 @@ const pathForEnglish = `/en${pathWithoutLang}`;
             Ελληνικά 🇬🇷
           </a>
         )}
+
+        <button
+          id="toggle-theme"
+          class="text-lg opacity-70 hover:opacity-100 transition"
+          title={isGreek ? 'Εναλλαγή θέματος' : 'Toggle theme'}
+        >
+          🌓
+        </button>
       </div>
 
       <!-- Ενέργειες -->

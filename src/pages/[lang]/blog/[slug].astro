@@ -67,7 +67,7 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
 const markdown = article?.content ?? '';
 ---
 
-<Layout title={pageTitle} lang={lang}>
+<Layout title={pageTitle} lang={lang} key={lang}>
   <head slot="head">
     <title>{pageTitle}</title>
     <meta name="description" content={pageDescription} />
@@ -103,9 +103,9 @@ const markdown = article?.content ?? '';
       {hasAltVersion && (
         <div class="text-right mt-10 text-sm">
           <a
-            href={`/${lang === 'el' ? 'en' : 'el'}/blog/${altArticle.slug}`}
             class="text-[#50c7c2] hover:underline"
-            reloadDocument
+            href={`/${lang === 'el' ? 'en' : 'el'}/blog/${altArticle.slug}`}
+            onclick="event.preventDefault(); window.location.href = this.href;"
           >
             {lang === 'el' ? 'Διαθέσιμο και στα Αγγλικά →' : 'Also available in Greek →'}
           </a>
