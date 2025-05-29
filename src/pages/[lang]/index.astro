@@ -35,27 +35,18 @@ const { data: articles, error } = await supabase
   .limit(1);
 
 const featured = articles?.[0] || null;
-
-// 🟡 DEBUG LOGS στο terminal
-console.log('🟡 DEBUG lang:', lang);
-console.log('🟡 DEBUG featured:', featured);
-console.log('🟡 DEBUG error:', error);
 ---
 
-<Layout title="Hitlift — Η Έξυπνη Άνοδος στο Real Estate" lang={lang} user={user}>
+<Layout title="Hitlift — The smart rise in real estate" lang={lang} user={user}>
   <div class="relative isolate min-h-[80vh] flex flex-col justify-center items-center text-center px-6 py-32 overflow-hidden bg-[#f4f3f0]">
     <BackgroundSketch class="absolute inset-0 opacity-10 z-0" />
 
     <h1 class="text-4xl font-bold tracking-tight sm:text-5xl relative z-10">
-      {lang === 'el'
-        ? 'Φαίνεται καλό. Αλλά... όντως συμφέρει;'
-        : 'Looks good. But… does it really pay off?'}
+      Looks good.
     </h1>
 
     <p class="mt-6 text-lg leading-8 text-gray-600 max-w-xl mx-auto relative z-10">
-      {lang === 'el'
-        ? 'Η ερώτηση που μένει, όταν όλα τα υπόλοιπα μοιάζουν σωστά.'
-        : 'The question that remains, when everything else looks right.'}
+      But… does it really pay off?
     </p>
 
     {featured ? (
