@@ -1,49 +1,44 @@
+export const prerender = false;
+
 import type { APIRoute } from 'astro';
 import { createServerClientReadOnly } from '../../lib/createServerClient';
-import { serialize } from 'cookie';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
-  const { email, password } = await request.json();
+  try {
+    const bodyText = await request.text();
+    if (!bodyText) {
+      return new Response(JSON.stringify({ error: 'Missing request body' }), {
+        status: 400,
+      });
+    }
 
-  const supabase = createServerClientReadOnly(cookies);
+    const { email, password } = JSON.parse(bodyText);
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+    if (!email || !password) {
+      return new Response(JSON.stringify({ error: 'Missing credentials' }), {
+        status: 400,
+      });
+    }
 
-  if (error || !data.session) {
-    return new Response(
-      JSON.stringify({ error: 'Wrong email or password' }),
-      { status: 401 }
-    );
+    const supabase = createServerClientReadOnly(cookies);
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error || !data.session) {
+      return new Response(JSON.stringify({ error: error?.message || 'Login failed' }), {
+        status: 401,
+      });
+    }
+
+    return new Response(null, {
+      status: 200,
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: 'Invalid request format' }), {
+      status: 400,
+    });
   }
-
-  const { session } = data;
-
-  const headers = new Headers();
-  headers.append(
-    'Set-Cookie',
-    serialize('sb-access-token', session.access_token, {
-      path: '/',
-      httpOnly: true,
-      maxAge: 60 * 60 * 12, // 12 ώρες
-      sameSite: 'lax',
-    })
-  );
-  headers.append(
-    'Set-Cookie',
-    serialize('sb-refresh-token', session.refresh_token, {
-      path: '/',
-      httpOnly: true,
-      maxAge: 60 * 60 * 24 * 30, // 30 ημέρες
-      sameSite: 'lax',
-    })
-  );
-  headers.append('Content-Type', 'application/json');
-
-  return new Response(JSON.stringify({ success: true }), {
-    status: 200,
-    headers,
-  });
 };
