@@ -64,10 +64,7 @@ let emailAttempted = '';
         });
 
         if (res.ok) {
-          const currentPath = window.location.pathname;
-          const langMatch = currentPath.match(/^\/(el|en)/);
-          const lang = langMatch ? langMatch[1] : 'el';
-          window.location.href = `/${lang}/admin`;
+          window.location.href = '/admin/editor';
         } else {
           const result = await res.json();
           errorBox.textContent = result.error || 'Login failed';

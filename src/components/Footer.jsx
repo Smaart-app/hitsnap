@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function Footer({ lang = 'el' }) {
-  const name = lang === 'en' ? 'Anna Phokidou' : 'Άννα Φωκίδου';
+  const name = lang === 'en' ? 'Anna Fokidou' : 'Άννα Φωκίδου';
   const message =
     lang === 'en'
       ? 'The smart rise in real estate, beyond the obvious.'
