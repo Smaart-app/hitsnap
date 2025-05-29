@@ -21,16 +21,17 @@ if (!supportedLangs.includes(lang)) {
 const supabase = createServerClientReadOnly(Astro.cookies);
 const todayISO = new Date().toISOString();
 
+const slugSuffix = `-${lang}`; // υποστηρίζει slug με κατάληξη -el ή -en
+
 const { data: articles } = await supabase
   .from('articles')
   .select('*')
   .eq('lang', lang)
   .eq('published', true)
   .lte('publish_date', todayISO)
-  .order('publish_date', { ascending: false })
-  .limit(1);
+  .order('publish_date', { ascending: false });
 
-const featured = articles?.[0] || null;
+const featured = articles?.find((article) => article.slug.endsWith(slugSuffix)) || articles?.[0] || null;
 ---
 
 <Layout title="Hitlift — The smart rise in real estate" lang={lang}>

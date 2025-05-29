@@ -13,6 +13,7 @@ const supabase = createServerClient(
   { cookies: Astro.cookies }
 );
 
+// 🔍 Φέρνουμε το άρθρο στην τρέχουσα γλώσσα
 const { data: articles } = await supabase
   .from('articles')
   .select('*')
@@ -20,22 +21,48 @@ const { data: articles } = await supabase
   .eq('lang', lang)
   .limit(1);
 
-const article = articles?.[0];
-const altLang = lang === 'el' ? 'en' : 'el';
+let article = articles?.[0];
 
-const { data: altArticles } = await supabase
-  .from('articles')
-  .select('slug')
-  .eq('translation_of', article?.translation_of || article?.id)
-  .eq('lang', altLang)
-  .eq('published', true)
-  .limit(1);
+// 🔁 Αν δεν βρέθηκε, ψάξε μήπως υπάρχει σε άλλη γλώσσα και κάνε redirect
+if (!article) {
+  const altLang = lang === 'el' ? 'en' : 'el';
 
-const altArticle = altArticles?.[0];
+  const { data: altArticles } = await supabase
+    .from('articles')
+    .select('slug')
+    .eq('slug', slug)
+    .eq('lang', altLang)
+    .eq('published', true)
+    .limit(1);
+
+  const alt = altArticles?.[0];
+
+  if (alt) {
+    return Astro.redirect(`/${altLang}/blog/${slug}`, 302);
+  }
+}
+
+// ✅ Αν υπάρχει article, φέρνουμε και το αντίστοιχο σε άλλη γλώσσα (για το κουμπί μετάφρασης)
+let altArticle = null;
+
+if (article) {
+  const altLang = lang === 'el' ? 'en' : 'el';
+
+  const { data: altArticles } = await supabase
+    .from('articles')
+    .select('slug')
+    .eq('translation_of', article.translation_of || article.id)
+    .eq('lang', altLang)
+    .eq('published', true)
+    .limit(1);
+
+  altArticle = altArticles?.[0];
+}
+
 const hasAltVersion = !!altArticle;
 
 const pageTitle = article?.title ?? 'Unknown Article';
-const pageDescription = article?.excerpt ?? 'This article may have moved or never existed.';
+const pageDescription = article?.excerpt ?? 'This article may have been moved or never existed.';
 const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
 const markdown = article?.content ?? '';
 ---
@@ -76,8 +103,9 @@ const markdown = article?.content ?? '';
       {hasAltVersion && (
         <div class="text-right mt-10 text-sm">
           <a
-            href={`/${altLang}/blog/${altArticle.slug}`}
+            href={`/${lang === 'el' ? 'en' : 'el'}/blog/${altArticle.slug}`}
             class="text-[#50c7c2] hover:underline"
+            reloadDocument
           >
             {lang === 'el' ? 'Διαθέσιμο και στα Αγγλικά →' : 'Also available in Greek →'}
           </a>
