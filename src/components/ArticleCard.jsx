@@ -1,19 +1,27 @@
-export default function ArticleCard({ title, excerpt, image, href, lang = 'el' }) {
+export default function ArticleCard({
+  title,
+  excerpt,
+  image,
+  href,
+  altHref,
+  lang = 'el',
+}) {
   const readMoreText = lang === 'en' ? 'Read more →' : 'Διαβάστε περισσότερα →';
+  const altLangText = lang === 'en' ? 'View in Greek →' : 'Δες και στα Αγγλικά →';
 
   return (
-    <article className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden w-full max-w-screen-sm sm:max-w-xl mx-auto flex flex-col">
+    <article className="bg-white rounded-2xl sm:rounded-3xl shadow-md hover:shadow-lg transition overflow-hidden w-full max-w-screen-sm sm:max-w-xl mx-auto flex flex-col">
       {image && (
-        <div className="w-full max-h-[250px] overflow-hidden">
+        <div className="w-full max-h-[180px] sm:max-h-[220px] overflow-hidden">
           <img
             src={image}
             alt={title}
-            className="w-full h-[250px] object-cover object-center"
+            className="w-full h-[180px] sm:h-[220px] object-cover object-center"
           />
         </div>
       )}
 
-      <div className="flex flex-col justify-between gap-4 p-5 sm:p-6">
+      <div className="flex flex-col justify-between gap-4 p-6 sm:p-8">
         <div>
           <h2 className="text-lg sm:text-xl font-semibold mb-2 text-zinc-800">
             {title}
@@ -23,12 +31,22 @@ export default function ArticleCard({ title, excerpt, image, href, lang = 'el' }
           </p>
         </div>
 
-        <a
-          href={href}
-          className="inline-block text-[#50c7c2] font-semibold hover:underline text-sm"
-        >
-          {readMoreText}
-        </a>
+        <div className="mt-2 flex flex-col sm:flex-row sm:justify-between gap-1 text-sm">
+          <a
+            href={href}
+            className="text-[#50c7c2] font-semibold hover:underline"
+          >
+            {readMoreText}
+          </a>
+          {altHref && (
+            <a
+              href={altHref}
+              className="text-zinc-500 hover:text-[#50c7c2] transition"
+            >
+              {altLangText}
+            </a>
+          )}
+        </div>
       </div>
     </article>
   );
