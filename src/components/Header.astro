@@ -7,29 +7,27 @@ const base = isGreek ? '/el' : '/en';
 
 const currentPath = Astro.url.pathname;
 
-// Active link detection
 const isHome = currentPath === '/';
 const isArticles = currentPath.includes('/blog') && !currentPath.includes('/editor');
 const isContact = currentPath.includes('/contact');
 const isDashboard = currentPath.includes('/dashboard');
 const isEditor = currentPath.includes('/editor');
 
-// Intelligent language switching
 const pathWithoutLang = currentPath.replace(/^\/(el|en)/, '');
 const pathForGreek = `/el${pathWithoutLang}`;
 const pathForEnglish = `/en${pathWithoutLang}`;
 ---
 
-<header class="w-full border-b border-zinc-200 bg-white dark:bg-zinc-950 shadow-sm px-6 py-4">
-  <div class="flex justify-between items-center max-w-screen-xl mx-auto">
+<header class="w-full border-b border-zinc-200 bg-white dark:bg-zinc-950 shadow-sm px-4 sm:px-6 py-3 sm:py-4">
+  <div class="max-w-screen-xl mx-auto flex flex-wrap items-center justify-between gap-y-2">
     <!-- Λογότυπο -->
     <a href="/" class="text-3xl tracking-tight flex items-center leading-none" style="font-family: 'Lora', serif;">
-      <span class="font-bold text-black">Hit</span>
+      <span class="font-bold text-black dark:text-white">Hit</span>
       <span class="font-normal text-[#50c7c2] ml-1">lift</span>
     </a>
 
     <!-- Πλοήγηση -->
-    <nav class="flex items-center gap-6 text-base font-medium text-zinc-700 dark:text-zinc-300">
+    <nav class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm sm:text-base font-medium text-zinc-700 dark:text-zinc-300">
       <a href="/" class={`${isHome ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'} transition`}>
         {isGreek ? 'Αρχική' : 'Home'}
       </a>
@@ -40,7 +38,21 @@ const pathForEnglish = `/en${pathWithoutLang}`;
         {isGreek ? 'Επικοινωνία' : 'Contact'}
       </a>
 
-      {user && (
+      <!-- Γλώσσα -->
+      <div class="ml-1 sm:ml-2 flex items-center gap-2 text-sm sm:text-base">
+        {isGreek ? (
+          <a href={pathForEnglish} aria-label="Switch to English" class="hover:text-[#50c7c2]">
+            English 🇬🇧
+          </a>
+        ) : (
+          <a href={pathForGreek} aria-label="Μετάβαση στα Ελληνικά" class="hover:text-[#50c7c2]">
+            Ελληνικά 🇬🇷
+          </a>
+        )}
+      </div>
+
+      <!-- Ενέργειες -->
+      {user ? (
         <>
           <a href="/dashboard" class={`${isDashboard ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'} transition`}>
             📋 {isGreek ? 'Πίνακας' : 'Dashboard'}
@@ -52,26 +64,11 @@ const pathForEnglish = `/en${pathWithoutLang}`;
             🚪 {isGreek ? 'Αποσύνδεση' : 'Logout'}
           </a>
         </>
-      )}
-
-      {!user && (
+      ) : (
         <a href="/login" class="text-[#50c7c2] hover:underline">
           🔐 {isGreek ? 'Είσοδος' : 'Login'}
         </a>
       )}
-
-      <!-- Γλώσσα -->
-      <div class="ml-2 flex items-center gap-2 text-sm">
-        {isGreek ? (
-          <a href={pathForEnglish} class="hover:text-[#50c7c2]">
-            English 🇬🇧
-          </a>
-        ) : (
-          <a href={pathForGreek} class="hover:text-[#50c7c2]">
-            Ελληνικά 🇬🇷
-          </a>
-        )}
-      </div>
     </nav>
   </div>
 </header>
