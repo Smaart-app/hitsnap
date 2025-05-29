@@ -5,9 +5,9 @@ const lang = Astro.props?.lang || 'el';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.jsx';
 import BackgroundSketch from '../components/BackgroundSketch.astro';
-import { createServerClientReadOnly } from '../lib/createServerClient'; // <-- άλλαξε εδώ
+import { createServerClientReadOnly } from '../lib/createServerClient';
 
-const supabase = createServerClientReadOnly(Astro.cookies); // <-- και εδώ
+const supabase = createServerClientReadOnly(Astro.cookies);
 const { data: { user } } = await supabase.auth.getUser();
 ---
 
@@ -23,9 +23,12 @@ const { data: { user } } = await supabase.auth.getUser();
   <body class="bg-[#f4f3f0] text-[#1a1a1a] leading-relaxed relative overflow-x-hidden min-h-screen">
     <Header lang={lang} user={user} />
 
-    <BackgroundSketch />
+    <!-- Σωστό z-index ώστε να φαίνονται τα σπίτια -->
+    <div class="absolute top-0 left-0 w-full h-auto z-0 pointer-events-none select-none">
+      <BackgroundSketch />
+    </div>
 
-    <main class="px-6 py-12 relative z-10">
+    <main class="relative z-10 pt-[10vh]">
       <slot />
     </main>
 
