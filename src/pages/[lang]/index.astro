@@ -37,18 +37,20 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
 
 <Layout title="Hitlift — The smart rise in real estate" lang={lang}>
   <!-- Hero Full Centered -->
-  <section class="bg-[#f4f3f0] flex flex-col justify-center items-center text-center px-6 h-[90vh] relative z-10">
-    <div class="max-w-3xl w-full flex flex-col items-center justify-center gap-6 -mt-24">
+  <section class="bg-[#f4f3f0] min-h-[90vh] flex flex-col justify-center items-center text-center px-6 relative z-10">
+    <div class="w-full max-w-3xl mx-auto flex flex-col items-center justify-center gap-6" style="margin-top: -8rem;">
       <!-- Σκίτσο -->
-      <img 
-        src="/assets/images/houses-sketch.png" 
-        alt="Χειροποίητο σκίτσο σπιτιών" 
-        class="mx-auto h-auto" 
-        style="aspect-ratio: 2.5 / 1; max-width: 660px;" 
-      />
+      <div class="w-full flex justify-center">
+        <img 
+          src="/assets/images/houses-sketch.png" 
+          alt="Χειροποίητο σκίτσο σπιτιών" 
+          class="w-full h-auto max-w-[660px]" 
+          style="aspect-ratio: 2.5 / 1;" 
+        />
+      </div>
       
       <!-- Τίτλος & Υπότιτλος -->
-      <div class="px-2 w-full text-center">
+      <div class="w-full text-center px-2">
         <h1 
           class="whitespace-pre-line text-4xl sm:text-5xl font-bold leading-tight mb-2 text-black" 
           style="font-family: 'Playfair Display', serif;"
