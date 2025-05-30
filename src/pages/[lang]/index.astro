@@ -40,14 +40,15 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
 
 <Layout title="Hitlift — The smart rise in real estate" lang={lang}>
 
-  <!-- Sketch background as framed "painting" -->
+  <!-- Sketch background framed as painting -->
   <section class="relative bg-[#f4f3f0] overflow-hidden">
     <div class="relative mx-auto w-[90vw] max-w-5xl h-[200px] pt-12 sm:pt-16 opacity-30 pointer-events-none">
       <BackgroundSketch />
 
-      <!-- Framing lines inside SVG height only -->
-      <span class="absolute left-0 top-0 h-full w-[1px] bg-[#bbb] opacity-60"></span>
-      <span class="absolute right-0 top-0 h-full w-[1px] bg-[#bbb] opacity-60"></span>
+      <!-- Framing lines -->
+      <span class="absolute top-0 left-[1px] h-full w-[1px] bg-[#bbb] opacity-60"></span>
+      <span class="absolute top-0 right-0 h-full w-[1px] bg-[#bbb] opacity-60"></span>
+      <span class="absolute bottom-0 left-0 w-full h-[1px] bg-[#bbb] opacity-60"></span>
     </div>
   </section>
 
@@ -80,7 +81,7 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
     </a>
   </section>
 
-  <!-- Featured Article -->
+  <!-- Featured Article Section -->
   {featured ? (
     <section class="relative z-10 flex justify-center px-4 sm:px-6 pt-12 pb-24 bg-[#f4f3f0]">
       <div class="w-full max-w-screen-sm sm:max-w-xl text-center">
