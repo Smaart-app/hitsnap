@@ -69,7 +69,7 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
   <!-- Featured Article -->
   {featured ? (
     <section class="relative z-10 flex justify-center px-4 sm:px-6 pt-8 pb-20 bg-[#f4f3f0]">
-      <div class="w-full max-w-3xl px-6 sm:px-8 text-center">
+      <div class="w-full max-w-[640px] px-6 sm:px-8 text-center">
         <ArticleCard 
           title={featured.title}
           excerpt={featured.excerpt}
