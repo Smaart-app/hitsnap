@@ -1,7 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import ArticleCard from '../../components/ArticleCard.jsx';
-import BackgroundSketch from '../../components/BackgroundSketch.astro';
 import { createServerClientReadOnly } from '../../lib/createServerClient';
 
 export async function getStaticPaths() {
@@ -40,20 +39,17 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
 
 <Layout title="Hitlift — The smart rise in real estate" lang={lang}>
 
-  <!-- Sketch background framed as painting -->
-  <section class="relative bg-[#f4f3f0] overflow-hidden">
-    <div class="relative mx-auto w-[90vw] max-w-5xl h-[200px] pt-12 sm:pt-16 opacity-30 pointer-events-none">
-      <BackgroundSketch />
-
-      <!-- Framing lines -->
-      <span class="absolute top-0 left-[1px] h-full w-[1px] bg-[#bbb] opacity-60"></span>
-      <span class="absolute top-0 right-0 h-full w-[1px] bg-[#bbb] opacity-60"></span>
-      <span class="absolute bottom-0 left-0 w-full h-[1px] bg-[#bbb] opacity-60"></span>
+  <!-- Εικόνα φόντου (στατική, sketch) -->
+  <section class="bg-[#f4f3f0] text-center px-6 pt-12 sm:pt-20 pb-20">
+    <div class="mx-auto max-w-4xl pb-10">
+      <img
+        src="/assets/images/houses-sketch.png"
+        alt="Χειροποίητο σκίτσο σπιτιών"
+        class="mx-auto w-full h-auto opacity-90"
+        style="max-height: 240px;"
+      />
     </div>
-  </section>
 
-  <!-- Hero Title Section -->
-  <section class="relative bg-[#f4f3f0] text-center px-6 pt-12 sm:pt-20 pb-20">
     <h1
       class="whitespace-pre-line text-4xl sm:text-5xl font-bold leading-tight mb-6 text-black"
       style="
