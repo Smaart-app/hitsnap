@@ -1,4 +1,5 @@
 ---
+// index.astro ή [lang]/index.astro
 import Layout from '../../layouts/Layout.astro';
 import ArticleCard from '../../components/ArticleCard.jsx';
 import { createServerClientReadOnly } from '../../lib/createServerClient';
@@ -38,50 +39,48 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
 ---
 
 <Layout title="Hitlift — The smart rise in real estate" lang={lang}>
+  <!-- Hero Section -->
+  <section class="bg-[#f4f3f0] text-center px-6 pt-10 sm:pt-14 pb-10 sm:pb-14 min-h-[80vh] flex flex-col justify-center relative z-10">
+    <div class="max-w-4xl mx-auto flex flex-col items-center space-y-6">
+      <!-- Σκίτσο -->
+      <div class="w-full max-w-[600px]">
+        <img
+          src="/assets/images/houses-sketch.png"
+          alt="Χειροποίητο σκίτσο σπιτιών"
+          class="mx-auto h-auto"
+          style="aspect-ratio: 2.5 / 1;"
+        />
+      </div>
 
-  <!-- Εικόνα σκίτσου -->
-  <section class="bg-[#f4f3f0] text-center px-6 pt-4 sm:pt-8 pb-16 relative z-10">
-    <div class="flex justify-center -mt-12 sm:-mt-20">
-      <img
-        src="/assets/images/houses-sketch.png"
-        alt="Χειροποίητο σκίτσο σπιτιών"
-        class="mx-auto h-auto"
-        style="max-width: 640px; width: auto; aspect-ratio: 2.5 / 1;"
-      />
-    </div>
+      <!-- Τίτλος & Υπότιτλος -->
+      <div class="px-4">
+        <h1
+          class="whitespace-pre-line text-4xl sm:text-5xl font-bold leading-tight mb-3 text-black"
+          style="font-family: 'Playfair Display', serif;"
+        >
+          {lang === 'el'
+            ? 'Δεν είναι μόνο το σπίτι.\nΕίναι η επιλογή.'
+            : 'Looks good.'}
+        </h1>
 
-    <!-- Τίτλος / υπότιτλος με πλήρες centering -->
-    <div>
-      <h1
-        class="whitespace-pre-line text-4xl sm:text-5xl font-bold leading-tight mb-6 text-black"
-        style="
-          font-family: 'Playfair Display', serif;
-          background-color: rgba(255,255,255,0.01);
-          text-shadow: 0 0 0 #000;
-        "
-      >
-        {lang === 'el'
-          ? 'Δεν είναι μόνο το σπίτι.\nΕίναι η επιλογή.'
-          : 'Looks good.'}
-      </h1>
-
-      <p
-        class="text-lg mb-10 font-medium"
-        style="
-          font-family: 'Source Sans 3', sans-serif;
-          color: #1a1a1a;
-        "
-      >
-        {lang === 'el'
-          ? 'Ένα μέρος για όσους αναζητούν ουσία — όχι απλώς τετραγωνικά.'
-          : 'But… does it really pay off?'}
-      </p>
+        <p
+          class="text-lg font-medium"
+          style="
+            font-family: 'Source Sans 3', sans-serif;
+            color: #1a1a1a;
+          "
+        >
+          {lang === 'el'
+            ? 'Ένα μέρος για όσους αναζητούν ουσία — όχι απλώς τετραγωνικά.'
+            : 'But… does it really pay off?'}
+        </p>
+      </div>
     </div>
   </section>
 
-  <!-- Featured Article Section -->
+  <!-- Featured Article -->
   {featured ? (
-    <section class="relative z-10 flex justify-center px-4 sm:px-6 pt-4 sm:pt-6 pb-24 bg-[#f4f3f0]">
+    <section class="relative z-10 flex justify-center px-4 sm:px-6 pt-4 sm:pt-6 pb-20 bg-[#f4f3f0]">
       <div class="w-full max-w-[640px] px-6 sm:px-8 text-center">
         <ArticleCard
           title={featured.title}
