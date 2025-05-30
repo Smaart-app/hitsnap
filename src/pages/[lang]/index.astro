@@ -40,14 +40,17 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
 
 <Layout title="Hitlift — The smart rise in real estate" lang={lang}>
 
-  <!-- Framed sketch background directly under header -->
-  <section class="relative bg-[#f4f3f0] overflow-hidden">
-    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 z-0 opacity-30 w-[100vw] max-w-screen-xl">
-      <BackgroundSketch />
+  <!-- Hero Section -->
+  <section class="relative py-24 px-6 text-center overflow-hidden bg-[#f4f3f0]">
+    <!-- Framed sketch background under header -->
+    <div class="absolute top-[6rem] left-1/2 transform -translate-x-1/2 z-0 opacity-30 pointer-events-none">
+      <div class="w-[120vw] max-w-none -translate-x-[10vw]">
+        <BackgroundSketch />
+      </div>
     </div>
 
-    <!-- Title outside the SVG frame -->
-    <div class="relative z-10 pt-[12rem] pb-24 px-6 text-center">
+    <!-- Title and subtitle clearly placed lower -->
+    <div class="relative z-10 mt-[20rem]">
       <h1
         class="whitespace-pre-line text-4xl sm:text-5xl font-bold leading-tight mb-6 text-black"
         style="
@@ -76,7 +79,7 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
     </div>
   </section>
 
-  <!-- Featured Article -->
+  <!-- Featured Article Section -->
   {featured ? (
     <section class="relative z-10 flex justify-center px-4 sm:px-6 pt-12 pb-24">
       <div class="w-full max-w-screen-sm sm:max-w-xl text-center">
