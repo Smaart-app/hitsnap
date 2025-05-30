@@ -20,10 +20,6 @@ const { data: { user } } = await supabase.auth.getUser();
   </head>
 
   <body class="bg-[#f4f3f0] text-[#1a1a1a] leading-relaxed relative overflow-x-visible min-h-screen">
-
-    <!-- 👇 Βάζουμε εδώ το φόντο αν το page το καλέσει -->
-    <slot name="background" />
-
     <Header lang={lang} user={user} />
 
     <main class="relative z-0">
