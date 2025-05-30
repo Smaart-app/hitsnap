@@ -40,14 +40,18 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
 
 <Layout title="Hitlift — The smart rise in real estate" lang={lang}>
 
-  <!-- Framed Sketch Section -->
+  <!-- Sketch background framed like a board -->
   <section class="relative bg-[#f4f3f0] overflow-hidden">
-    <div class="mx-auto w-[90vw] max-w-5xl pt-12 sm:pt-16 opacity-30 pointer-events-none">
+    <div class="mx-auto w-[90vw] max-w-5xl pt-12 sm:pt-16 opacity-30 pointer-events-none relative">
       <BackgroundSketch />
+
+      <!-- Framing lines left and right -->
+      <div class="absolute top-0 left-0 h-full w-[2px] bg-[#bbb] opacity-60"></div>
+      <div class="absolute top-0 right-0 h-full w-[2px] bg-[#bbb] opacity-60"></div>
     </div>
   </section>
 
-  <!-- Hero Section -->
+  <!-- Hero content -->
   <section class="relative bg-[#f4f3f0] text-center px-6 pt-12 sm:pt-20 pb-20">
     <h1
       class="whitespace-pre-line text-4xl sm:text-5xl font-bold leading-tight mb-6 text-black"
@@ -62,7 +66,7 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
         : 'Looks good.'}
     </h1>
 
-    <p class="text-lg text-zinc-600 dark:text-zinc-300 mb-10">
+    <p class="text-lg text-zinc-800 dark:text-zinc-300 mb-10 font-medium">
       {lang === 'el'
         ? 'Ένα μέρος για όσους αναζητούν ουσία — όχι απλώς τετραγωνικά.'
         : 'But… does it really pay off?'}
