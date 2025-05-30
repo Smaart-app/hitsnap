@@ -3,7 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import PageBackground from '../../components/PageBackground.astro';
 import ArticleCard from '../../components/ArticleCard.jsx';
 import { createServerClientReadOnly } from '../../lib/createServerClient';
-import { Fragment } from 'astro/jsx';
+import { Fragment } from 'astro/jsx-runtime';
 
 export async function getStaticPaths() {
   return [
