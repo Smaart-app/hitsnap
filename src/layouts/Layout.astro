@@ -23,9 +23,7 @@ const { data: { user } } = await supabase.auth.getUser();
   <body class="bg-[#f4f3f0] text-[#1a1a1a] leading-relaxed relative overflow-x-visible min-h-screen">
     <Header lang={lang} user={user} />
 
-    <div class="absolute top-[80px] left-0 w-full max-h-[280px] z-[-1] pointer-events-none select-none">
-      <BackgroundSketch />
-    </div>
+    <BackgroundSketch />  <!-- ✅ Μόνο μία εμφάνιση -->
 
     <main class="relative z-0">
       <slot />
