@@ -36,46 +36,43 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
 
 <Layout title="Hitlift — The smart rise in real estate" lang={lang}>
   <!-- Hero Section -->
-  <section class="bg-[#f4f3f0] pt-10 pb-4 relative z-10">
-    <div class="w-full flex justify-center mb-[-2rem]">
-      <img 
-        src="/assets/images/houses-sketch.png" 
-        alt="Χειροποίητο σκίτσο σπιτιών" 
-        class="max-w-[620px] w-full h-auto object-contain"
-        style="aspect-ratio: 2.5 / 1;"
-      />
-    </div>
-
-    <div class="w-full max-w-5xl mx-auto px-4 flex flex-col lg:flex-row items-start justify-between gap-8 pt-8">
-      <!-- Κείμενο -->
-      <div class="flex-1 text-center lg:text-left">
-        <h1 
-          class="text-4xl sm:text-5xl font-bold leading-tight mb-2 text-black" 
-          style="font-family: 'Playfair Display', serif;"
-        >
-          {lang === 'el' ? 'Δεν είναι μόνο το σπίτι.\nΕίναι η επιλογή.' : 'Looks good.'}
-        </h1>
-        <p 
-          class="text-lg font-medium mt-2" 
-          style="font-family: 'Source Sans 3', sans-serif; color: #1a1a1a;"
-        >
-          {lang === 'el' ? 'Ένα μέρος για όσους αναζητούν ουσία — όχι απλώς τετραγωνικά.' : 'But… does it really pay off?'}
-        </p>
+  <section class="bg-[#f4f3f0] pt-12 pb-16 px-4 sm:px-8 relative z-10">
+    <div class="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      
+      <!-- Εικόνα σκίτσου -->
+      <div class="flex justify-center">
+        <img 
+          src="/assets/images/houses-sketch.png"
+          alt="Χειροποίητο σκίτσο σπιτιών"
+          class="w-full h-auto max-w-[500px] object-contain"
+          style="aspect-ratio: 2.5 / 1;"
+        />
       </div>
 
-      <!-- Featured Article (σαν καρτέλα στα δεξιά) -->
-      {featured && (
-        <div class="flex-1 max-w-md lg:max-w-sm mx-auto lg:mx-0 bg-white shadow-md rounded-xl p-4 mt-8 lg:mt-0">
-          <ArticleCard 
-            title={featured.title}
-            excerpt={featured.excerpt}
-            image={featured.image}
-            href={`/${lang}/blog/${featured.slug}`}
-            altHref={altHref}
-            lang={lang}
-          />
+      <!-- Κείμενο και featured άρθρο -->
+      <div class="flex flex-col gap-6">
+        <div class="text-left">
+          <h1 class="text-4xl sm:text-5xl font-bold text-black leading-tight" style="font-family: 'Playfair Display', serif;">
+            {lang === 'el' ? 'Δεν είναι μόνο το σπίτι.\nΕίναι η επιλογή.' : 'Looks good.'}
+          </h1>
+          <p class="text-lg font-medium mt-2" style="font-family: 'Source Sans 3', sans-serif; color: #1a1a1a;">
+            {lang === 'el' ? 'Ένα μέρος για όσους αναζητούν ουσία — όχι απλώς τετραγωνικά.' : 'But… does it really pay off?'}
+          </p>
         </div>
-      )}
+
+        {featured && (
+          <div class="bg-white shadow-md rounded-xl p-4 w-full max-w-md">
+            <ArticleCard 
+              title={featured.title}
+              excerpt={featured.excerpt}
+              image={featured.image}
+              href={`/${lang}/blog/${featured.slug}`}
+              altHref={altHref}
+              lang={lang}
+            />
+          </div>
+        )}
+      </div>
     </div>
   </section>
 
