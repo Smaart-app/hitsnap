@@ -1,7 +1,9 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import PageBackground from '../../components/PageBackground.astro';
 import ArticleCard from '../../components/ArticleCard.jsx';
 import { createServerClientReadOnly } from '../../lib/createServerClient';
+import { Fragment } from 'astro/jsx';
 
 export async function getStaticPaths() {
   return [
@@ -38,9 +40,11 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
 ---
 
 <Layout title="Hitlift — The smart rise in real estate" lang={lang}>
-  <section class="relative z-10 flex flex-col justify-center items-center text-center px-4 sm:px-6 pt-12 pb-12">
-    <!-- ❌ ΑΦΑΙΡΕΘΗΚΕ το BackgroundSketch εδώ -->
+  <Fragment slot="background">
+    <PageBackground />
+  </Fragment>
 
+  <section class="relative z-10 flex flex-col justify-center items-center text-center px-4 sm:px-6 pt-12 pb-12">
     <h1 class="text-3xl sm:text-5xl font-bold text-zinc-800 dark:text-zinc-100 text-balance" style="font-family: 'Playfair Display', serif;">
       {lang === 'el' ? 'Φαίνεται καλό.' : 'Looks good.'}
     </h1>
