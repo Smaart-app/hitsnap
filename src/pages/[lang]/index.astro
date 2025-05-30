@@ -82,15 +82,17 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
   <!-- Featured Article Section -->
   {featured ? (
     <section class="relative z-10 flex justify-center px-4 sm:px-6 pt-4 sm:pt-6 pb-24 bg-[#f4f3f0]">
-      <div class="w-full max-w-[720px] text-center">
-        <ArticleCard
-          title={featured.title}
-          excerpt={featured.excerpt}
-          image={featured.image}
-          href={`/${lang}/blog/${featured.slug}`}
-          altHref={altHref}
-          lang={lang}
-        />
+      <div class="w-full max-w-[720px]">
+        <div class="mx-auto max-w-[640px] px-6 sm:px-8 text-center">
+          <ArticleCard
+            title={featured.title}
+            excerpt={featured.excerpt}
+            image={featured.image}
+            href={`/${lang}/blog/${featured.slug}`}
+            altHref={altHref}
+            lang={lang}
+          />
+        </div>
       </div>
     </section>
   ) : (
