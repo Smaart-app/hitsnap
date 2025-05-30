@@ -4,7 +4,6 @@ const lang = Astro.props?.lang || 'el';
 
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.jsx';
-import PageBackground from '../components/PageBackground.astro';
 import { createServerClientReadOnly } from '../lib/createServerClient';
 
 const supabase = createServerClientReadOnly(Astro.cookies);
@@ -21,11 +20,7 @@ const { data: { user } } = await supabase.auth.getUser();
   </head>
 
   <body class="bg-[#f4f3f0] text-[#1a1a1a] leading-relaxed relative overflow-x-visible min-h-screen">
-    
-    <!-- 🔽 Τοποθετούμε το background ΠΡΩΤΟ -->
-    <PageBackground />
 
-    <!-- 🔼 Το περιεχόμενο ξεκινά εδώ -->
     <Header lang={lang} user={user} />
 
     <main class="relative z-10">
