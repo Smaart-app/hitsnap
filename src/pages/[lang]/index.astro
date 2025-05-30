@@ -39,7 +39,7 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
 
 <Layout title="Hitlift — The smart rise in real estate" lang={lang}>
 
-  <!-- Εικόνα σκίτσου (σταθερή) -->
+  <!-- Εικόνα σκίτσου -->
   <section class="bg-[#f4f3f0] text-center px-6 pt-4 sm:pt-8 pb-16 relative z-10">
     <div class="flex justify-center -mt-12 sm:-mt-20">
       <img
@@ -63,7 +63,13 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
         : 'Looks good.'}
     </h1>
 
-    <p class="text-lg text-zinc-800 dark:text-zinc-300 mb-2 font-medium">
+    <p
+      class="text-lg mb-10 font-medium"
+      style="
+        font-family: 'Source Sans 3', sans-serif;
+        color: #1a1a1a;
+      "
+    >
       {lang === 'el'
         ? 'Ένα μέρος για όσους αναζητούν ουσία — όχι απλώς τετραγωνικά.'
         : 'But… does it really pay off?'}
@@ -73,7 +79,7 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
   <!-- Featured Article Section -->
   {featured ? (
     <section class="relative z-10 flex justify-center px-4 sm:px-6 pt-4 sm:pt-6 pb-24 bg-[#f4f3f0]">
-      <div class="w-full max-w-screen-sm sm:max-w-xl text-center">
+      <div class="w-full max-w-[720px] text-center">
         <ArticleCard
           title={featured.title}
           excerpt={featured.excerpt}
