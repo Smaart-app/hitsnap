@@ -39,14 +39,14 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
 
 <Layout title="Hitlift — The smart rise in real estate" lang={lang}>
 
-  <!-- Εικόνα σκίτσου σε σταθερό καδράκι -->
-  <section class="bg-[#f4f3f0] text-center px-6 pt-12 sm:pt-20 pb-20">
-    <div class="flex justify-center py-10">
+  <!-- Σκίτσο σε σταθερό κάδρο -->
+  <section class="bg-[#f4f3f0] text-center px-6 pt-4 sm:pt-8 pb-20 relative z-10">
+    <div class="flex justify-center -mt-12 sm:-mt-20">
       <img
         src="/assets/images/houses-sketch.png"
         alt="Χειροποίητο σκίτσο σπιτιών"
-        class="w-auto h-auto max-w-[640px] border border-[#eaeaea] shadow-sm rounded-sm"
-        style="aspect-ratio: 2.5 / 1;"
+        class="mx-auto h-auto"
+        style="max-width: 720px; width: auto; aspect-ratio: 2.5 / 1;"
       />
     </div>
 
