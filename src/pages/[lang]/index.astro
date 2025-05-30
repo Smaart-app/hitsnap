@@ -1,6 +1,5 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import ArticleCard from '../../components/ArticleCard.jsx';
 import { createServerClientReadOnly } from '../../lib/createServerClient';
 
 export async function getStaticPaths() {
@@ -57,18 +56,21 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
       </p>
     </div>
 
-    <!-- Featured άρθρο (διακριτικά στα αριστερά) -->
+    <!-- Featured άρθρο (σαν μικρό teaser αριστερά, διακριτικό) -->
     {featured && (
       <div class="flex justify-start max-w-6xl mx-auto px-4">
-        <div class="bg-white shadow-md rounded-md p-4 w-full max-w-[300px]">
-          <ArticleCard 
-            title={featured.title}
-            excerpt={featured.excerpt?.slice(0, 140) + '…'}
-            image={featured.image}
-            href={`/${lang}/blog/${featured.slug}`}
-            altHref={altHref}
-            lang={lang}
-          />
+        <div class="bg-white shadow-sm rounded-md p-3 w-full max-w-[260px]">
+          <a href={`/${lang}/blog/${featured.slug}`} class="block">
+            <h2 class="text-sm font-semibold text-gray-900 mb-1 leading-tight">
+              {featured.title}
+            </h2>
+            <p class="text-sm text-gray-600 mb-2">
+              {featured.excerpt?.split('.')[0] + '...'}
+            </p>
+            <span class="text-sm text-primary font-medium hover:underline">
+              {lang === 'el' ? 'Δες περισσότερα →' : 'Read more →'}
+            </span>
+          </a>
         </div>
       </div>
     )}
