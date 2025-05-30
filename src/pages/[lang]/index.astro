@@ -40,7 +40,7 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
 
 <Layout title="Hitlift — The smart rise in real estate" lang={lang}>
   <!-- Hero Section -->
-  <section class="bg-[#f4f3f0] text-center px-6 pt-10 sm:pt-14 pb-10 sm:pb-14 min-h-[80vh] flex flex-col justify-center relative z-10">
+  <section class="bg-[#f4f3f0] text-center px-6 pt-12 pb-12 relative z-10">
     <div class="max-w-4xl mx-auto flex flex-col items-center space-y-6">
       <!-- Σκίτσο -->
       <div class="w-full max-w-[600px]">
@@ -80,7 +80,7 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
 
   <!-- Featured Article -->
   {featured ? (
-    <section class="relative z-10 flex justify-center px-4 sm:px-6 pt-4 sm:pt-6 pb-20 bg-[#f4f3f0]">
+    <section class="relative z-10 flex justify-center px-4 sm:px-6 pt-2 pb-20 bg-[#f4f3f0]">
       <div class="w-full max-w-[640px] px-6 sm:px-8 text-center">
         <ArticleCard
           title={featured.title}
