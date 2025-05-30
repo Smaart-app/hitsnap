@@ -11,7 +11,6 @@ module.exports = {
     'top-0',
     'left-0',
     'w-full',
-    'h-full',
     'h-screen',
     'z-[-1]',
     'pointer-events-none',
@@ -20,6 +19,10 @@ module.exports = {
     'opacity-10',
     'bg-[#f4f3f0]',
     'text-[#1a1a1a]',
+
+    // 👇 Custom animation classes
+    'fade-in-up',
+    'fade-in-left',
   ],
   darkMode: 'class',
   theme: {
