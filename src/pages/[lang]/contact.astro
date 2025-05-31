@@ -1,4 +1,6 @@
 ---
+export const prerender = false;
+
 export async function getStaticPaths() {
   return [
     { params: { lang: "el" } },
@@ -25,28 +27,7 @@ const isGreek = lang === 'el';
         : 'If you have feedback, ideas, or just want to say hello, I’m all ears.'}
     </p>
 
-    <form
-      class="mt-10 space-y-4 max-w-md w-full text-left relative z-10"
-      on:submit|preventDefault={async (e) => {
-        const formData = new FormData(e.target);
-        const res = await fetch('/api/contact', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: formData.get('name'),
-            email: formData.get('email'),
-            message: formData.get('message')
-          })
-        });
-
-        if (res.ok) {
-          alert(isGreek ? 'Το μήνυμα εστάλη!' : 'Message sent!');
-          e.target.reset();
-        } else {
-          alert(isGreek ? 'Κάτι πήγε στραβά.' : 'Something went wrong.');
-        }
-      }}
-    >
+    <form id="contact-form" class="mt-10 space-y-4 max-w-md w-full text-left relative z-10">
       <input
         name="name"
         type="text"
@@ -73,5 +54,63 @@ const isGreek = lang === 'el';
         {isGreek ? 'Αποστολή' : 'Send'}
       </button>
     </form>
+
+    <p id="response-message" class="mt-4 text-sm text-center"></p>
   </div>
+
+  <script is:client>
+    window.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('contact-form');
+      const responseMsg = document.getElementById('response-message');
+
+      if (!form) {
+        console.error('⚠️ Η φόρμα δεν βρέθηκε στο DOM!');
+        return;
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        responseMsg.textContent = '';
+
+        const formData = new FormData(form);
+        const payload = {
+          name: formData.get('name') || '',
+          email: formData.get('email') || '',
+          message: formData.get('message') || ''
+        };
+
+        if (!payload.email || !payload.message) {
+          responseMsg.textContent = isGreek
+            ? '⚠️ Το email και το μήνυμα είναι υποχρεωτικά.'
+            : '⚠️ Email and message are required.';
+          return;
+        }
+
+        try {
+          const res = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            responseMsg.textContent = isGreek
+              ? '📨 Το μήνυμά σου στάλθηκε με επιτυχία!'
+              : '📨 Your message was sent successfully!';
+            form.reset();
+          } else {
+            responseMsg.textContent = isGreek
+              ? `⚠️ Σφάλμα: ${data.error || 'Δεν στάλθηκε το μήνυμα.'}`
+              : `⚠️ Error: ${data.error || 'Message not sent.'}`;
+          }
+        } catch (err) {
+          responseMsg.textContent = isGreek
+            ? '⚠️ Πρόβλημα σύνδεσης.'
+            : '⚠️ Connection error.';
+          console.error('❌ Σφάλμα:', err);
+        }
+      });
+    });
+  </script>
 </Layout>

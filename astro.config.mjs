@@ -5,7 +5,7 @@ import react from "@astrojs/react";
 import netlify from "@astrojs/netlify";
 
 export default defineConfig({
-  output: "static",
-  adapter: netlify(),
+  output: "server", // 🔧 Χρειάζεται για να επιτραπεί POST /api/contact
+  adapter: netlify(), // ✅ Συμβατό με Netlify serverless functions
   integrations: [tailwind(), mdx(), react()],
 });
