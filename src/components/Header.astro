@@ -1,11 +1,16 @@
 ---
 const user = Astro.props?.user || null;
-const lang = Astro.props?.lang || 'el';
+
+function getLangFromPath(pathname) {
+  const match = pathname.match(/^\/(el|en)(\/|$)/);
+  return match?.[1] || 'el';
+}
+
+const currentPath = Astro.url.pathname;
+const lang = getLangFromPath(currentPath);
 
 const isGreek = lang === 'el';
 const base = isGreek ? '/el' : '/en';
-
-const currentPath = Astro.url.pathname;
 
 const isHome = currentPath === '/';
 const isArticles = currentPath.includes('/blog') && !currentPath.includes('/editor');

@@ -50,7 +50,7 @@ if (article) {
 
   const { data: altArticles } = await supabase
     .from('articles')
-    .select('slug')
+    .select('slug, lang')
     .eq('translation_of', article.translation_of || article.id)
     .eq('lang', altLang)
     .eq('published', true)
@@ -104,8 +104,7 @@ const markdown = article?.content ?? '';
         <div class="text-right mt-10 text-sm">
           <a
             class="text-[#50c7c2] hover:underline"
-            href={`/${lang === 'el' ? 'en' : 'el'}/blog/${altArticle.slug}`}
-            onclick="event.preventDefault(); window.location.href = this.href;"
+            href={`/${altArticle.lang}/blog/${altArticle.slug}`}
           >
             {lang === 'el' ? 'Διαθέσιμο και στα Αγγλικά →' : 'Also available in Greek →'}
           </a>
