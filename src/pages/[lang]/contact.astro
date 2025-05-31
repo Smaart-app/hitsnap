@@ -59,15 +59,12 @@ const isGreek = lang === 'el';
   </div>
 
   <script is:client>
-    window.addEventListener('DOMContentLoaded', () => {
-      const form = document.getElementById('contact-form');
-      const responseMsg = document.getElementById('response-message');
+    const form = document.getElementById('contact-form');
+    const responseMsg = document.getElementById('response-message');
 
-      if (!form) {
-        console.error('⚠️ Η φόρμα δεν βρέθηκε στο DOM!');
-        return;
-      }
-
+    if (!form) {
+      console.error('⚠️ Η φόρμα δεν βρέθηκε στο DOM!');
+    } else {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         responseMsg.textContent = '';
@@ -111,6 +108,6 @@ const isGreek = lang === 'el';
           console.error('❌ Σφάλμα:', err);
         }
       });
-    });
+    }
   </script>
 </Layout>
