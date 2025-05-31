@@ -18,7 +18,6 @@ if (!supportedLangs.includes(lang)) {
 
 const supabase = createServerClientReadOnly(Astro.cookies);
 const todayISO = new Date().toISOString();
-const slugSuffix = `-${lang}`;
 
 const { data: articles } = await supabase
   .from('articles')
@@ -28,14 +27,13 @@ const { data: articles } = await supabase
   .lte('publish_date', todayISO)
   .order('publish_date', { ascending: false });
 
-const featured = articles?.find((article) => article.slug.endsWith(slugSuffix)) || articles?.[0] || null;
-const altLang = lang === 'el' ? 'en' : 'el';
-const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
+const featured = articles?.[0] || null;
+const rest = featured ? articles.slice(1) : [];
 ---
 
 <Layout title="Hitlift — The smart rise in real estate" lang={lang}>
   <section class="bg-[#f4f3f0] pt-12 pb-20 px-4 sm:px-8 relative z-10">
-    
+
     <!-- Εικόνα -->
     <div class="w-full flex justify-center mb-4 fade-in-up">
       <img 
@@ -62,29 +60,44 @@ const altHref = featured ? `/${altLang}/blog/${featured.slug}` : null;
       </p>
     </div>
 
-    <!-- Featured άρθρο -->
+    <!-- Featured -->
     {featured && (
-      <div class="flex justify-start max-w-6xl mx-auto px-4 fade-in-left" style="animation-delay: 0.4s;">
-        <div class="bg-white shadow-sm rounded-md p-3 w-full max-w-[260px]">
-          <a href={`/${lang}/blog/${featured.slug}`} class="block">
-            <h2 class="text-sm font-semibold text-gray-900 mb-1 leading-tight">
-              {featured.title}
-            </h2>
-            <p class="text-sm text-gray-600 mb-2">
-              {featured.excerpt?.split('.')[0] + '...'}
-            </p>
-            <span class="text-sm text-primary font-medium hover:underline">
+      <div class="flex justify-center mb-12 fade-in-left" style="animation-delay: 0.4s;">
+        <div class="bg-white shadow-md rounded-lg p-4 w-full max-w-md">
+          <a href={`/${lang}/blog/${featured.slug}`} class="block hover:underline">
+            <h2 class="text-lg font-bold text-gray-900 mb-1 leading-tight">{featured.title}</h2>
+            <p class="text-sm text-gray-600 mb-2">{featured.excerpt?.split('.')[0] + '...'}</p>
+            <span class="text-sm text-primary font-semibold">
               {lang === 'el' ? 'Δες περισσότερα →' : 'Read more →'}
             </span>
           </a>
         </div>
       </div>
     )}
-  </section>
 
-  {!featured && (
-    <section class="relative z-10 text-center py-16 text-gray-500 bg-[#f4f3f0]">
-      {lang === 'el' ? 'Δεν υπάρχει ακόμη προτεινόμενο άρθρο.' : 'No featured article available yet.'}
-    </section>
-  )}
+    <!-- All άρθρα -->
+    {rest.length > 0 && (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 fade-in-up" style="animation-delay: 0.6s;">
+        {rest.map((article) => (
+          <div class="bg-white rounded-md shadow-sm p-3">
+            <a href={`/${lang}/blog/${article.slug}`} class="block hover:underline">
+              <h3 class="text-sm font-semibold text-gray-900 mb-1">{article.title}</h3>
+              <p class="text-sm text-gray-600 mb-2">{article.excerpt?.split('.')[0] + '...'}</p>
+              <span class="text-sm text-[#50c7c2] font-medium">
+                {lang === 'el' ? 'Περισσότερα →' : 'More →'}
+              </span>
+            </a>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {articles.length === 0 && (
+      <section class="text-center py-16 text-gray-500 bg-[#f4f3f0]">
+        {lang === 'el'
+          ? 'Δεν υπάρχουν ακόμη άρθρα σε αυτή τη γλώσσα.'
+          : 'No articles available in this language yet.'}
+      </section>
+    )}
+  </section>
 </Layout>

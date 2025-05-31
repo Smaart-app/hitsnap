@@ -3,6 +3,7 @@ import Layout from '../../../layouts/Layout.astro';
 import Markdown from '../../../components/Markdown.astro';
 import { createServerClient } from '@supabase/ssr';
 
+export const client = 'load';
 export const prerender = false;
 
 const { slug, lang } = Astro.params;
@@ -37,21 +38,24 @@ if (!article) {
 
   const alt = altArticles?.[0];
 
-  if (alt) {
-    return Astro.redirect(`/${altLang}/blog/${slug}`, 302);
+  if (alt && alt.slug !== slug) {
+    return Astro.redirect(`/${altLang}/blog/${alt.slug}`, 302);
   }
+
+  // ✅ Αν ούτε το alt υπάρχει, γύρνα στο /blog για τη γλώσσα
+  return Astro.redirect(`/${lang}/blog`, 302);
 }
 
-// ✅ Αν υπάρχει article, φέρνουμε και το αντίστοιχο σε άλλη γλώσσα (για το κουμπί μετάφρασης)
 let altArticle = null;
 
 if (article) {
   const altLang = lang === 'el' ? 'en' : 'el';
+  const groupId = article.translation_of || article.id;
 
   const { data: altArticles } = await supabase
     .from('articles')
     .select('slug, lang')
-    .eq('translation_of', article.translation_of || article.id)
+    .or(`id.eq.${groupId},translation_of.eq.${groupId}`)
     .eq('lang', altLang)
     .eq('published', true)
     .limit(1);
@@ -67,7 +71,13 @@ const pageUrl = `https://hitlift.gr/${lang}/blog/${slug}`;
 const markdown = article?.content ?? '';
 ---
 
-<Layout title={pageTitle} lang={lang} key={lang}>
+<Layout
+  title={pageTitle}
+  lang={lang}
+  key={lang}
+  altArticle={altArticle}
+  disableHeaderLangSwitch={true}
+>
   <head slot="head">
     <title>{pageTitle}</title>
     <meta name="description" content={pageDescription} />
@@ -78,64 +88,49 @@ const markdown = article?.content ?? '';
     <meta name="language" content={lang === 'el' ? 'Greek' : 'English'} />
   </head>
 
-  {article ? (
-    <section class="max-w-3xl mx-auto py-12 px-4">
-      <article class="prose prose-zinc dark:prose-invert max-w-none">
-        <h1>{article.title}</h1>
+  <section class="max-w-3xl mx-auto py-12 px-4">
+    <article class="prose prose-zinc dark:prose-invert max-w-none">
+      <h1>{article.title}</h1>
 
-        {article.publish_date && (
-          <p class="text-sm text-zinc-500">
-            {new Date(article.publish_date).toLocaleDateString(lang === "en" ? "en-GB" : "el-GR")}
-          </p>
-        )}
-
-        {article.cover_image && (
-          <img
-            src={article.cover_image}
-            alt="Cover image"
-            class="my-6 max-h-[400px] w-auto max-w-full object-contain rounded-lg shadow"
-          />
-        )}
-
-        <Markdown content={markdown} />
-      </article>
-
-      {hasAltVersion && (
-        <div class="text-right mt-10 text-sm">
-          <a
-            class="text-[#50c7c2] hover:underline"
-            href={`/${altArticle.lang}/blog/${altArticle.slug}`}
-          >
-            {lang === 'el' ? 'Διαθέσιμο και στα Αγγλικά →' : 'Also available in Greek →'}
-          </a>
-        </div>
+      {article.publish_date && (
+        <p class="text-sm text-zinc-500">
+          {new Date(article.publish_date).toLocaleDateString(lang === "en" ? "en-GB" : "el-GR")}
+        </p>
       )}
 
-      <div class="mt-12 text-center mb-24">
-        <a href={`/${lang}/blog`} class="inline-block text-[#50c7c2] hover:underline">
-          ← {lang === 'el' ? 'Επιστροφή στα άρθρα' : 'Back to blog'}
+      {article.cover_image && (
+        <img
+          src={article.cover_image}
+          alt="Cover image"
+          class="my-6 max-h-[400px] w-auto max-w-full object-contain rounded-lg shadow"
+        />
+      )}
+
+      <Markdown content={markdown} />
+    </article>
+
+    {hasAltVersion && (
+      <div class="text-right mt-10 text-sm">
+        <a
+          class="text-[#50c7c2] hover:underline"
+          href={`/${altArticle.lang}/blog/${altArticle.slug}`}
+          target="_self"
+          data-force-reload
+        >
+          {lang === 'el' ? 'Διαθέσιμο και στα Αγγλικά →' : 'Also available in Greek →'}
         </a>
       </div>
+    )}
 
-      <details class="mt-8 bg-zinc-100 text-xs p-4 rounded shadow text-black">
-        <summary class="cursor-pointer">🛠 View raw article data</summary>
-        <pre class="overflow-auto whitespace-pre-wrap">{JSON.stringify(article, null, 2)}</pre>
-      </details>
-    </section>
-  ) : (
-    <section class="text-center py-24">
-      <h1 class="text-4xl font-bold mb-4">404 — Article Not Found</h1>
-      <p class="text-gray-600 dark:text-gray-400 mb-8">
-        {lang === 'el'
-          ? 'Το άρθρο δεν βρέθηκε ή δεν έχει δημοσιευτεί.'
-          : 'This article may have been moved or unpublished.'}
-      </p>
-      <a
-        href={`/${lang}/blog`}
-        class="inline-block bg-[#50c7c2] text-white px-6 py-3 rounded-lg shadow hover:bg-[#3db2b0] transition"
-      >
-        {lang === 'el' ? '🏠 Επιστροφή στα άρθρα' : '🏠 Back to blog'}
+    <div class="mt-12 text-center mb-24">
+      <a href={`/${lang}/blog`} class="inline-block text-[#50c7c2] hover:underline">
+        ← {lang === 'el' ? 'Επιστροφή στα άρθρα' : 'Back to blog'}
       </a>
-    </section>
-  )}
+    </div>
+
+    <details class="mt-8 bg-zinc-100 text-xs p-4 rounded shadow text-black">
+      <summary class="cursor-pointer">🛠 View raw article data</summary>
+      <pre class="overflow-auto whitespace-pre-wrap">{JSON.stringify(article, null, 2)}</pre>
+    </details>
+  </section>
 </Layout>
