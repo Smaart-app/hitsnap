@@ -59,6 +59,7 @@ const isGreek = lang === 'el';
   </div>
 
   <script is:client>
+    const isGreek = window.location.pathname.startsWith('/el');
     const form = document.getElementById('contact-form');
     const responseMsg = document.getElementById('response-message');
 
