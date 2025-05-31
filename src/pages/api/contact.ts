@@ -1,9 +1,13 @@
 import type { APIRoute } from 'astro';
-import axios from 'axios';
+import { createClient } from '@supabase/supabase-js';
 
 export const POST: APIRoute = async ({ request }) => {
   const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL!;
   const SUPABASE_KEY = import.meta.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: { persistSession: false }
+  });
 
   const contentType = request.headers.get('content-type');
   if (!contentType || !contentType.includes('application/json')) {
@@ -23,24 +27,17 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: 'Missing fields' }), { status: 400 });
   }
 
-  // Supabase insert μέσω axios
+  // Supabase insert μέσω SDK (παρακάμπτει RLS όταν έχεις service_role key)
   try {
-    const { data: insertResult } = await axios.post(
-      `${SUPABASE_URL}/rest/v1/contacts`,
-      [{ name, email, message }],
-      {
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-          Prefer: 'return=representation'
-        }
-      }
-    );
+    const { data: insertResult, error } = await supabase
+      .from('contacts')
+      .insert([{ name, email, message }])
+      .select();
 
-    console.log('✅ Supabase axios insert success:', insertResult);
+    if (error) throw error;
+    console.log('✅ Supabase SDK insert success:', insertResult);
   } catch (err: any) {
-    console.error('🔥 Supabase axios error:', err?.response?.data || err.message);
+    console.error('🔥 Supabase SDK error:', err.message);
     return new Response(JSON.stringify({ error: 'Supabase insert failed' }), { status: 500 });
   }
 
