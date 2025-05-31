@@ -1,14 +1,11 @@
 import type { APIRoute } from 'astro';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClientNoCookies } from '../../lib/createServerClient';
+
+console.log('🔐 Loaded service key:', import.meta.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 12)); // 👀 Δες τι key διαβάζεται
+
+const supabase = createAdminClientNoCookies(); // 💥 Καθαρός server client – χωρίς cookies
 
 export const POST: APIRoute = async ({ request }) => {
-  const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL!;
-  const SUPABASE_KEY = import.meta.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-    auth: { persistSession: false },
-  });
-
   const contentType = request.headers.get('content-type');
   if (!contentType || !contentType.includes('application/json')) {
     return new Response(JSON.stringify({ error: 'Invalid content type' }), { status: 415 });

@@ -34,5 +34,22 @@ export function createServerClientFull(cookies: AstroCookies) {
   );
 }
 
-// 🔧 Αυτή είναι η συνάρτηση που σου έλειπε
+// 🔧 Αντιστοίχιση για όποιον χρησιμοποιεί alias
 export const createServerClientWithCookies = createServerClientFull;
+
+// ✅ Νέα καθαρή admin συνάρτηση χωρίς κανένα cookie (μόνο για server χρήση)
+export function createAdminClientNoCookies() {
+  return createServerClient(
+    import.meta.env.PUBLIC_SUPABASE_URL!,
+    import.meta.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      cookies: {
+        get() {
+          return undefined;
+        },
+        set() {},
+        remove() {},
+      },
+    }
+  );
+}
