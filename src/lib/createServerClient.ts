@@ -1,16 +1,26 @@
 import { createServerClient } from '@supabase/ssr';
 import type { AstroCookies } from 'astro';
 
+// 🌍 Φόρτωσε .env μόνο αν λείπει (π.χ. σε build ή dev crash)
+if (!process.env.PUBLIC_SUPABASE_URL || !process.env.PUBLIC_SUPABASE_ANON_KEY) {
+  try {
+    const dotenv = await import('dotenv');
+    dotenv.config();
+    console.log('✅ .env loaded from createServerClient.ts');
+  } catch (err) {
+    console.error('❌ Failed to load dotenv:', err);
+  }
+}
+
 export function createServerClientReadOnly(cookies: AstroCookies) {
   return createServerClient(
-    import.meta.env.PUBLIC_SUPABASE_URL!,
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.PUBLIC_SUPABASE_URL!,
+    process.env.PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         get(name) {
           return cookies.get(name)?.value;
         },
-        // Δεν κάνουμε set/remove για να μην πετάει AstroError
         set() {},
         remove() {},
       },
@@ -20,8 +30,8 @@ export function createServerClientReadOnly(cookies: AstroCookies) {
 
 export function createServerClientFull(cookies: AstroCookies) {
   return createServerClient(
-    import.meta.env.PUBLIC_SUPABASE_URL!,
-    import.meta.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
       cookies: {
         get(name) {
@@ -34,14 +44,12 @@ export function createServerClientFull(cookies: AstroCookies) {
   );
 }
 
-// 🔧 Αντιστοίχιση για όποιον χρησιμοποιεί alias
 export const createServerClientWithCookies = createServerClientFull;
 
-// ✅ Νέα καθαρή admin συνάρτηση χωρίς κανένα cookie (μόνο για server χρήση)
 export function createAdminClientNoCookies() {
   return createServerClient(
-    import.meta.env.PUBLIC_SUPABASE_URL!,
-    import.meta.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
       cookies: {
         get() {

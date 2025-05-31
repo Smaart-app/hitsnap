@@ -1,9 +1,20 @@
 import type { APIRoute } from 'astro';
-import { createAdminClientNoCookies } from '../../lib/createServerClient';
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
 
-console.log('🔐 Loaded service key:', import.meta.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 12)); // 👀 Δες τι key διαβάζεται
+dotenv.config(); // 🔐 Χειροκίνητη φόρτωση .env για server route
 
-const supabase = createAdminClientNoCookies(); // 💥 Καθαρός server client – χωρίς cookies
+// Logging για έλεγχο
+console.log('🔐 Loaded URL:', process.env.PUBLIC_SUPABASE_URL);
+console.log('🔐 Loaded KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 12));
+
+const supabase = createClient(
+  process.env.PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: { persistSession: false },
+  }
+);
 
 export const POST: APIRoute = async ({ request }) => {
   const contentType = request.headers.get('content-type');
@@ -26,53 +37,19 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: 'Missing fields' }), { status: 400 });
   }
 
-  // Supabase insert
   try {
-    const { data: insertResult, error } = await supabase
+    const { data: result, error } = await supabase
       .from('contacts')
-      .insert([{ name, email, message }])
-      .select();
+      .insert([{ name, email, message }]);
 
     if (error) {
       console.error('🔥 Supabase insert error:', error.message);
       throw error;
     }
 
-    console.log('✅ Supabase insert success:', insertResult);
+    console.log('✅ Supabase insert success:', result);
   } catch (err: any) {
     return new Response(JSON.stringify({ error: 'Supabase insert failed' }), { status: 500 });
-  }
-
-  // EmailJS send
-  try {
-    const emailPayload = {
-      service_id: 'service_rmsqduf',
-      template_id: 'template_ewoapex',
-      user_id: 'Tfu4LjZEcoZIh-UtA',
-      template_params: {
-        name,
-        email,
-        message
-      }
-    };
-
-    const emailRes = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(emailPayload),
-    });
-
-    const result = await emailRes.text();
-
-    if (!emailRes.ok) {
-      console.error('⚠️ EmailJS response error:', result);
-      return new Response(JSON.stringify({ error: 'Email sending failed' }), { status: 502 });
-    }
-
-    console.log('✅ EmailJS success:', result);
-  } catch (err) {
-    console.error('❌ EmailJS exception:', err);
-    return new Response(JSON.stringify({ error: 'Unexpected error while sending email' }), { status: 500 });
   }
 
   return new Response(JSON.stringify({ success: true }), { status: 200 });
