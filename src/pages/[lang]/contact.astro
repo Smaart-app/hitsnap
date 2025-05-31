@@ -16,7 +16,6 @@ const isGreek = lang === 'el';
 
 <Layout title={isGreek ? 'Επικοινωνία — Hitlift' : 'Contact — Hitlift'} lang={lang}>
   <div class="relative isolate min-h-[80vh] flex flex-col justify-center items-center text-center px-6 py-32 overflow-hidden bg-[#f4f3f0]">
-
     <h1 class="text-4xl font-bold tracking-tight sm:text-5xl relative z-10">
       {isGreek ? 'Επικοινώνησε μαζί μου' : 'Get in touch'}
     </h1>
@@ -55,7 +54,7 @@ const isGreek = lang === 'el';
       </button>
     </form>
 
-    <p id="response-message" class="mt-4 text-sm text-center"></p>
+    <p id="response-message" class="mt-4 text-sm text-center font-medium hidden"></p>
   </div>
 
   <script is:client>
@@ -63,12 +62,21 @@ const isGreek = lang === 'el';
     const form = document.getElementById('contact-form');
     const responseMsg = document.getElementById('response-message');
 
+    const showMessage = (msg, type = 'neutral') => {
+      responseMsg.textContent = msg;
+      responseMsg.classList.remove('hidden', 'text-red-600', 'text-green-600', 'text-gray-600');
+
+      if (type === 'success') responseMsg.classList.add('text-green-600');
+      else if (type === 'error') responseMsg.classList.add('text-red-600');
+      else responseMsg.classList.add('text-gray-600');
+    };
+
     if (!form) {
       console.error('⚠️ Η φόρμα δεν βρέθηκε στο DOM!');
     } else {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        responseMsg.textContent = '';
+        responseMsg.classList.add('hidden');
 
         const formData = new FormData(form);
         const payload = {
@@ -78,14 +86,18 @@ const isGreek = lang === 'el';
         };
 
         if (!payload.email || !payload.message) {
-          responseMsg.textContent = isGreek
-            ? '⚠️ Το email και το μήνυμα είναι υποχρεωτικά.'
-            : '⚠️ Email and message are required.';
+          showMessage(
+            isGreek
+              ? '⚠️ Το email και το μήνυμα είναι υποχρεωτικά.'
+              : '⚠️ Email and message are required.',
+            'error'
+          );
           return;
         }
 
         try {
-          // Supabase insert
+          showMessage(isGreek ? '📨 Αποστολή...' : '📨 Sending...', 'neutral');
+
           const res = await fetch('/api/contact', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -95,36 +107,44 @@ const isGreek = lang === 'el';
           const data = await res.json();
 
           if (!res.ok) {
-            responseMsg.textContent = isGreek
-              ? `⚠️ Σφάλμα Supabase: ${data.error || 'Αποτυχία αποστολής.'}`
-              : `⚠️ Supabase error: ${data.error || 'Message failed.'}`;
+            showMessage(
+              isGreek
+                ? `⚠️ Σφάλμα Supabase: ${data.error || 'Αποτυχία αποστολής.'}`
+                : `⚠️ Supabase error: ${data.error || 'Message failed.'}`,
+              'error'
+            );
             return;
           }
 
-          // EmailJS send from browser via external script
           try {
             await window.sendEmail(payload);
-            responseMsg.textContent = isGreek
-              ? '📨 Το μήνυμά σου στάλθηκε με επιτυχία!'
-              : '📨 Your message was sent successfully!';
+            showMessage(
+              isGreek
+                ? '✅ Το μήνυμά σου στάλθηκε με επιτυχία!'
+                : '✅ Your message was sent successfully!',
+              'success'
+            );
             form.reset();
           } catch (emailError) {
             console.error('❌ EmailJS error:', emailError);
-            responseMsg.textContent = isGreek
-              ? '⚠️ Το μήνυμα αποθηκεύτηκε αλλά δεν στάλθηκε email.'
-              : '⚠️ Message saved but email not sent.';
+            showMessage(
+              isGreek
+                ? '⚠️ Το μήνυμα αποθηκεύτηκε αλλά δεν στάλθηκε email.'
+                : '⚠️ Message saved but email not sent.',
+              'error'
+            );
           }
 
         } catch (err) {
-          responseMsg.textContent = isGreek
-            ? '⚠️ Πρόβλημα σύνδεσης.'
-            : '⚠️ Connection error.';
+          showMessage(
+            isGreek ? '⚠️ Πρόβλημα σύνδεσης.' : '⚠️ Connection error.',
+            'error'
+          );
           console.error('❌ Σφάλμα:', err);
         }
       });
     }
   </script>
 
-  <!-- 🔗 Εξωτερικό script με window.sendEmail -->
   <script src="/emailClient.js" type="module"></script>
 </Layout>

@@ -1,4 +1,5 @@
-export default function ArticleCard({
+
+export default function ArticleCard({ 
   title,
   excerpt,
   image,
@@ -12,11 +13,12 @@ export default function ArticleCard({
   return (
     <article className="bg-white rounded-2xl sm:rounded-3xl shadow-md hover:shadow-lg transition overflow-hidden w-full max-w-screen-sm sm:max-w-xl mx-auto flex flex-col">
       {image && (
-        <div className="w-full max-h-[180px] sm:max-h-[220px] overflow-hidden">
+        <div className="w-full overflow-hidden">
           <img
             src={image}
             alt={title}
-            className="w-full h-[180px] sm:h-[220px] object-cover object-center"
+            className="w-full object-cover object-center"
+            loading="lazy"
           />
         </div>
       )}
