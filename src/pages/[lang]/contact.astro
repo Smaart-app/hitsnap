@@ -59,8 +59,6 @@ const isGreek = lang === 'el';
   </div>
 
   <script is:client>
-    import emailjs from 'emailjs-com';
-
     const isGreek = window.location.pathname.startsWith('/el');
     const form = document.getElementById('contact-form');
     const responseMsg = document.getElementById('response-message');
@@ -103,15 +101,9 @@ const isGreek = lang === 'el';
             return;
           }
 
-          // EmailJS send from browser
+          // EmailJS send from browser via external script
           try {
-            await emailjs.send(
-              'service_rmsqduf',
-              'template_ewoapex',
-              payload,
-              'Tfu4LjZEcoZIh-UtA'
-            );
-
+            await window.sendEmail(payload);
             responseMsg.textContent = isGreek
               ? '📨 Το μήνυμά σου στάλθηκε με επιτυχία!'
               : '📨 Your message was sent successfully!';
@@ -132,4 +124,7 @@ const isGreek = lang === 'el';
       });
     }
   </script>
+
+  <!-- 🔗 Εξωτερικό script με window.sendEmail -->
+  <script src="/scripts/emailClient.js" type="module"></script>
 </Layout>
