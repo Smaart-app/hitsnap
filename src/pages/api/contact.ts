@@ -6,7 +6,7 @@ export const POST: APIRoute = async ({ request }) => {
   const SUPABASE_KEY = import.meta.env.SUPABASE_SERVICE_ROLE_KEY!;
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-    auth: { persistSession: false }
+    auth: { persistSession: false },
   });
 
   const contentType = request.headers.get('content-type');
@@ -18,37 +18,43 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     data = await request.json();
   } catch (err) {
+    console.error('❌ Invalid JSON:', err);
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
   }
 
   const { name, email, message } = data;
 
   if (!email || !message) {
+    console.warn('⚠️ Missing fields:', { email, message });
     return new Response(JSON.stringify({ error: 'Missing fields' }), { status: 400 });
   }
 
-  // Supabase insert μέσω SDK (παρακάμπτει RLS όταν έχεις service_role key)
+  // Supabase insert
   try {
     const { data: insertResult, error } = await supabase
       .from('contacts')
       .insert([{ name, email, message }])
       .select();
 
-    if (error) throw error;
-    console.log('✅ Supabase SDK insert success:', insertResult);
+    if (error) {
+      console.error('🔥 Supabase insert error:', error.message);
+      throw error;
+    }
+
+    console.log('✅ Supabase insert success:', insertResult);
   } catch (err: any) {
-    console.error('🔥 Supabase SDK error:', err.message);
     return new Response(JSON.stringify({ error: 'Supabase insert failed' }), { status: 500 });
   }
 
-  // EmailJS (όπως πριν)
+  // EmailJS send
   try {
     const emailPayload = {
       service_id: 'service_rmsqduf',
       template_id: 'template_ewoapex',
       user_id: 'Tfu4LjZEcoZIh-UtA',
       template_params: {
-        rating: '5',
+        name,
+        email,
         message
       }
     };
@@ -56,7 +62,7 @@ export const POST: APIRoute = async ({ request }) => {
     const emailRes = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(emailPayload)
+      body: JSON.stringify(emailPayload),
     });
 
     const result = await emailRes.text();
