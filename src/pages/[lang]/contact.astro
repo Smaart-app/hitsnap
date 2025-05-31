@@ -59,6 +59,8 @@ const isGreek = lang === 'el';
   </div>
 
   <script is:client>
+    import emailjs from 'emailjs-com';
+
     const isGreek = window.location.pathname.startsWith('/el');
     const form = document.getElementById('contact-form');
     const responseMsg = document.getElementById('response-message');
@@ -85,6 +87,7 @@ const isGreek = lang === 'el';
         }
 
         try {
+          // Supabase insert
           const res = await fetch('/api/contact', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -92,16 +95,34 @@ const isGreek = lang === 'el';
           });
 
           const data = await res.json();
-          if (res.ok) {
+
+          if (!res.ok) {
+            responseMsg.textContent = isGreek
+              ? `⚠️ Σφάλμα Supabase: ${data.error || 'Αποτυχία αποστολής.'}`
+              : `⚠️ Supabase error: ${data.error || 'Message failed.'}`;
+            return;
+          }
+
+          // EmailJS send from browser
+          try {
+            await emailjs.send(
+              'service_rmsqduf',
+              'template_ewoapex',
+              payload,
+              'Tfu4LjZEcoZIh-UtA'
+            );
+
             responseMsg.textContent = isGreek
               ? '📨 Το μήνυμά σου στάλθηκε με επιτυχία!'
               : '📨 Your message was sent successfully!';
             form.reset();
-          } else {
+          } catch (emailError) {
+            console.error('❌ EmailJS error:', emailError);
             responseMsg.textContent = isGreek
-              ? `⚠️ Σφάλμα: ${data.error || 'Δεν στάλθηκε το μήνυμα.'}`
-              : `⚠️ Error: ${data.error || 'Message not sent.'}`;
+              ? '⚠️ Το μήνυμα αποθηκεύτηκε αλλά δεν στάλθηκε email.'
+              : '⚠️ Message saved but email not sent.';
           }
+
         } catch (err) {
           responseMsg.textContent = isGreek
             ? '⚠️ Πρόβλημα σύνδεσης.'
