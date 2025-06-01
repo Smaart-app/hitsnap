@@ -29,11 +29,23 @@ const { data: articles } = await supabase
 
 const featured = articles?.[0] || null;
 const rest = featured ? articles.slice(1) : [];
+
+const title = "Hitlift — The smart rise in real estate";
+const description = lang === 'el'
+  ? "Τι λείπει από τον τρόπο που αγοράζουμε και επενδύουμε σε ακίνητα; Η Hitlift εξερευνά τις απαντήσεις — άρθρο το άρθρο."
+  : "What’s missing from the way we buy and invest in real estate? Hitlift explores the gaps — one article at a time.";
 ---
 
-<Layout title="Hitlift — The smart rise in real estate" lang={lang}>
-  <section class="bg-[#f4f3f0] pt-12 pb-20 px-4 sm:px-8 relative z-10">
+<Layout title={title} lang={lang}>
+  <head>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/preview-image.png" />
+  </head>
 
+  <section class="bg-[#f4f3f0] pt-12 pb-20 px-4 sm:px-8 relative z-10">
     <!-- Εικόνα -->
     <div class="w-full flex justify-center mb-4 fade-in-up">
       <img 

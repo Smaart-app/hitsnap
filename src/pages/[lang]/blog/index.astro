@@ -1,7 +1,7 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import ArticleCard from '../../../components/ArticleCard.jsx';
-import { createServerClientReadOnly } from '../../../lib/createServerClient'; // χρήση του safe helper
+import { createServerClientReadOnly } from '../../../lib/createServerClient';
 
 export async function getStaticPaths() {
   return [
@@ -13,7 +13,6 @@ export async function getStaticPaths() {
 const { lang } = Astro.params;
 
 const supabase = createServerClientReadOnly(Astro.cookies);
-
 const todayISO = new Date().toISOString();
 
 const { data: articles, error } = await supabase
@@ -32,14 +31,18 @@ function getAltLang(current) {
 
 const pageTitle = lang === 'en' ? 'Articles | Hitlift' : 'Άρθρα | Hitlift';
 const pageDesc = lang === 'en'
-  ? 'Explore the latest articles from Hitlift.'
-  : 'Δες τα τελευταία άρθρα από τη Hitlift.';
+  ? 'Explore the latest articles from Hitlift about real estate, strategy and clarity.'
+  : 'Δες τα τελευταία άρθρα της Hitlift για ακίνητα, στρατηγική και καθαρή σκέψη.';
 ---
 
 <Layout title={pageTitle} lang={lang}>
   <head slot="head">
     <meta charset="UTF-8" />
     <meta name="description" content={pageDesc} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDesc} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/preview-image.png" />
     <title>{pageTitle}</title>
   </head>
 
