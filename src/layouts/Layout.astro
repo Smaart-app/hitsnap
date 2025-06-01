@@ -22,11 +22,12 @@ const { data: { user } } = await supabase.auth.getUser();
   </head>
 
   <body class="bg-[#f4f3f0] text-[#1a1a1a] leading-relaxed relative overflow-x-visible min-h-screen">
-
     <Header lang={lang} user={user} />
 
     <main class="relative z-10">
-      <slot />
+      <div class="container">
+        <slot />
+      </div>
     </main>
 
     <Footer client:load lang={lang} />
