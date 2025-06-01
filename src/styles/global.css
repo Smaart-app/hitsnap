@@ -50,6 +50,24 @@ a {
   animation: fadeInLeft 0.8s ease-out both;
 }
 
+/* ✨ Animation: Float (για παζλάκι κ.ά.) */
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
+
+.animate-float {
+  animation: float 3.2s ease-in-out infinite;
+}
+
+/* ✅ Tailwind safelist fallback (αν purge κόβει custom classes) */
+@layer utilities {
+  .animate-float {
+    animation: float 3.2s ease-in-out infinite;
+  }
+}
+
 /* ✨ Responsive horizontal spacing (container behavior) */
 .container {
   @apply mx-auto px-4; /* κινητά: 1rem δεξιά-αριστερά */
