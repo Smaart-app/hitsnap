@@ -42,12 +42,16 @@ const description = lang === 'el'
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/preview-og.png" />
+    <meta property="og:url" content={`https://hitlift.app/${lang}`} />
+    <meta property="og:image" content="https://hitlift.app/preview-og.png" />
+
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content="https://hitlift.app/preview-og.png" />
   </head>
 
   <section class="bg-[#f4f3f0] pt-12 pb-20 px-4 sm:px-8 relative z-10">
-    <!-- Εικόνα -->
     <div class="w-full flex justify-center mb-4 fade-in-up">
       <img 
         src="/assets/images/houses-sketch.png"
@@ -57,7 +61,6 @@ const description = lang === 'el'
       />
     </div>
 
-    <!-- Τίτλος, Υπότιτλος και Παζλάκι -->
     <div class="w-full text-center mx-auto max-w-[520px] mb-10 px-4 fade-in-up" style="animation-delay: 0.2s;">
       <h1 class="text-[28px] sm:text-[32px] font-bold text-black leading-snug mb-1"
            style="font-family: 'Playfair Display', serif;">
@@ -71,7 +74,6 @@ const description = lang === 'el'
           ? 'Αλλά... αξίζει στ’ αλήθεια;'
           : 'But… does it really pay off?'}
       </p>
-      <!-- 🧩 Παζλάκι -->
       <img 
         src="/assets/images/puzzle-piece-dark.png"
         alt="Το κομμάτι που λείπει"
@@ -79,7 +81,6 @@ const description = lang === 'el'
       />
     </div>
 
-    <!-- Featured -->
     {featured && (
       <div class="flex justify-center mb-12 fade-in-left" style="animation-delay: 0.4s;">
         <div class="bg-white shadow-md rounded-lg p-4 w-full max-w-md">
@@ -94,7 +95,6 @@ const description = lang === 'el'
       </div>
     )}
 
-    <!-- All άρθρα -->
     {rest.length > 0 && (
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 fade-in-up" style="animation-delay: 0.6s;">
         {rest.map((article) => (
