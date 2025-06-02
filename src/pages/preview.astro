@@ -1,0 +1,46 @@
+---
+const title = "Hitlift — The smart rise in real estate";
+const description = "Not just real estate. A better way to choose.";
+const image = "https://hitlift.app/preview-og-final.png";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+
+    <meta name="description" content={description} />
+    <meta name="image" property="og:image" content={image} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://hitlift.app/preview" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+
+    <style>
+      body {
+        margin: 0;
+        padding: 3rem;
+        font-family: sans-serif;
+        background: #f4f3f0;
+        text-align: center;
+        color: #333;
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+        margin-top: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>{title}</h1>
+    <p>{description}</p>
+    <img src={image} alt="Hitlift preview" />
+  </body>
+</html>
