@@ -85,9 +85,13 @@ const markdown = article?.content ?? '';
     <meta name="language" content={lang === 'el' ? 'Greek' : 'English'} />
   </head>
 
-  <section class="max-w-3xl mx-auto py-12 px-4">
+    <section class="max-w-3xl mx-auto py-12 px-4">
     <article class="prose prose-zinc max-w-none">
-      <h1>{article.title}</h1>
+    <h1 class="text-2xl sm:text-3xl font-bold text-black"
+    style="font-family: 'Playfair Display', serif;">
+    {article.title}
+  </h1>
+
 
       {article.publish_date && (
         <p class="text-sm text-zinc-500">
