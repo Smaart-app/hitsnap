@@ -24,16 +24,16 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
 }
 ---
 
-<header class="w-full border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
+<header class="w-full border-b border-zinc-200 bg-[#1a1a1a] text-white shadow-sm">
   <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-4">
     <!-- Λογότυπο -->
     <a href="/" class="text-3xl tracking-tight flex items-center leading-none" style="font-family: 'Lora', serif;">
-      <span class="font-bold text-black dark:text-white">Hit</span>
+      <span class="font-bold text-white">Hit</span>
       <span class="font-normal text-[#50c7c2] ml-1">lift</span>
     </a>
 
     <!-- Κεντρική Πλοήγηση -->
-    <nav class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm sm:text-base font-medium text-zinc-700 dark:text-zinc-300">
+    <nav class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm sm:text-base font-medium text-white/90">
       <a href="/" class={`${isHome ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'} transition`}>
         {isGreek ? 'Αρχική' : 'Home'}
       </a>
@@ -45,8 +45,8 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
       </a>
     </nav>
 
-    <!-- Δεξιά ζώνη: Γλώσσα + θέμα + σύνδεση -->
-    <div class="flex items-center gap-3 text-sm sm:text-base">
+    <!-- Δεξιά ζώνη -->
+    <div class="flex items-center gap-3 text-sm sm:text-base text-white/80">
       {!disableLangSwitch && (
         <a
           href={langSwitchHref}
@@ -58,36 +58,9 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
         </a>
       )}
 
-      <!-- Toggle theme με κομψό εικονίδιο -->
-      <button
-        id="toggle-theme"
-        class="text-zinc-600 dark:text-zinc-300 hover:text-[#50c7c2] transition text-base"
-        title={isGreek ? 'Εναλλαγή θέματος' : 'Toggle theme'}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 3v1m0 16v1m8.66-11.66l-.707.707M4.05 19.95l-.707-.707M21 12h-1M4 12H3m16.95 7.95l-.707-.707M4.05 4.05l-.707.707M12 5a7 7 0 100 14 7 7 0 000-14z"/>
-        </svg>
-      </button>
-
-      <!-- Ενέργειες χρήστη -->
-      {user ? (
-        <>
-          <a href="/dashboard" class={`${isDashboard ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'} transition`}>
-            📋 {isGreek ? 'Πίνακας' : 'Dashboard'}
-          </a>
-          <a href={`${base}/blog/editor`} class={`${isEditor ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'} transition`}>
-            📝 {isGreek ? 'Επεξεργασία' : 'Editor'}
-          </a>
-          <a href="/api/logout" class="text-red-600 hover:underline">
-            🚪 {isGreek ? 'Αποσύνδεση' : 'Logout'}
-          </a>
-        </>
-      ) : (
-        <a href="/login" class="text-[#50c7c2] hover:underline">
-          🔐 {isGreek ? 'Είσοδος' : 'Login'}
-        </a>
-      )}
+      <a href="/login" class="text-[#50c7c2] hover:underline">
+        🔐 {isGreek ? 'Είσοδος' : 'Login'}
+      </a>
     </div>
   </div>
 </header>

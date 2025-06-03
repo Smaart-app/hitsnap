@@ -14,7 +14,6 @@ const supabase = createServerClient(
   { cookies: Astro.cookies }
 );
 
-// 🔍 Φέρνουμε το άρθρο στην τρέχουσα γλώσσα
 const { data: articles } = await supabase
   .from('articles')
   .select('*')
@@ -24,7 +23,6 @@ const { data: articles } = await supabase
 
 let article = articles?.[0];
 
-// 🔁 Αν δεν βρέθηκε, ψάξε μήπως υπάρχει σε άλλη γλώσσα και κάνε redirect
 if (!article) {
   const altLang = lang === 'el' ? 'en' : 'el';
 
@@ -42,7 +40,6 @@ if (!article) {
     return Astro.redirect(`/${altLang}/blog/${alt.slug}`, 302);
   }
 
-  // ✅ Αν ούτε το alt υπάρχει, γύρνα στο /blog για τη γλώσσα
   return Astro.redirect(`/${lang}/blog`, 302);
 }
 
@@ -89,7 +86,7 @@ const markdown = article?.content ?? '';
   </head>
 
   <section class="max-w-3xl mx-auto py-12 px-4">
-    <article class="prose prose-zinc dark:prose-invert max-w-none">
+    <article class="prose prose-zinc max-w-none">
       <h1>{article.title}</h1>
 
       {article.publish_date && (

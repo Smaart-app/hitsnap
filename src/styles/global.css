@@ -27,10 +27,6 @@ a {
   @apply text-blue-600 dark:text-blue-300 underline;
 }
 
-.dark .prose {
-  @apply text-gray-300;
-}
-
 /* ✨ Animations */
 
 /* Fade In Up */
