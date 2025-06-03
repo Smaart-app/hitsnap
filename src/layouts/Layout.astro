@@ -19,24 +19,10 @@ const { data: { user } } = await supabase.auth.getUser();
     <title>{title}</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
-
-    <!-- Prevent theme flash -->
-    <script>
-      (function () {
-        try {
-          const theme = localStorage.getItem('theme');
-          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          if (theme === 'dark' || (!theme && prefersDark)) {
-            document.documentElement.classList.add('dark');
-          }
-        } catch (_) {}
-      })();
-    </script>
-
     <slot name="head" />
   </head>
 
-  <body class="bg-[#f4f3f0] text-[#1a1a1a] leading-relaxed relative overflow-x-visible min-h-screen transition-colors duration-300 ease-in-out">
+  <body class="bg-[#f4f3f0] text-[#1a1a1a] leading-relaxed relative overflow-x-visible min-h-screen">
     <Header lang={lang} user={user} />
 
     <main class="relative z-10">
@@ -47,7 +33,6 @@ const { data: { user } } = await supabase.auth.getUser();
 
     <Footer client:load lang={lang} />
 
-    <!-- Functional theme toggle -->
     <script is:client>
       const html = document.documentElement;
 

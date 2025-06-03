@@ -84,11 +84,11 @@ const image = "https://hitlift.app/preview-og-final.png?v=2";
 
     {featured && (
       <div class="flex justify-center mb-12 fade-in-left" style="animation-delay: 0.4s;">
-        <div class="bg-white shadow-md rounded-lg p-4 w-full max-w-md transition">
+        <div class="bg-white shadow-md rounded-lg p-4 w-full max-w-md">
           <a href={`/${lang}/blog/${featured.slug}`} class="block hover:underline">
             <h2 class="text-lg font-bold text-gray-900 mb-1 leading-tight">{featured.title}</h2>
             <p class="text-sm text-gray-600 mb-2">{featured.excerpt?.split('.')[0] + '...'}</p>
-            <span class="text-sm text-[#50c7c2] font-semibold">
+            <span class="text-sm text-primary font-semibold">
               {lang === 'el' ? 'Δες περισσότερα →' : 'Read more →'}
             </span>
           </a>
@@ -99,7 +99,7 @@ const image = "https://hitlift.app/preview-og-final.png?v=2";
     {rest.length > 0 && (
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 fade-in-up" style="animation-delay: 0.6s;">
         {rest.map((article) => (
-          <div class="bg-white rounded-md shadow-sm p-3 transition">
+          <div class="bg-white rounded-md shadow-sm p-3">
             <a href={`/${lang}/blog/${article.slug}`} class="block hover:underline">
               <h3 class="text-sm font-semibold text-gray-900 mb-1">{article.title}</h3>
               <p class="text-sm text-gray-600 mb-2">{article.excerpt?.split('.')[0] + '...'}</p>
@@ -112,7 +112,7 @@ const image = "https://hitlift.app/preview-og-final.png?v=2";
       </div>
     )}
 
-    {Array.isArray(articles) && articles.length === 0 && (
+    {articles.length === 0 && (
       <section class="text-center py-16 text-gray-500 bg-[#f4f3f0]">
         {lang === 'el'
           ? 'Δεν υπάρχουν ακόμη άρθρα σε αυτή τη γλώσσα.'

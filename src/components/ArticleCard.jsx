@@ -1,4 +1,4 @@
-export default function ArticleCard({
+export default function ArticleCard({  
   title,
   excerpt,
   image,
@@ -10,7 +10,7 @@ export default function ArticleCard({
   const altLangText = lang === 'en' ? 'View in Greek →' : 'Δες και στα Αγγλικά →';
 
   return (
-    <article className="bg-white dark:bg-zinc-900 rounded-2xl sm:rounded-3xl shadow-md hover:shadow-lg transition overflow-hidden w-full max-w-screen-sm sm:max-w-xl mx-auto flex flex-col">
+    <article className="bg-white rounded-2xl sm:rounded-3xl shadow-md hover:shadow-lg transition overflow-hidden w-full max-w-screen-sm sm:max-w-xl mx-auto flex flex-col">
       {image && (
         <div className="w-full overflow-hidden">
           <img
@@ -24,10 +24,10 @@ export default function ArticleCard({
 
       <div className="flex flex-col justify-between gap-4 p-6 sm:p-8">
         <div>
-          <h2 className="text-lg sm:text-xl font-semibold mb-2 text-zinc-800 dark:text-zinc-100">
+          <h2 className="text-lg sm:text-xl font-semibold mb-2 text-zinc-800">
             {title}
           </h2>
-          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-300 line-clamp-4 leading-relaxed">
+          <p className="text-sm sm:text-base text-zinc-600 line-clamp-4 leading-relaxed">
             {excerpt}
           </p>
         </div>
@@ -42,7 +42,7 @@ export default function ArticleCard({
           {altHref && (
             <a
               href={altHref}
-              className="text-zinc-500 hover:text-[#50c7c2] transition dark:text-zinc-400 dark:hover:text-[#50c7c2]"
+              className="text-zinc-500 hover:text-[#50c7c2] transition"
             >
               {altLangText}
             </a>
