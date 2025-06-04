@@ -30,26 +30,26 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
   <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-3">
     
     <!-- Λογότυπο -->
-    <a href="/" class="text-3xl tracking-tight leading-none text-center sm:text-left" style="font-family: 'Lora', serif;">
+    <a href="/" class="text-3xl tracking-tight leading-none text-center sm:text-left whitespace-nowrap" style="font-family: 'Lora', serif;">
       <span class="text-black dark:text-white">Hit</span><span class="text-[#50c7c2]">lift</span>
     </a>
 
     <!-- Πλοήγηση + Δεξιά Ζώνη -->
-    <div class="flex flex-wrap sm:flex-nowrap justify-center sm:justify-end items-center gap-1 sm:gap-3 text-xs sm:text-base text-black/80 dark:text-white/80 overflow-x-auto">
-      <a href="/" class={`px-1 py-0.5 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isHome ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>
+    <div class="flex flex-wrap sm:flex-nowrap justify-center sm:justify-end items-center gap-1 sm:gap-3 text-xs sm:text-base text-black/80 dark:text-white/80 overflow-x-auto min-w-0 w-full sm:w-auto">
+      <a href="/" class={`px-1 py-0.5 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 whitespace-nowrap ${isHome ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>
         {isGreek ? 'Αρχική' : 'Home'}
       </a>
-      <a href={`${base}/blog`} class={`px-1 py-0.5 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>
+      <a href={`${base}/blog`} class={`px-1 py-0.5 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 whitespace-nowrap ${isArticles ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>
         {isGreek ? 'Άρθρα' : 'Articles'}
       </a>
-      <a href={`${base}/contact`} class={`px-1 py-0.5 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>
+      <a href={`${base}/contact`} class={`px-1 py-0.5 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 whitespace-nowrap ${isContact ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>
         {isGreek ? 'Επικοινωνία' : 'Contact'}
       </a>
 
       {!disableLangSwitch && (
         <a
           href={langSwitchHref}
-          class="px-1 py-0.5 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition hover:text-[#50c7c2]"
+          class="px-1 py-0.5 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition hover:text-[#50c7c2] whitespace-nowrap"
           target="_self"
           data-force-reload
         >
@@ -59,7 +59,7 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
 
       <ThemeButton client:only="react" />
 
-      <a href="/login" class="px-1 py-0.5 rounded-sm text-[#50c7c2] hover:underline transition hover:bg-zinc-100 dark:hover:bg-zinc-800">
+      <a href="/login" class="ml-auto px-1 py-0.5 rounded-sm text-[#50c7c2] hover:underline transition hover:bg-zinc-100 dark:hover:bg-zinc-800 whitespace-nowrap">
         🔐 {isGreek ? 'Είσοδος' : 'Login'}
       </a>
     </div>
