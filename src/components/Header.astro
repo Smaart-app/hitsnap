@@ -35,7 +35,7 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
     </a>
 
     <!-- Πλοήγηση + Δεξιά Ζώνη -->
-    <div class="flex flex-wrap sm:flex-nowrap justify-center sm:justify-end items-center gap-1 sm:gap-3 text-xs sm:text-base text-black/80 dark:text-white/80 overflow-x-auto min-w-0 w-full sm:w-auto">
+    <div class="flex flex-wrap sm:flex-nowrap justify-center sm:justify-end items-center gap-1 sm:gap-3 text-xs sm:text-base text-black/80 dark:text-white/80 overflow-x-auto scroll-mx-2 w-full sm:w-auto">
       <a href="/" class={`px-1 py-0.5 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 whitespace-nowrap ${isHome ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>
         {isGreek ? 'Αρχική' : 'Home'}
       </a>
