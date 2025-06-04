@@ -1,30 +1,21 @@
 ---
 ---
-
-// Theme toggle button – minimal & safe
-<button
-  id="toggle-theme"
-  class="text-base hover:scale-110 transition"
-  aria-label="Toggle theme"
->
+<button id="toggle-theme" class="text-base hover:scale-110 transition" aria-label="Toggle theme">
   🌓
 </button>
 
 <script is:client>
   const html = document.documentElement;
 
-  // Apply saved theme or system preference on load
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const savedTheme = localStorage.getItem('theme');
-
-  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+  if (
+    localStorage.getItem('theme') === 'dark' ||
+    (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  ) {
     html.classList.add('dark');
   }
 
-  // Toggle theme on click
   document.getElementById('toggle-theme')?.addEventListener('click', () => {
     html.classList.toggle('dark');
-    const newTheme = html.classList.contains('dark') ? 'dark' : 'light';
-    localStorage.setItem('theme', newTheme);
+    localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
   });
 </script>
