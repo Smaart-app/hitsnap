@@ -1,5 +1,5 @@
 ---
-import ThemeToggle from './ThemeSwitch.astro'; // ✅ Διορθώθηκε το import
+import ThemeButton from './ThemeButton.astro';
 
 const user = Astro.props?.user || null;
 const lang = Astro.props?.lang || 'el';
@@ -57,7 +57,7 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
         </a>
       )}
 
-      <ThemeToggle client:load />
+      <ThemeButton client:load />
 
       <a href="/login" class="px-1 py-0.5 rounded-sm text-[#50c7c2] hover:underline transition hover:bg-zinc-100 dark:hover:bg-zinc-800">
         🔐 {isGreek ? 'Είσοδος' : 'Login'}
