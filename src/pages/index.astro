@@ -1,24 +1,22 @@
 ---
-export const prerender = false;
-
-const acceptLang = Astro.request.headers.get('accept-language') || '';
-const isGreek =
-  acceptLang.toLowerCase().startsWith('el') ||
-  acceptLang.toLowerCase().includes('el-gr');
-
+const langFromStorage = "navigator" in globalThis ? (navigator.language || '').toLowerCase() : '';
+const isGreek = langFromStorage.startsWith('el') || langFromStorage.includes('el-gr');
 const lang = isGreek ? 'el' : 'en';
-
-try {
-  return Astro.redirect(`/${lang}`);
-} catch (err) {
-  // fallback if redirect fails
-}
 ---
 
 <html lang={lang}>
   <head>
     <title>Redirecting...</title>
-    <meta http-equiv="refresh" content="0; url=/${lang}" />
+    <meta http-equiv="refresh" content={`0; url=/${lang}`} />
+    <script>
+      // Extra safety for browsers that don't follow meta refresh
+      const lang = (navigator.language || '').toLowerCase();
+      if (lang.startsWith('el') || lang.includes('el-gr')) {
+        window.location.href = '/el';
+      } else {
+        window.location.href = '/en';
+      }
+    </script>
   </head>
   <body style="background:#f4f3f0;text-align:center;padding:4rem;font-family:sans-serif">
     <h1>🔁 Redirecting to your preferred language...</h1>
