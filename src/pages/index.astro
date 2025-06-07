@@ -1,9 +1,13 @@
 ---
-export const prerender = false;
-
-const langFromHeader = Astro.request.headers.get('accept-language') || '';
-const isGreek = langFromHeader.toLowerCase().startsWith('el') || langFromHeader.toLowerCase().includes('el-gr');
-const lang = isGreek ? 'el' : 'en';
-
-return Astro.redirect(`/${lang}`);
+export const prerender = true;
+const defaultLang = 'el';
 ---
+
+<html>
+  <head>
+    <meta http-equiv="refresh" content={`0; url=/${defaultLang}`} />
+  </head>
+  <body>
+    <p>Redirecting to /{defaultLang}...</p>
+  </body>
+</html>
