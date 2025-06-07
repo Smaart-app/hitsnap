@@ -1,0 +1,5 @@
+{
+  "redirects": [
+    { "source": "/", "destination": "/el/blog", "permanent": true }
+  ]
+}
