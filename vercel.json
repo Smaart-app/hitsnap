@@ -1,5 +1,5 @@
 {
   "redirects": [
-    { "source": "/", "destination": "/el/blog", "permanent": true }
+    { "source": "/", "destination": "/el", "permanent": true }
   ]
 }
