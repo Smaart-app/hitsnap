@@ -25,13 +25,22 @@ let emailAttempted = '';
 
       <div>
         <label class="block font-semibold mb-1">Password</label>
-        <input
-          type="password"
-          name="password"
-          class="w-full p-2 border rounded"
-          placeholder="••••••••••"
-          required
-        />
+        <div class="relative">
+          <input
+            id="passwordInput"
+            type="password"
+            name="password"
+            class="w-full p-2 border rounded pr-10"
+            placeholder="••••••••••"
+            required
+          />
+          <button
+            type="button"
+            id="togglePassword"
+            class="absolute inset-y-0 right-0 px-3 text-sm text-gray-600"
+            tabindex="-1"
+          >👁</button>
+        </div>
       </div>
 
       <button
@@ -46,6 +55,14 @@ let emailAttempted = '';
   <script type="module">
     const form = document.getElementById('loginForm');
     const errorBox = document.getElementById('errorBox');
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('passwordInput');
+
+    toggleBtn.addEventListener('click', () => {
+      const type = passwordInput.type === 'password' ? 'text' : 'password';
+      passwordInput.type = type;
+      toggleBtn.textContent = type === 'password' ? '👁' : '🙈';
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();

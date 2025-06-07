@@ -1,20 +1,11 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { createServerClientReadOnly } from '../../lib/createServerClient';
+
+const { user } = Astro.props;
 
 const lang = Astro.params.lang || 'el';
 const isGreek = lang === 'el';
 const today = new Date().toISOString().split('T')[0];
-
-const supabase = createServerClientReadOnly(Astro.cookies);
-
-const {
-  data: { user }
-} = await supabase.auth.getUser();
-
-if (!user) {
-  return Astro.redirect('/login');
-}
 ---
 
 <Layout title={isGreek ? 'Δημιουργία Άρθρου | Hitlift' : 'Create Article | Hitlift'} lang={lang} user={user}>
@@ -104,7 +95,6 @@ if (!user) {
     </div>
   </main>
 
-  <!-- AUTOSAVE + PREVIEW SCRIPT -->
   <script type="module">
     import { marked } from 'marked';
 
