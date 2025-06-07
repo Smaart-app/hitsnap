@@ -8,31 +8,18 @@ const isGreek =
 
 const lang = isGreek ? 'el' : 'en';
 
-const title = "Hitlift — The smart rise in real estate";
-const description = "What’s missing from the way we buy and invest in real estate? Hitlift explores the gaps — one article at a time.";
-const image = "https://hitlift.app/preview-og-final.png?v=2";
+try {
+  return Astro.redirect(`/${lang}`);
+} catch (err) {
+  // fallback if redirect fails
+}
 ---
 
 <html lang={lang}>
   <head>
-    <title>{title}</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={description} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://hitlift.app" />
-    <meta property="og:image" content={image} />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={image} />
-
-    <!-- Browser redirect -->
+    <title>Redirecting...</title>
     <meta http-equiv="refresh" content={`0; url=/${lang}`} />
   </head>
-
   <body style="background:#f4f3f0;text-align:center;padding:4rem;font-family:sans-serif">
     <h1>🔁 Redirecting to your preferred language...</h1>
     <p>If you are not redirected, <a href={`/${lang}`}>click here</a>.</p>
