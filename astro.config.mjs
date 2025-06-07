@@ -2,11 +2,11 @@ import { defineConfig } from "astro/config";
 import tailwind from "@astrojs/tailwind";
 import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
-import netlify from "@astrojs/netlify";
+import vercel from "@astrojs/vercel"; // 👉 άλλαξε από netlify σε vercel
 
 export default defineConfig({
-  output: "server", // 🔧 Χρειάζεται για να επιτραπεί POST /api/contact
-  adapter: netlify(), // ✅ Συμβατό με Netlify serverless functions
+  output: "server", // 🔧 Παραμένει γιατί χρειάζεσαι API routes
+  adapter: vercel(), // ✅ Αυτό χρειάζεται για να λειτουργεί στο Vercel
   integrations: [tailwind(), mdx(), react()],
   vite: {
     define: {
