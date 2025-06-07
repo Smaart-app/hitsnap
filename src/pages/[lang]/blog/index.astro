@@ -15,13 +15,26 @@ const { lang } = Astro.params;
 const supabase = createServerClientReadOnly(Astro.cookies);
 const todayISO = new Date().toISOString();
 
-const { data: articles, error } = await supabase
-  .from('articles')
-  .select('*')
-  .eq('lang', lang)
-  .eq('published', true)
-  .lte('publish_date', todayISO)
-  .order('publish_date', { ascending: false });
+let articles = [];
+try {
+  const { data, error } = await supabase
+    .from('articles')
+    .select('*')
+    .eq('lang', lang)
+    .eq('published', true)
+    .lte('publish_date', todayISO)
+    .order('publish_date', { ascending: false });
+
+  if (error) {
+    console.warn(`Supabase error for lang=${lang}:`, error);
+  } else if (!data || data.length === 0) {
+    console.info(`No articles found for lang=${lang}`);
+  } else {
+    articles = data;
+  }
+} catch (e) {
+  console.error('Failed to fetch articles:', e);
+}
 
 function getAltLang(current) {
   if (current === 'el') return 'en';
@@ -51,7 +64,7 @@ const pageDesc = lang === 'en'
       {lang === 'en' ? 'Articles' : 'Άρθρα'}
     </h1>
 
-    {articles && articles.length > 0 ? (
+    {articles.length > 0 ? (
       <section class="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {articles.map((article) => {
           const altLang = getAltLang(lang);
