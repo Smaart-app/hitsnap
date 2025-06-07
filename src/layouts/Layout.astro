@@ -7,6 +7,7 @@ const lang = Astro.props?.lang || 'el';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.jsx';
 import { createServerClientReadOnly } from '../lib/createServerClient';
+import { Analytics } from '@vercel/analytics/react'; // ✅ Προσθήκη
 
 const supabase = createServerClientReadOnly(Astro.cookies);
 const { data: { user } } = await supabase.auth.getUser();
@@ -41,6 +42,8 @@ const { data: { user } } = await supabase.auth.getUser();
     </main>
 
     <Footer client:load lang={lang} />
+
+    <Analytics /> <!-- ✅ Εδώ μπαίνει -->
 
     <script is:client>
       const html = document.documentElement;
