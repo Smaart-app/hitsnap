@@ -1,13 +1,7 @@
 ---
 export const prerender = true;
-const defaultLang = 'el';
----
 
-<html>
-  <head>
-    <meta http-equiv="refresh" content={`0; url=/${defaultLang}`} />
-  </head>
-  <body>
-    <p>Redirecting to /{defaultLang}...</p>
-  </body>
-</html>
+export function GET() {
+  return Astro.redirect('/el', 302);
+}
+---
