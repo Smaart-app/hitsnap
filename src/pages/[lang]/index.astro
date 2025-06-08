@@ -14,8 +14,8 @@ export async function getStaticPaths() {
 const { lang } = Astro.params;
 const supportedLangs = ['el', 'en'];
 
-if (!supportedLangs.includes(lang)) {
-  throw new Error(`Unsupported language: ${lang}`);
+if (!lang || !supportedLangs.includes(lang)) {
+  return Astro.redirect('/el', 302);
 }
 
 const supabase = createServerClientReadOnly(Astro.cookies);
