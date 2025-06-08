@@ -1,7 +1,16 @@
 ---
 export const prerender = true;
-
-export function GET() {
-  return Astro.redirect('/el', 302);
-}
 ---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hitlift is live</title>
+  </head>
+  <body style="font-family:sans-serif; text-align:center; padding: 5rem;">
+    <h1>✅ The site is working!</h1>
+    <p>This page confirms that the root route <code>/</code> is rendering correctly.</p>
+    <p><a href="/el">Go to Greek version →</a></p>
+    <p><a href="/en">Go to English version →</a></p>
+  </body>
+</html>
