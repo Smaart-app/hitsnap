@@ -5,9 +5,8 @@ const title = Astro.props?.title || 'Hitlift';
 const lang = Astro.props?.lang || 'el';
 
 import Header from '../components/Header.astro';
-import Footer from '../components/Footer.jsx';
+import Footer from '../components/Footer.astro';
 import { createServerClientReadOnly } from '../lib/createServerClient';
-import { Analytics } from '@vercel/analytics/react'; // ✅ Προσθήκη
 
 const supabase = createServerClientReadOnly(Astro.cookies);
 const { data: { user } } = await supabase.auth.getUser();
@@ -41,9 +40,7 @@ const { data: { user } } = await supabase.auth.getUser();
       </div>
     </main>
 
-    <Footer client:load lang={lang} />
-
-    <Analytics /> <!-- ✅ Εδώ μπαίνει -->
+    <Footer lang={lang} />
 
     <script is:client>
       const html = document.documentElement;

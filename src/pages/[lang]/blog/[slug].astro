@@ -5,8 +5,8 @@ import Layout from '../../../layouts/Layout.astro';
 import Markdown from '../../../components/Markdown.astro';
 import { createServerClient } from '@supabase/ssr';
 
-export const client = 'load';
 export const prerender = false;
+export const client = 'load';
 
 const { slug, lang } = Astro.params;
 

@@ -1,4 +1,4 @@
-export default function ArticleCard({  
+export default function ArticleCard({
   title,
   excerpt,
   image,
@@ -36,6 +36,8 @@ export default function ArticleCard({
           <a
             href={href}
             className="text-[#50c7c2] font-semibold hover:underline"
+            rel="prefetch"
+            target="_self"
           >
             {readMoreText}
           </a>
@@ -43,6 +45,8 @@ export default function ArticleCard({
             <a
               href={altHref}
               className="text-zinc-500 hover:text-[#50c7c2] transition"
+              rel="prefetch"
+              target="_self"
             >
               {altLangText}
             </a>
