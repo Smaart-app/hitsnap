@@ -24,7 +24,7 @@ const articles = [
         : 'My journey in real estate started with interior design and evolved through technology.',
     cover_image:
       'https://ighqljuycyjfwgysmaaa.supabase.co/storage/v1/object/public/01-toixoi-kai-pixels/01-toixoi-kai-pixels.png',
-    slug: 'toixoi-kai-pixels',
+    slug: lang === 'el' ? 'toixoi-kai-pixels-el' : 'toixoi-kai-pixels-en',
   },
 ];
 
@@ -60,16 +60,15 @@ const pageDesc =
         const altLang = getAltLang(lang);
 
         return (
-          <div class="space-y-2">
-            <ArticleCard
-              title={article.title}
-              excerpt={article.excerpt}
-              image={article.cover_image}
-              href={`/${lang}/blog/${article.slug}`}
-              lang={lang}
-              altHref={`/${altLang}/blog/${article.slug}`}
-            />
-          </div>
+          <ArticleCard
+            client:load
+            title={article.title}
+            excerpt={article.excerpt}
+            image={article.cover_image}
+            href={`/${lang}/blog/${article.slug}`}
+            lang={lang}
+            altHref={`/${altLang}/blog/${article.slug}`}
+          />
         );
       })}
     </section>

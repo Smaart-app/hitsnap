@@ -5,12 +5,16 @@ export const prerender = true;
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Hitlift Local Dev</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redirecting...</title>
+    <meta http-equiv="refresh" content="0; url=/en" />
+    <script>
+      // Optional: redirect to preferred language
+      const userLang = navigator.language?.startsWith('el') ? 'el' : 'en';
+      window.location.href = `/${userLang}`;
+    </script>
   </head>
-  <body style="font-family:sans-serif; text-align:center; padding: 5rem;">
-    <h1>🧪 Local development mode</h1>
-    <p>This is the default root page in development.</p>
-    <p><a href="/en">Go to English version →</a></p>
-    <p><a href="/el">Go to Greek version →</a></p>
+  <body style="font-family: sans-serif; text-align: center; padding: 5rem;">
+    <p>Redirecting...</p>
   </body>
 </html>

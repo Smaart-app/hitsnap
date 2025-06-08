@@ -9,6 +9,10 @@ export default function ArticleCard({
   const readMoreText = lang === 'en' ? 'Read more →' : 'Διαβάστε περισσότερα →';
   const altLangText = lang === 'en' ? 'View in Greek →' : 'Δες και στα Αγγλικά →';
 
+  const goTo = (url) => {
+    window.location.href = url;
+  };
+
   return (
     <article className="bg-white rounded-2xl sm:rounded-3xl shadow-md hover:shadow-lg transition overflow-hidden w-full max-w-screen-sm sm:max-w-xl mx-auto flex flex-col">
       {image && (
@@ -33,23 +37,20 @@ export default function ArticleCard({
         </div>
 
         <div className="mt-2 flex flex-col gap-1 text-sm text-center sm:text-left">
-          <a
-            href={href}
-            className="text-[#50c7c2] font-semibold hover:underline"
-            rel="prefetch"
-            target="_self"
+          <button
+            onClick={() => goTo(href)}
+            className="text-[#50c7c2] font-semibold hover:underline text-left"
           >
             {readMoreText}
-          </a>
+          </button>
+
           {altHref && (
-            <a
-              href={altHref}
-              className="text-zinc-500 hover:text-[#50c7c2] transition"
-              rel="prefetch"
-              target="_self"
+            <button
+              onClick={() => goTo(altHref)}
+              className="text-zinc-500 hover:text-[#50c7c2] transition text-left"
             >
               {altLangText}
-            </a>
+            </button>
           )}
         </div>
       </div>
