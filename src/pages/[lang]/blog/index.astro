@@ -14,11 +14,17 @@ const { lang } = Astro.params;
 const articles = [
   {
     id: 1,
-    title: lang === 'el' ? 'Δοκιμαστικό άρθρο' : 'Test article',
-    excerpt: 'Αυτό είναι ένα άρθρο mock για δοκιμή.',
+    title:
+      lang === 'el'
+        ? 'Ανάμεσα σε τοίχους και pixels'
+        : 'Between Walls and Pixels',
+    excerpt:
+      lang === 'el'
+        ? 'Ένα προσωπικό ξεκίνημα από το interior design έως την ψηφιακή καινοτομία'
+        : 'My journey in real estate started with interior design and evolved through technology.',
     cover_image:
       'https://ighqljuycyjfwgysmaaa.supabase.co/storage/v1/object/public/01-toixoi-kai-pixels/01-toixoi-kai-pixels.png',
-    slug: `demo-${lang}`,
+    slug: 'toixoi-kai-pixels',
   },
 ];
 
@@ -52,7 +58,6 @@ const pageDesc =
     <section class="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {articles.map((article) => {
         const altLang = getAltLang(lang);
-        const translatedSlug = article.slug.replace(`-${lang}`, `-${altLang}`);
 
         return (
           <div class="space-y-2">
@@ -62,7 +67,7 @@ const pageDesc =
               image={article.cover_image}
               href={`/${lang}/blog/${article.slug}`}
               lang={lang}
-              altHref={`/${altLang}/blog/${translatedSlug}`}
+              altHref={`/${altLang}/blog/${article.slug}`}
             />
           </div>
         );
