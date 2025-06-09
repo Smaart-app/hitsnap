@@ -130,10 +130,5 @@ const markdown = article?.content ?? '';
         ← {lang === 'el' ? 'Επιστροφή στα άρθρα' : 'Back to blog'}
       </a>
     </div>
-
-    <details class="mt-8 bg-zinc-100 text-xs p-4 rounded shadow text-black">
-      <summary class="cursor-pointer">🛠 View raw article data</summary>
-      <pre class="overflow-auto whitespace-pre-wrap">{JSON.stringify(article, null, 2)}</pre>
-    </details>
   </section>
 </Layout>
