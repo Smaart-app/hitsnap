@@ -4,3 +4,9 @@
 
 [functions]
   directory = ".netlify/functions"
+
+[[redirects]]
+  from = "http://*"
+  to = "https://hitlift.app/:splat"
+  status = 301
+  force = true
