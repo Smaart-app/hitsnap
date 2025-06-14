@@ -1,9 +1,8 @@
-import type { APIRoute, APIContext } from 'astro';
+import type { APIRoute, APIContext } from 'astro'; 
 import { createServerClientWithCookies } from '../../lib/createServerClient';
 
 export const POST: APIRoute = async (context: APIContext) => {
   const { request, cookies } = context;
-
   const supabase = createServerClientWithCookies(cookies);
 
   const {
@@ -32,6 +31,8 @@ export const POST: APIRoute = async (context: APIContext) => {
     return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
   }
 
+  const publish_datetime = publish_date ? new Date(publish_date) : null;
+
   const { data: existing, error: fetchError } = await supabase
     .from('articles')
     .select('id')
@@ -53,7 +54,7 @@ export const POST: APIRoute = async (context: APIContext) => {
         content,
         excerpt,
         published,
-        publish_date,
+        publish_date: publish_datetime,
         cover_image,
         translation_of
       })
@@ -70,7 +71,7 @@ export const POST: APIRoute = async (context: APIContext) => {
       excerpt,
       lang,
       published,
-      publish_date,
+      publish_date: publish_datetime,
       cover_image,
       translation_of
     });
