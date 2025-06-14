@@ -1,6 +1,7 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import ArticleCard from '../../../components/ArticleCard.jsx';
+import { createServerClient } from '@supabase/ssr';
 
 export async function getStaticPaths() {
   return [
@@ -11,26 +12,23 @@ export async function getStaticPaths() {
 
 const { lang } = Astro.params;
 
-const articles = [
+const supabase = createServerClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
   {
-    id: 1,
-    title:
-      lang === 'el'
-        ? 'Ανάμεσα σε τοίχους και pixels'
-        : 'Between Walls and Pixels',
-    excerpt:
-      lang === 'el'
-        ? 'Ένα προσωπικό ξεκίνημα από το interior design έως την ψηφιακή καινοτομία'
-        : 'My journey in real estate started with interior design and evolved through technology.',
-    cover_image:
-      'https://ighqljuycyjfwgysmaaa.supabase.co/storage/v1/object/public/01-toixoi-kai-pixels/01-toixoi-kai-pixels.png',
-    slug: lang === 'el' ? 'toixoi-kai-pixels-el' : 'toixoi-kai-pixels-en',
-  },
-];
+    cookies: Astro.cookies,
+  }
+);
 
-function getAltLang(current) {
-  return current === 'el' ? 'en' : 'el';
-}
+const now = new Date().toISOString();
+
+const { data: articles, error } = await supabase
+  .from('articles')
+  .select('*')
+  .eq('lang', lang)
+  .eq('published', true)
+  .lte('publish_date', now)
+  .order('publish_date', { ascending: false });
 
 const pageTitle = lang === 'en' ? 'Articles | Hitlift' : 'Άρθρα | Hitlift';
 const pageDesc =
@@ -55,11 +53,13 @@ const pageDesc =
       {lang === 'en' ? 'Articles' : 'Άρθρα'}
     </h1>
 
-    <section class="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-      {articles.map((article) => {
-        const altLang = getAltLang(lang);
-
-        return (
+    {articles?.length === 0 ? (
+      <p class="text-center text-zinc-500">
+        {lang === 'en' ? 'No articles found.' : 'Δεν υπάρχουν άρθρα προς εμφάνιση.'}
+      </p>
+    ) : (
+      <section class="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {articles.map((article) => (
           <ArticleCard
             client:load
             title={article.title}
@@ -67,10 +67,10 @@ const pageDesc =
             image={article.cover_image}
             href={`/${lang}/blog/${article.slug}`}
             lang={lang}
-            altHref={`/${altLang}/blog/${article.slug}`}
+            altHref={`/${lang === 'el' ? 'en' : 'el'}/blog/${article.slug}`}
           />
-        );
-      })}
-    </section>
+        ))}
+      </section>
+    )}
   </main>
 </Layout>

@@ -1,0 +1,60 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Markdown from '../../../components/Markdown.astro';
+import { createServerClient } from '@supabase/ssr';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+const supabase = createServerClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+  {
+    cookies: Astro.cookies,
+  }
+);
+
+const { data: articles, error } = await supabase
+  .from('articles')
+  .select('*')
+  .eq('slug', slug)
+  .limit(1);
+
+const article = articles?.[0];
+
+function getStatus(article) {
+  if (!article?.published) return 'draft';
+  if (new Date(article.publish_date) > new Date()) return 'scheduled';
+  return 'published';
+}
+---
+
+<Layout title={article?.title || 'Preview'}>
+  <main class="max-w-3xl mx-auto px-4 py-16">
+    {article ? (
+      <>
+        <h1 class="text-3xl font-bold mb-4">{article.title}</h1>
+        <p class="text-zinc-500 text-sm mb-3">
+          🗓️ {new Date(article.publish_date).toLocaleString('el-GR')} | 🏷️ {article.lang?.toUpperCase()}
+        </p>
+        <p class="text-sm font-semibold mb-6">
+          📌 Κατάσταση: {' '}
+          {getStatus(article) === 'draft' && '📝 Πρόχειρο'}
+          {getStatus(article) === 'scheduled' && '⏳ Προγραμματισμένο'}
+          {getStatus(article) === 'published' && '✅ Δημοσιευμένο'}
+        </p>
+        {article.cover_image && (
+          <img
+            src={article.cover_image}
+            alt="Cover"
+            class="rounded-lg mb-6 w-full max-h-[400px] object-cover"
+          />
+        )}
+        <Markdown content={article.content} />
+      </>
+    ) : (
+      <p class="text-center text-red-500 font-semibold">❌ Το άρθρο δεν βρέθηκε.</p>
+    )}
+  </main>
+</Layout>

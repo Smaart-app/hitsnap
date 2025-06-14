@@ -1,67 +1,75 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import { requireUser } from '../../lib/requireUser';
+import Layout from '../../../layouts/Layout.astro';
+import ArticleCard from '../../../components/ArticleCard.jsx';
 import { createServerClient } from '@supabase/ssr';
 
-const user = await requireUser(Astro);
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'el' } },
+    { params: { lang: 'en' } },
+  ];
+}
+
+const { lang } = Astro.params;
+
 const supabase = createServerClient(
   import.meta.env.PUBLIC_SUPABASE_URL,
   import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
   {
-    cookies: {
-      get: (name) => Astro.cookies.get(name)?.value,
-      set: () => {},
-      remove: () => {},
-    },
+    cookies: Astro.cookies,
   }
 );
+
+const now = new Date().toISOString();
 
 const { data: articles, error } = await supabase
   .from('articles')
   .select('*')
+  .eq('lang', lang)
   .order('publish_date', { ascending: false });
 
+const pageTitle = lang === 'en' ? 'Articles | Hitlift' : 'Άρθρα | Hitlift';
+const pageDesc =
+  lang === 'en'
+    ? 'Explore the latest articles from Hitlift about real estate, strategy and clarity.'
+    : 'Δες τα τελευταία άρθρα της Hitlift για ακίνητα, στρατηγική και καθαρή σκέψη.';
 ---
 
-<Layout title="My Articles | Hitlift" user={user}>
-  <main class="max-w-6xl mx-auto px-4 py-12">
-    <h1 class="text-2xl font-bold mb-6">📚 Τα Άρθρα μου</h1>
+<Layout title={pageTitle} lang={lang}>
+  <head slot="head">
+    <meta charset="UTF-8" />
+    <meta name="description" content={pageDesc} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDesc} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/preview-image.png" />
+    <title>{pageTitle}</title>
+  </head>
 
-    <input
-      type="text"
-      id="searchInput"
-      placeholder="Αναζήτηση..."
-      class="w-full p-2 border rounded mb-6"
-      on:input={(e) => {
-        const term = e.target.value.toLowerCase();
-        document.querySelectorAll('[data-title]').forEach((el) => {
-          el.classList.toggle('hidden', !el.dataset.title.includes(term));
-        });
-      }}
-    />
+  <main class="max-w-6xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-center mb-10">
+      {lang === 'en' ? 'Articles' : 'Άρθρα'}
+    </h1>
 
-    <div class="grid md:grid-cols-2 gap-6">
-      {articles?.map((article) => (
-        <div
-          class="border rounded p-4 shadow-sm hover:shadow transition"
-          data-title={article.title.toLowerCase()}
-        >
-          <h2 class="font-semibold text-lg mb-2">{article.title}</h2>
-          {article.cover_image && (
-            <img src={article.cover_image} alt="cover" class="rounded mb-3 max-h-48 object-cover w-full" />
-          )}
-          <p class="text-sm text-zinc-500 mb-1">
-            📅 {new Date(article.publish_date).toLocaleString('el-GR')}<br />
-            🗂️ {article.lang?.toUpperCase()} | 🏷️ {article.published ? 'Δημοσιευμένο' : 'Πρόχειρο'}
-          </p>
-          <a
-            href={`/admin/editor?edit=${article.id}`}
-            class="inline-block mt-2 text-sm text-[#50c7c2] hover:underline"
-          >
-            ✏️ Επεξεργασία
-          </a>
-        </div>
-      ))}
-    </div>
+    {articles?.length === 0 ? (
+      <p class="text-center text-zinc-500">
+        {lang === 'en' ? 'No articles found.' : 'Δεν υπάρχουν άρθρα προς εμφάνιση.'}
+      </p>
+    ) : (
+      <section class="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {articles.map((article) => (
+          <ArticleCard
+            client:load
+            title={article.title}
+            excerpt={article.excerpt}
+            image={article.cover_image}
+            href={`/${lang}/blog/${article.slug}`}
+            lang={lang}
+            altHref={`/${lang === 'el' ? 'en' : 'el'}/blog/${article.slug}`}
+            status={article.published ? (new Date(article.publish_date) > new Date() ? 'scheduled' : 'published') : 'draft'}
+          />
+        ))}
+      </section>
+    )}
   </main>
 </Layout>
