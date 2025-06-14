@@ -1,44 +1,40 @@
-export const prerender = false;
-
 import type { APIRoute } from 'astro';
-import { createServerClientReadOnly } from '../../lib/createServerClient';
+import { createServerClient } from '@supabase/ssr';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
-  try {
-    const bodyText = await request.text();
-    if (!bodyText) {
-      return new Response(JSON.stringify({ error: 'Missing request body' }), {
-        status: 400,
-      });
+  const supabase = createServerClient(
+    import.meta.env.PUBLIC_SUPABASE_URL,
+    import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+    {
+      cookies: {
+        get: (name) => cookies.get(name)?.value,
+        set: (name, value, options) =>
+          cookies.set(name, value, {
+            path: '/',
+            httpOnly: false,
+            secure: true,
+            sameSite: 'Lax',
+            ...options,
+          }),
+        remove: (name, options) => cookies.delete(name, { path: '/', ...options }),
+      },
     }
+  );
 
-    const { email, password } = JSON.parse(bodyText);
+  const { email, password } = await request.json();
 
-    if (!email || !password) {
-      return new Response(JSON.stringify({ error: 'Missing credentials' }), {
-        status: 400,
-      });
-    }
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-    const supabase = createServerClientReadOnly(cookies);
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error || !data.session) {
-      return new Response(JSON.stringify({ error: error?.message || 'Login failed' }), {
-        status: 401,
-      });
-    }
-
-    return new Response(null, {
-      status: 200,
-    });
-  } catch (err) {
-    return new Response(JSON.stringify({ error: 'Invalid request format' }), {
-      status: 400,
+  if (error || !data.session) {
+    return new Response(JSON.stringify({ error: error?.message || 'Login failed' }), {
+      status: 401,
     });
   }
+
+  return new Response(JSON.stringify({ success: true }), {
+    status: 200,
+  });
 };
