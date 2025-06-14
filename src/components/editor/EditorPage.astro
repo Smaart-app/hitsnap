@@ -93,9 +93,10 @@ const isGreek = lang === 'el';
     </div>
   </main>
 
-  <script type="module">
-    import { marked } from 'marked';
+  <!-- Load marked.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
+  <script type="module">
     const input = document.getElementById('markdownInput');
     const preview = document.getElementById('markdownPreview');
     const form = document.getElementById('articleForm');
@@ -165,7 +166,7 @@ const isGreek = lang === 'el';
       el.addEventListener('input', resetIdleTimer);
     });
 
-    setInterval(autosave, 30000); // 30s
+    setInterval(autosave, 30000);
     renderPreview();
 
     form.addEventListener('submit', async (e) => {
