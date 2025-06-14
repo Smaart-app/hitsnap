@@ -1,0 +1,102 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+const lang = 'el';
+const isGreek = lang === 'el';
+---
+
+<Layout title={isGreek ? 'Δημιουργία Άρθρου | Hitlift' : 'Create Article | Hitlift'} lang={lang}>
+  <main class="max-w-6xl mx-auto px-4 py-12">
+    <h1 class="text-2xl font-bold mb-6">{isGreek ? '📝 Δημιουργία Άρθρου' : '📝 Create New Article'}</h1>
+    <div id="feedback"></div>
+
+    <div class="grid lg:grid-cols-2 gap-8">
+      <form id="articleForm" class="space-y-4">
+        <div>
+          <label class="block mb-1 font-semibold">Slug (URL)</label>
+          <input type="text" name="slug" class="w-full p-2 border rounded" required />
+        </div>
+
+        <div>
+          <label class="block mb-1 font-semibold">{isGreek ? 'Τίτλος' : 'Title'}</label>
+          <input type="text" name="title" class="w-full p-2 border rounded" required />
+        </div>
+
+        <div>
+          <label class="block mb-1 font-semibold">{isGreek ? 'Απόσπασμα' : 'Excerpt'}</label>
+          <textarea name="excerpt" maxlength="160" rows="3" class="w-full p-2 border rounded" placeholder={isGreek ? 'Προαιρετικό απόσπασμα...' : 'Optional excerpt...'}></textarea>
+        </div>
+
+        <div>
+          <label class="block mb-1 font-semibold">{isGreek ? 'Περιεχόμενο (Markdown)' : 'Content (Markdown)'}</label>
+          <textarea name="content" id="markdownInput" class="w-full p-2 border rounded font-mono text-sm" rows="12" required></textarea>
+        </div>
+
+        <div>
+          <label class="block mb-1 font-semibold">{isGreek ? 'Εικόνα Εξωφύλλου' : 'Cover Image (URL)'}</label>
+          <input type="url" name="cover_image" class="w-full p-2 border rounded" />
+        </div>
+
+        <div class="flex gap-4">
+          <div class="w-full">
+            <label class="block mb-1 font-semibold">{isGreek ? 'Ημερομηνία Δημοσίευσης' : 'Publish Date'}</label>
+            <input type="datetime-local" name="publish_date" class="w-full p-2 border rounded" />
+          </div>
+          <div class="w-full">
+            <label class="block mb-1 font-semibold">{isGreek ? 'Κατάσταση' : 'Published'}</label>
+            <select name="published" class="w-full p-2 border rounded">
+              <option value="true">{isGreek ? 'Ναι' : 'Yes'}</option>
+              <option value="false">{isGreek ? 'Όχι' : 'No'}</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="bg-[#50c7c2] text-white px-6 py-2 rounded font-semibold">
+          {isGreek ? 'Αποθήκευση' : 'Save'}
+        </button>
+      </form>
+
+      <section class="prose prose-zinc dark:prose-invert p-4 border rounded shadow-sm overflow-auto max-h-[800px]">
+        <h2 class="text-xl font-bold mb-2">{isGreek ? 'Προεπισκόπηση' : 'Preview'}</h2>
+        <div id="previewImageContainer"></div>
+        <div id="markdownPreview" class="text-sm text-zinc-800 dark:text-zinc-200"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script type="module">
+    const form = document.getElementById('articleForm');
+    const preview = document.getElementById('markdownPreview');
+    const input = document.getElementById('markdownInput');
+    const previewImageContainer = document.getElementById('previewImageContainer');
+    const feedback = document.getElementById('feedback');
+
+    const renderPreview = () => {
+      const img = form.cover_image?.value;
+      previewImageContainer.innerHTML = img ? `<img src="${img}" class="mb-4 rounded shadow max-h-64">` : '';
+      preview.innerHTML = marked.parse(input.value || '');
+    };
+
+    form.addEventListener('input', renderPreview);
+    renderPreview();
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form));
+      data.published = data.published === 'true';
+      try {
+        const res = await fetch('/api/save-article', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const result = await res.json();
+        feedback.innerHTML = `<div class="p-3 rounded font-semibold mb-6 ${result.error ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
+          ${result.error ? `❌ ${result.error}` : '✅ Article saved successfully!'}
+        </div>`;
+      } catch {
+        feedback.innerHTML = `<div class="p-3 rounded font-semibold mb-6 bg-red-100 text-red-700">❌ Unexpected error</div>`;
+      }
+    });
+  </script>
+</Layout>
