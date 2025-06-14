@@ -1,8 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-
 const { user } = Astro.props;
-
 const lang = Astro.params.lang || 'el';
 const isGreek = lang === 'el';
 ---
@@ -13,15 +11,13 @@ const isGreek = lang === 'el';
     </a>
 
     <h1 class="text-2xl font-bold mb-6">{isGreek ? '📝 Δημιουργία Άρθρου' : '📝 Create New Article'}</h1>
-
     <div id="feedback"></div>
 
     <div class="grid lg:grid-cols-2 gap-8">
-      <!-- FORM -->
       <form id="articleForm" class="space-y-4">
         <div>
           <label class="block mb-1 font-semibold">Slug (URL)</label>
-          <input type="text" name="slug" class="w-full p-2 border rounded" placeholder="my-first-article" required />
+          <input type="text" name="slug" class="w-full p-2 border rounded" required />
         </div>
 
         <div>
@@ -65,7 +61,6 @@ const isGreek = lang === 'el';
             <label class="block mb-1 font-semibold">{isGreek ? 'Ημερομηνία και Ώρα Δημοσίευσης' : 'Publish Date & Time'}</label>
             <input type="datetime-local" name="publish_date" class="w-full p-2 border rounded" />
           </div>
-
           <div class="w-full">
             <label class="block mb-1 font-semibold">{isGreek ? 'Δημοσιευμένο' : 'Published'}</label>
             <select name="published" class="w-full p-2 border rounded">
@@ -85,28 +80,37 @@ const isGreek = lang === 'el';
         </div>
       </form>
 
-      <!-- LIVE PREVIEW -->
       <section class="prose prose-zinc dark:prose-invert p-4 border rounded shadow-sm overflow-auto max-h-[800px]">
         <h2 class="text-xl font-bold mb-2">{isGreek ? 'Προεπισκόπηση' : 'Preview'}</h2>
+        <div id="previewImageContainer"></div>
         <div id="markdownPreview" class="text-sm text-zinc-800 dark:text-zinc-200"></div>
+        <div id="translationPreview" class="mt-8 border-t pt-4 hidden">
+          <h3 class="font-semibold mb-2">{isGreek ? 'Αγγλική Μετάφραση' : 'English Translation'}</h3>
+          <div id="translatedMarkdown" class="text-sm text-zinc-800 dark:text-zinc-200"></div>
+        </div>
       </section>
     </div>
   </main>
 
-  <!-- Load marked.js via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
   <script type="module">
     const input = document.getElementById('markdownInput');
     const preview = document.getElementById('markdownPreview');
     const form = document.getElementById('articleForm');
     const feedback = document.getElementById('feedback');
+    const previewImageContainer = document.getElementById('previewImageContainer');
+    const translatedContainer = document.getElementById('translationPreview');
+    const translatedMarkdown = document.getElementById('translatedMarkdown');
 
     const fieldsToTrack = ['slug', 'title', 'excerpt', 'content'];
     let lastSavedData = {};
     let idleTimer;
 
     const renderPreview = () => {
+      const coverImageUrl = form.cover_image?.value;
+      previewImageContainer.innerHTML = coverImageUrl
+        ? `<img src="${coverImageUrl}" alt="Cover Image" class="mb-4 rounded shadow max-h-64">`
+        : '';
       preview.innerHTML = marked.parse(input.value || '');
     };
 
@@ -119,14 +123,8 @@ const isGreek = lang === 'el';
       return data;
     };
 
-    const hasChanged = () => {
-      const current = getCurrentData();
-      return fieldsToTrack.some(field => current[field] !== lastSavedData[field]);
-    };
-
     const autosave = async () => {
       if (!hasChanged()) return;
-
       const data = getCurrentData();
       data.draft = true;
 
@@ -136,9 +134,7 @@ const isGreek = lang === 'el';
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
-
         const result = await res.json();
-
         if (!result.error) {
           lastSavedData = fieldsToTrack.reduce((acc, key) => {
             acc[key] = data[key];
@@ -150,6 +146,11 @@ const isGreek = lang === 'el';
       } catch (err) {
         console.warn('Autosave failed', err);
       }
+    };
+
+    const hasChanged = () => {
+      const current = getCurrentData();
+      return fieldsToTrack.some(field => current[field] !== lastSavedData[field]);
     };
 
     const resetIdleTimer = () => {
@@ -179,9 +180,7 @@ const isGreek = lang === 'el';
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         });
-
         const result = await res.json();
-
         feedback.innerHTML = `<div class="p-3 rounded font-semibold mb-6 ${result.error ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
           ${result.error ? `❌ ${result.error}` : '✅ Article saved successfully!'}
         </div>`;
@@ -189,6 +188,26 @@ const isGreek = lang === 'el';
         feedback.innerHTML = `<div class="p-3 rounded font-semibold mb-6 bg-red-100 text-red-700">
           ❌ Unexpected error
         </div>`;
+      }
+    });
+
+    // Translation logic
+    document.getElementById('translateBtn')?.addEventListener('click', async () => {
+      const body = getCurrentData();
+      try {
+        const res = await fetch('/api/translate-article', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const result = await res.json();
+        if (!result.error && result.translated) {
+          translatedContainer.classList.remove('hidden');
+          translatedMarkdown.innerHTML = marked.parse(result.translated);
+        }
+      } catch (err) {
+        translatedMarkdown.innerHTML = '<p class="text-red-600">❌ Translation failed.</p>';
+        translatedContainer.classList.remove('hidden');
       }
     });
   </script>

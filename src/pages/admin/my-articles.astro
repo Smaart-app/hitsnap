@@ -1,0 +1,67 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { requireUser } from '../../lib/requireUser';
+import { createServerClient } from '@supabase/ssr';
+
+const user = await requireUser(Astro);
+const supabase = createServerClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+  {
+    cookies: {
+      get: (name) => Astro.cookies.get(name)?.value,
+      set: () => {},
+      remove: () => {},
+    },
+  }
+);
+
+const { data: articles, error } = await supabase
+  .from('articles')
+  .select('*')
+  .order('publish_date', { ascending: false });
+
+---
+
+<Layout title="My Articles | Hitlift" user={user}>
+  <main class="max-w-6xl mx-auto px-4 py-12">
+    <h1 class="text-2xl font-bold mb-6">📚 Τα Άρθρα μου</h1>
+
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Αναζήτηση..."
+      class="w-full p-2 border rounded mb-6"
+      on:input={(e) => {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('[data-title]').forEach((el) => {
+          el.classList.toggle('hidden', !el.dataset.title.includes(term));
+        });
+      }}
+    />
+
+    <div class="grid md:grid-cols-2 gap-6">
+      {articles?.map((article) => (
+        <div
+          class="border rounded p-4 shadow-sm hover:shadow transition"
+          data-title={article.title.toLowerCase()}
+        >
+          <h2 class="font-semibold text-lg mb-2">{article.title}</h2>
+          {article.cover_image && (
+            <img src={article.cover_image} alt="cover" class="rounded mb-3 max-h-48 object-cover w-full" />
+          )}
+          <p class="text-sm text-zinc-500 mb-1">
+            📅 {new Date(article.publish_date).toLocaleString('el-GR')}<br />
+            🗂️ {article.lang?.toUpperCase()} | 🏷️ {article.published ? 'Δημοσιευμένο' : 'Πρόχειρο'}
+          </p>
+          <a
+            href={`/admin/editor?edit=${article.id}`}
+            class="inline-block mt-2 text-sm text-[#50c7c2] hover:underline"
+          >
+            ✏️ Επεξεργασία
+          </a>
+        </div>
+      ))}
+    </div>
+  </main>
+</Layout>
