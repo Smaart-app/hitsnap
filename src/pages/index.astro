@@ -6,14 +6,34 @@ export const prerender = true;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Redirecting...</title>
+    <title>Hitlift – Real Estate Intelligence</title>
+
+    <!-- SEO canonical -->
+    <link rel="canonical" href="https://hitlift.app/" />
+
+    <!-- Open Graph (social preview) -->
+    <meta property="og:title" content="Hitlift – Real Estate Intelligence" />
+    <meta property="og:description" content="Between walls and pixels — and everything in between." />
+    <meta property="og:image" content="https://hitlift.app/preview-og-final.png" />
+    <meta property="og:url" content="https://hitlift.app/" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Hitlift – Real Estate Intelligence" />
+    <meta name="twitter:description" content="Between walls and pixels — and everything in between." />
+    <meta name="twitter:image" content="https://hitlift.app/preview-og-final.png" />
+
+    <!-- Optional: immediate redirect -->
     <meta http-equiv="refresh" content="0; url=/en" />
+
     <script>
       // Optional: redirect to preferred language
       const userLang = navigator.language?.startsWith('el') ? 'el' : 'en';
       window.location.href = `/${userLang}`;
     </script>
   </head>
+
   <body style="font-family: sans-serif; text-align: center; padding: 5rem;">
     <p>Redirecting...</p>
   </body>
