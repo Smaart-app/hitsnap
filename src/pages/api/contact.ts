@@ -4,10 +4,6 @@ import dotenv from 'dotenv';
 
 dotenv.config(); // 🔐 Χειροκίνητη φόρτωση .env για server route
 
-// Logging για έλεγχο
-console.log('🔐 Loaded URL:', process.env.PUBLIC_SUPABASE_URL);
-console.log('🔐 Loaded KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 12));
-
 const supabase = createClient(
   process.env.PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
