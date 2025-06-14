@@ -44,7 +44,8 @@ export function createServerClientFull(cookies: AstroCookies) {
   );
 }
 
-export const createServerClientWithCookies = createServerClientFull;
+// ✅ Αυτό είναι το ΣΩΣΤΟ για authenticated χρήστες
+export const createServerClientWithCookies = createServerClientReadOnly;
 
 export function createAdminClientNoCookies() {
   return createServerClient(
