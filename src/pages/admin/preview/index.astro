@@ -1,16 +1,10 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { createServerClient } from '@supabase/ssr';
+import { createServerClientWithCookies } from '../../../lib/createServerClient.ts';
 
 export const prerender = false;
 
-const supabase = createServerClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
-  {
-    cookies: Astro.cookies,
-  }
-);
+const supabase = createServerClientWithCookies(Astro.cookies);
 
 const { data: articles, error } = await supabase
   .from('articles')

@@ -3,18 +3,14 @@
 
 import Layout from '../../../layouts/Layout.astro';
 import Markdown from '../../../components/Markdown.astro';
-import { createServerClient } from '@supabase/ssr';
+import { createServerClientReadOnly } from '../../../lib/createServerClient.ts';
 
 export const prerender = false;
 export const client = 'load';
 
 const { slug, lang } = Astro.params;
 
-const supabase = createServerClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
-  { cookies: Astro.cookies }
-);
+const supabase = createServerClientReadOnly(Astro.cookies);
 
 const { data: articles } = await supabase
   .from('articles')

@@ -1,0 +1,33 @@
+---
+import Layout from '../../../layouts/Layout.astro'
+import EditorPage from '../../../components/editor/EditorPage.astro'
+import { createServerClientWithCookies } from '../../../lib/createServerClient.ts'
+
+const { slug } = Astro.params
+
+const supabase = createServerClientWithCookies(Astro.cookies)
+
+const { data, error } = await supabase
+  .from('articles')
+  .select('*')
+  .eq('slug', slug)
+  .limit(1)
+
+console.log('🔍 Slug:', slug)
+console.log('🧾 Supabase result:', data)
+console.log('⚠️ Error:', error)
+
+const article = data?.[0] ?? null
+---
+
+<Layout title={`Επεξεργασία - ${article?.title || slug}`}>
+  <main class="max-w-3xl mx-auto px-4 py-16">
+    {article ? (
+      <EditorPage article={article} />
+    ) : (
+      <p class="text-red-600 text-center text-lg font-semibold">
+        ❌ Δεν βρέθηκε άρθρο με slug: <code>{slug}</code>
+      </p>
+    )}
+  </main>
+</Layout>

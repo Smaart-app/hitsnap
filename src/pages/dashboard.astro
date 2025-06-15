@@ -2,6 +2,8 @@
 import Layout from '../layouts/Layout.astro';
 import { createServerClientReadOnly } from '../lib/createServerClient';
 
+export const prerender = false;
+
 const supabase = createServerClientReadOnly(Astro.cookies);
 
 const {

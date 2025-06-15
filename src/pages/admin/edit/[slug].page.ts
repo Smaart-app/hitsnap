@@ -1,5 +1,5 @@
 import type { APIContext } from "astro";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClientWithCookies } from "../../../lib/createServerClient.ts";
 
 export const prerender = false;
 
@@ -12,11 +12,7 @@ export async function get({ params, cookies }: APIContext) {
     return new Response("⛔ Invalid slug", { status: 400 });
   }
 
-  const supabase = createServerClient(
-    import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
-    { cookies }
-  );
+  const supabase = createServerClientWithCookies(cookies);
 
   const { data: article, error } = await supabase
     .from("articles")

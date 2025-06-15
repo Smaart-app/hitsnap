@@ -1,19 +1,13 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import Markdown from '../../../components/Markdown.astro';
-import { createServerClient } from '@supabase/ssr';
+import { createServerClientWithCookies } from '../../../lib/createServerClient.ts';
 
 export const prerender = false;
 
 const { slug } = Astro.params;
 
-const supabase = createServerClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
-  {
-    cookies: Astro.cookies,
-  }
-);
+const supabase = createServerClientWithCookies(Astro.cookies);
 
 const { data: articles, error } = await supabase
   .from('articles')
@@ -39,7 +33,7 @@ function getStatus(article) {
           🗓️ {new Date(article.publish_date).toLocaleString('el-GR')} | 🏷️ {article.lang?.toUpperCase()}
         </p>
         <p class="text-sm font-semibold mb-6">
-          📌 Κατάσταση: {' '}
+          📌 Κατάσταση:{' '}
           {getStatus(article) === 'draft' && '📝 Πρόχειρο'}
           {getStatus(article) === 'scheduled' && '⏳ Προγραμματισμένο'}
           {getStatus(article) === 'published' && '✅ Δημοσιευμένο'}

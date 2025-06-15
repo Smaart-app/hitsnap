@@ -6,7 +6,7 @@ export const getStaticPaths = async () => {
 };
 
 import Layout from '../../../layouts/Layout.astro';
-import { createServerClient } from '@supabase/ssr';
+import { createServerClientWithCookies } from '../../../lib/createServerClient.ts';
 import type { APIContext } from 'astro';
 
 export async function get({ params, cookies }: APIContext) {
@@ -22,11 +22,7 @@ export async function get({ params, cookies }: APIContext) {
     });
   }
 
-  const supabase = createServerClient(
-    import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
-    { cookies }
-  );
+  const supabase = createServerClientWithCookies(cookies);
 
   const { data: article, error } = await supabase
     .from('articles')
