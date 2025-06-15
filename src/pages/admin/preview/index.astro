@@ -33,29 +33,37 @@ function getStatus(article) {
     ) : (
       <div class="space-y-6">
         {articles.map((article) => (
-          <div class="p-4 border rounded shadow-sm flex items-center justify-between">
+          <div
+            class="p-4 border rounded shadow-sm flex items-center justify-between"
+            key={article.id}
+          >
             <div>
               <h2 class="text-lg font-semibold">{article.title}</h2>
               <p class="text-sm text-zinc-500">
-                🗓️ {new Date(article.publish_date).toLocaleString('el-GR')} | 🏷️ {article.lang?.toUpperCase()} | 📌{' '}
+                🗓️ {new Date(article.publish_date).toLocaleString('el-GR')} | 🏷️{' '}
+                {article.lang?.toUpperCase()} | 📌{' '}
                 {getStatus(article) === 'draft' && '📝 Πρόχειρο'}
                 {getStatus(article) === 'scheduled' && '⏳ Προγραμματισμένο'}
                 {getStatus(article) === 'published' && '✅ Δημοσιευμένο'}
               </p>
             </div>
             <div class="flex gap-3">
-              <a
-                href={`/admin/preview/${article.slug}`}
-                class="text-sm text-blue-600 hover:underline"
-              >
-                👁️ Προβολή
-              </a>
-              <a
-                href={`/admin/editor/${article.slug}`}
-                class="text-sm text-green-600 hover:underline"
-              >
-                ✏️ Επεξεργασία
-              </a>
+              {article.slug && (
+                <>
+                  <a
+                    href={`/admin/preview/${article.slug}`}
+                    class="text-sm text-blue-600 hover:underline"
+                  >
+                    👁️ Προβολή
+                  </a>
+                  <a
+                    href={`/admin/editor/${article.slug}`}
+                    class="text-sm text-green-600 hover:underline"
+                  >
+                    ✏️ Επεξεργασία
+                  </a>
+                </>
+              )}
             </div>
           </div>
         ))}
