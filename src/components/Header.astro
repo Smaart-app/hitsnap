@@ -14,7 +14,8 @@ const isHome = currentPath === '/';
 const isArticles = currentPath.includes('/blog') && !currentPath.includes('/editor');
 const isContact = currentPath.includes('/contact');
 const isDashboard = currentPath.includes('/dashboard');
-const isEditor = currentPath.includes('/editor');
+const isEditor = currentPath === '/admin/editor';
+const isPreview = currentPath === '/admin/preview';
 
 let langSwitchHref = isGreek ? '/en' : '/el';
 
@@ -36,28 +37,44 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
       <a href="/" class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isHome ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Αρχική' : 'Home'}</a>
       <a href={`${base}/blog`} class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Άρθρα' : 'Articles'}</a>
       <a href={`${base}/contact`} class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Επικοινωνία' : 'Contact'}</a>
+      {user && (
+        <>
+          <a href="/admin/preview" class={`px-2 py-1 rounded-sm transition ${isPreview ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2] hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>📋 Preview</a>
+          <a href="/admin/editor" class={`px-2 py-1 rounded-sm transition ${isEditor ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2] hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>✏️ {isGreek ? 'Νέο Άρθρο' : 'New Article'}</a>
+        </>
+      )}
       {!disableLangSwitch && (
         <a href={langSwitchHref} class="px-2 py-1 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition hover:text-[#50c7c2]">{isGreek ? 'English 🇬🇧' : 'Ελληνικά 🇬🇷'}</a>
       )}
       <ThemeButton client:only="react" />
-      <a href="/login" class="px-2 py-1 rounded-sm text-[#50c7c2] hover:underline transition hover:bg-zinc-100 dark:hover:bg-zinc-800">🔐 {isGreek ? 'Είσοδος' : 'Login'}</a>
+      <a href={user ? "/logout" : "/login"} class="px-2 py-1 rounded-sm text-[#50c7c2] hover:underline transition hover:bg-zinc-100 dark:hover:bg-zinc-800">
+        {user ? '🚪 Έξοδος' : '🔐 ' + (isGreek ? 'Είσοδος' : 'Login')}
+      </a>
     </nav>
   </div>
 </header>
 
 <div id="overlay" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-30"></div>
 
-<nav id="mainNav" class="hidden sm:hidden flex flex-col gap-2 items-start text-sm bg-white dark:bg-[#1a1a1a] w-full absolute top-[60px] left-0 px-6 py-4 border-b border-zinc-200 shadow-md z-40 animate-fadeIn">
-  <a href="/" class="w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 delay-100">{isGreek ? 'Αρχική' : 'Home'}</a>
-  <a href={`${base}/blog`} class="w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 delay-150">{isGreek ? 'Άρθρα' : 'Articles'}</a>
-  <a href={`${base}/contact`} class="w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 delay-200">{isGreek ? 'Επικοινωνία' : 'Contact'}</a>
-  {!disableLangSwitch && (
-    <a href={langSwitchHref} class="w-full px-2 py-2 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition hover:text-[#50c7c2] delay-300">{isGreek ? 'English 🇬🇧' : 'Ελληνικά 🇬🇷'}</a>
+<nav id="mainNav" class="hidden sm:hidden flex-col gap-2 items-start text-sm bg-white dark:bg-[#1a1a1a] w-full absolute top-[60px] left-0 px-6 py-4 border-b border-zinc-200 shadow-md z-40 animate-fadeIn">
+  <a href="/" class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isHome ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Αρχική' : 'Home'}</a>
+  <a href={`${base}/blog`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Άρθρα' : 'Articles'}</a>
+  <a href={`${base}/contact`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Επικοινωνία' : 'Contact'}</a>
+  {user && (
+    <>
+      <a href="/admin/preview" class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isPreview ? 'text-[#50c7c2] font-bold' : ''}`}>📋 Preview</a>
+      <a href="/admin/editor" class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isEditor ? 'text-[#50c7c2] font-bold' : ''}`}>✏️ {isGreek ? 'Νέο Άρθρο' : 'New Article'}</a>
+    </>
   )}
-  <div class="w-full px-2 py-2 delay-400">
+  {!disableLangSwitch && (
+    <a href={langSwitchHref} class="w-full px-2 py-2 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition hover:text-[#50c7c2]">{isGreek ? 'English 🇬🇧' : 'Ελληνικά 🇬🇷'}</a>
+  )}
+  <div class="w-full px-2 py-2">
     <ThemeButton client:only="react" />
   </div>
-  <a href="/login" class="w-full px-2 py-2 rounded-sm text-[#50c7c2] hover:underline transition hover:bg-zinc-100 dark:hover:bg-zinc-800 delay-500">🔐 {isGreek ? 'Είσοδος' : 'Login'}</a>
+  <a href={user ? "/logout" : "/login"} class="w-full px-2 py-2 rounded-sm text-[#50c7c2] hover:underline transition hover:bg-zinc-100 dark:hover:bg-zinc-800">
+    {user ? '🚪 Έξοδος' : '🔐 ' + (isGreek ? 'Είσοδος' : 'Login')}
+  </a>
 </nav>
 
 <style>
