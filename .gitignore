@@ -5,6 +5,9 @@ node_modules/
 dist/
 build/
 
+# Netlify build artifacts
+.netlify/
+
 # Environment variables
 .env
 .env.local

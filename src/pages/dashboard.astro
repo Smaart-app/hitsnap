@@ -1,10 +1,10 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { createServerClientReadOnly } from '../lib/createServerClient';
+import { createAdminClientNoCookies } from '../lib/createServerClient';
 
 export const prerender = false;
 
-const supabase = createServerClientReadOnly(Astro.cookies);
+const supabase = createAdminClientNoCookies();
 
 const {
   data: { user },
@@ -24,16 +24,29 @@ const { data: articles, error } = await supabase
 
 const todayISO = new Date().toISOString();
 
+const processedArticles = articles?.map(article => {
+  const isPublishedStatus = article.published === true;
+  const isScheduled = isPublishedStatus ? article.publish_date > todayISO : false;
+  const isPublished = isPublishedStatus ? article.publish_date <= todayISO : false;
+
+  return {
+    ...article,
+    isScheduled,
+    isPublished,
+    isDraft: !article.published
+  };
+}) ?? [];
+
 let visible = [];
 
 if (tab === 'published') {
-  visible = articles?.filter((a) => a.published && a.publish_date <= todayISO) ?? [];
+  visible = processedArticles.filter(a => a.isPublished);
 } else if (tab === 'scheduled') {
-  visible = articles?.filter((a) => a.published && a.publish_date > todayISO) ?? [];
+  visible = processedArticles.filter(a => a.isScheduled);
 } else if (tab === 'drafts') {
-  visible = articles?.filter((a) => !a.published) ?? [];
+  visible = processedArticles.filter(a => a.isDraft);
 } else {
-  visible = articles ?? [];
+  visible = processedArticles;
 }
 ---
 
@@ -72,12 +85,10 @@ if (tab === 'published') {
               ? new Date(article.publish_date).toLocaleDateString(locale)
               : '—';
 
-            const isScheduled = article.published && article.publish_date > todayISO;
-            const isPublished = article.published && article.publish_date <= todayISO;
-
             const editUrl = `/admin/editor/${article.slug}`;
             const altLang = article.lang === 'el' ? 'en' : 'el';
-            const translateUrl = `/admin/editor/${article.slug}?base_lang=${article.lang}&lang=${altLang}`;
+            const baseLang = article.lang;
+            const translateUrl = '/admin/editor/' + article.slug + '?base_lang=' + baseLang + '&lang=' + altLang;
 
             return (
               <tr class="border-b border-gray-100 hover:bg-gray-50">
@@ -85,9 +96,9 @@ if (tab === 'published') {
                 <td class="py-2 px-2">{article.title}</td>
                 <td class="py-2 px-2 uppercase">{article.lang}</td>
                 <td class="py-2 px-2">
-                  {isScheduled ? (
+                  {article.isScheduled ? (
                     <span class="text-blue-600 font-medium">📅 Προγραμματισμένο</span>
-                  ) : isPublished ? (
+                  ) : article.isPublished ? (
                     <span class="text-green-600 font-medium">✓ Δημοσιευμένο</span>
                   ) : (
                     <span class="text-yellow-600 font-medium">✎ Πρόχειρο</span>
