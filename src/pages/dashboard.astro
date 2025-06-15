@@ -73,6 +73,10 @@ if (tab === 'published') {
             const isScheduled = article.published && article.publish_date > todayISO;
             const isPublished = article.published && article.publish_date <= todayISO;
 
+            const editUrl = `/admin/editor/${article.slug}`;
+            const altLang = article.lang === 'el' ? 'en' : 'el';
+            const translateUrl = `/admin/editor/${article.slug}?base_lang=${article.lang}&lang=${altLang}`;
+
             return (
               <tr class="border-b border-gray-100 hover:bg-gray-50">
                 <td class="py-2 px-2 font-mono">{article.slug}</td>
@@ -89,18 +93,8 @@ if (tab === 'published') {
                 </td>
                 <td class="py-2 px-2">{formattedDate}</td>
                 <td class="py-2 px-2 space-x-2">
-                  <a
-                    href={`/${article.lang}/blog/editor?slug=${article.slug}`}
-                    class="text-[#50c7c2] hover:underline text-sm"
-                  >
-                    ✏️ Επεξεργασία
-                  </a>
-                  <a
-                    href={`/${article.lang}/blog/editor?slug=${article.slug}&base_lang=${article.lang}&lang=${article.lang === 'el' ? 'en' : 'el'}`}
-                    class="text-[#777] hover:text-[#50c7c2] hover:underline text-sm"
-                  >
-                    🌍 Μετάφραση
-                  </a>
+                  <a href={editUrl} class="text-[#50c7c2] hover:underline text-sm">✏️ Επεξεργασία</a>
+                  <a href={translateUrl} class="text-[#777] hover:text-[#50c7c2] hover:underline text-sm">🌍 Μετάφραση</a>
                 </td>
               </tr>
             );
