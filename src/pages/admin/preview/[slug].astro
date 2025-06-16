@@ -16,32 +16,70 @@ let article = null;
 let error = null;
 let debugInfo = null;
 
-if (user) {
-  const { data, error: fetchError } = await supabase
+// --- Attempt 1: Fetch with lang ---
+const { data: primaryData, error: primaryError } = await supabase
+  .from('articles')
+  .select('*')
+  .eq('slug', slug)
+  .eq('lang', lang)
+  .maybeSingle();
+
+// --- Attempt 2: Fallback without lang ---
+let data = primaryData;
+let fetchError = primaryError;
+
+if (!primaryData && !primaryError) {
+  const { data: fallbackData, error: fallbackError } = await supabase
     .from('articles')
     .select('*')
     .eq('slug', slug)
-    .eq('lang', lang)
-    .eq('user_id', user.id)
-    .maybeSingle(); // πιο καθαρό από limit(1)
+    .maybeSingle();
 
-  article = data || null;
-  error = fetchError;
+  data = fallbackData;
+  fetchError = fallbackError;
+}
 
-  if (!article && process.env.NODE_ENV === 'development') {
-    const { data: allArticles } = await supabase
-      .from('articles')
-      .select('id, slug, title, published, user_id, created_at')
-      .eq('slug', slug);
+if (data) {
+  const isOwner = user && data.user_id === user.id;
+  const isPublic = data.published && new Date(data.publish_date) <= new Date();
 
-    debugInfo = {
-      currentUserId: user.id,
-      foundArticles: allArticles,
-      searchedSlug: slug
-    };
+  if (isOwner || isPublic) {
+    article = data;
+  } else {
+    error = { message: 'Δεν έχεις δικαίωμα προβολής αυτού του άρθρου.' };
   }
 } else {
-  error = { message: 'Not authenticated' };
+  error = fetchError ?? { message: 'Το άρθρο δεν βρέθηκε.' };
+}
+
+// --- Enhanced debug info ---
+if (!article && import.meta.env.MODE === 'development') {
+  const { data: allArticles } = await supabase
+    .from('articles')
+    .select('*')
+    .eq('slug', slug);
+
+  const { data: userArticles } = user ? await supabase
+    .from('articles')
+    .select('id, slug, title, lang, published, user_id, created_at')
+    .eq('user_id', user.id)
+    .limit(5) : { data: null };
+
+  debugInfo = {
+    searchParams: { slug, lang },
+    astroParams: Astro.params,
+    currentUserId: user?.id,
+    foundArticlesWithSlug: allArticles,
+    totalFoundWithSlug: allArticles?.length || 0,
+    recentUserArticles: userArticles,
+    possibleReasons: [
+      'Το άρθρο δεν αποθηκεύτηκε με το σωστό user_id',
+      'Το slug άλλαξε κατά την αποθήκευση', 
+      'Το άρθρο διαγράφηκε',
+      'Πρόβλημα με το autosave',
+      'Λάθος lang parameter ή slug με/χωρίς -el/-en'
+    ]
+  };
 }
 
 function getStatus(article) {
@@ -68,7 +106,7 @@ const statusDisplay = status ? getStatusDisplay(status) : null;
     {error ? (
       <div class="text-center">
         <p class="text-red-600 text-lg font-semibold mb-4">
-          ⚠️ Σφάλμα: {error.message}
+          ⚠️ {error.message}
         </p>
         <a href={`/${lang || 'el'}/blog`} class="text-blue-600 hover:underline">
           ← Επιστροφή στα άρθρα
@@ -81,18 +119,20 @@ const statusDisplay = status ? getStatusDisplay(status) : null;
           <div class="flex flex-wrap items-center gap-4 text-sm text-zinc-600 mb-4">
             <span>🗓️ {new Date(article.publish_date || article.created_at).toLocaleString('el-GR')}</span>
             <span>🏷️ {article.lang?.toUpperCase()}</span>
-            {article.excerpt && <span>📄 {article.excerpt.length} chars excerpt</span>}
+            {article.excerpt && <span>📄 {article.excerpt.length} χαρακτήρες περίληψη</span>}
           </div>
           <div class="flex items-center justify-between mb-6">
             <p class={`text-sm font-semibold ${statusDisplay.color}`}>
               📌 Κατάσταση: {statusDisplay.emoji} {statusDisplay.text}
             </p>
-            <a 
-              href={`/${lang || article.lang || 'el'}/admin/edit/${article.slug}`}
-              class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm font-semibold"
-            >
-              ✏️ Επεξεργασία
-            </a>
+            {user && article.user_id === user.id && (
+              <a 
+                href={`/${lang || article.lang || 'el'}/admin/edit/${article.slug}`}
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm font-semibold"
+              >
+                ✏️ Επεξεργασία
+              </a>
+            )}
           </div>
         </div>
 
@@ -126,10 +166,38 @@ const statusDisplay = status ? getStatusDisplay(status) : null;
       <div class="text-center">
         <p class="text-red-500 font-semibold mb-4">❌ Το άρθρο δεν βρέθηκε.</p>
         {debugInfo && (
-          <div class="mt-8 p-4 bg-gray-100 rounded text-left text-xs">
-            <h3 class="font-bold mb-2">Debug Info:</h3>
-            <pre class="whitespace-pre-wrap">{JSON.stringify(debugInfo, null, 2)}</pre>
-          </div>
+          <details class="mt-8 p-4 bg-gray-100 rounded text-left">
+            <summary class="font-bold mb-2 cursor-pointer">🔍 Debug Information (Click to expand)</summary>
+            <div class="mt-4 space-y-4">
+              <div class="bg-white p-3 rounded border">
+                <h4 class="font-semibold text-sm mb-2">🎯 Search Parameters:</h4>
+                <pre class="text-xs bg-gray-50 p-2 rounded overflow-auto">{JSON.stringify(debugInfo.searchParams, null, 2)}</pre>
+              </div>
+              
+              {debugInfo.foundArticlesWithSlug?.length > 0 && (
+                <div class="bg-white p-3 rounded border">
+                  <h4 class="font-semibold text-sm mb-2">📄 Found Articles with Same Slug:</h4>
+                  <pre class="text-xs bg-gray-50 p-2 rounded overflow-auto">{JSON.stringify(debugInfo.foundArticlesWithSlug, null, 2)}</pre>
+                </div>
+              )}
+
+              {debugInfo.recentUserArticles?.length > 0 && (
+                <div class="bg-white p-3 rounded border">
+                  <h4 class="font-semibold text-sm mb-2">📝 Your Recent Articles:</h4>
+                  <pre class="text-xs bg-gray-50 p-2 rounded overflow-auto">{JSON.stringify(debugInfo.recentUserArticles, null, 2)}</pre>
+                </div>
+              )}
+
+              <div class="bg-yellow-50 p-3 rounded border border-yellow-200">
+                <h4 class="font-semibold text-sm mb-2">💡 Πιθανές αιτίες:</h4>
+                <ul class="text-xs space-y-1">
+                  {debugInfo.possibleReasons.map(reason => (
+                    <li>• {reason}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </details>
         )}
         <div class="mt-4 space-x-4">
           <a href={`/${lang || 'el'}/blog`} class="text-blue-600 hover:underline">

@@ -31,9 +31,16 @@ const backText = isEditMode
       {backText}
     </a>
 
-    <h1 class="text-2xl font-bold mb-6">
-      {isEditMode ? '✏️' : '📝'} {pageTitle}
-    </h1>
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold">
+        {isEditMode ? '✏️' : '📝'} {pageTitle}
+      </h1>
+      
+      <!-- Status Indicator -->
+      <div id="statusIndicator" class="px-3 py-1 rounded-full text-sm font-medium border">
+        <!-- Will be populated by JavaScript -->
+      </div>
+    </div>
     
     <div id="feedback"></div>
 
@@ -140,6 +147,16 @@ const backText = isEditMode
           </div>
         </div>
 
+        <!-- Timestamps Display (for edit mode) -->
+        {isEditMode && article && (
+          <div class="bg-gray-50 p-3 rounded text-sm text-gray-600 space-y-1">
+            <div><strong>{isGreek ? 'Δημιουργήθηκε:' : 'Created:'}</strong> {new Date(article.created_at).toLocaleString()}</div>
+            {article.updated_at && (
+              <div><strong>{isGreek ? 'Τελευταία ενημέρωση:' : 'Last updated:'}</strong> {new Date(article.updated_at).toLocaleString()}</div>
+            )}
+          </div>
+        )}
+
         <div class="flex justify-between items-center mt-4">
           <button type="submit" class="bg-[#50c7c2] text-white px-6 py-2 rounded hover:bg-[#3db2b0] transition font-semibold">
             {isEditMode ? (isGreek ? 'Ενημέρωση' : 'Update') : (isGreek ? 'Αποθήκευση' : 'Save')}
@@ -163,7 +180,7 @@ const backText = isEditMode
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script type="module" define:vars={{ isEditMode }}>
+  <script type="module" define:vars={{ isEditMode, isGreek }}>
     const input = document.getElementById('markdownInput');
     const preview = document.getElementById('markdownPreview');
     const form = document.getElementById('articleForm');
@@ -171,6 +188,7 @@ const backText = isEditMode
     const previewImageContainer = document.getElementById('previewImageContainer');
     const translatedContainer = document.getElementById('translationPreview');
     const translatedMarkdown = document.getElementById('translatedMarkdown');
+    const statusIndicator = document.getElementById('statusIndicator');
 
     // Track ALL form fields for comprehensive autosave
     const fieldsToTrack = [
@@ -180,12 +198,41 @@ const backText = isEditMode
     let lastSavedData = {};
     let idleTimer;
 
+    // Status indicator texts
+    const statusTexts = {
+      draft: isGreek ? '📝 Προσχέδιο' : '📝 Draft',
+      scheduled: isGreek ? '⏰ Προγραμματισμένο' : '⏰ Scheduled', 
+      published: isGreek ? '✅ Δημοσιευμένο' : '✅ Published'
+    };
+
     const renderPreview = () => {
       const coverImageUrl = form.cover_image?.value;
       previewImageContainer.innerHTML = coverImageUrl
         ? `<img src="${coverImageUrl}" alt="Cover Image" class="mb-4 rounded shadow max-h-64 object-cover w-full">`
         : '';
       preview.innerHTML = marked.parse(input.value || '');
+    };
+
+    const updateStatusIndicator = () => {
+      const publishDate = new Date(form.publish_date?.value);
+      const isPublished = form.published?.value === 'true';
+      const now = new Date();
+      
+      let status, className;
+      
+      if (!isPublished) {
+        status = statusTexts.draft;
+        className = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      } else if (publishDate > now) {
+        status = statusTexts.scheduled;
+        className = 'bg-blue-100 text-blue-800 border-blue-300';
+      } else {
+        status = statusTexts.published;
+        className = 'bg-green-100 text-green-800 border-green-300';
+      }
+      
+      statusIndicator.textContent = status;
+      statusIndicator.className = `px-3 py-1 rounded-full text-sm font-medium border ${className}`;
     };
 
     const getCurrentData = () => {
@@ -236,13 +283,13 @@ const backText = isEditMode
           }, {});
           
           const now = new Date().toLocaleTimeString();
-          feedback.innerHTML = `<div class="text-xs text-zinc-500 mt-2">💾 Autosaved at ${now}</div>`;
+          feedback.innerHTML = `<div class="text-xs text-zinc-500 mt-2">💾 ${isGreek ? 'Αυτόματη αποθήκευση στις' : 'Autosaved at'} ${now}</div>`;
         } else {
           console.warn('Autosave error:', result.error);
         }
       } catch (err) {
         console.warn('Autosave failed:', err);
-        feedback.innerHTML = `<div class="text-xs text-red-500 mt-2">⚠️ Autosave failed</div>`;
+        feedback.innerHTML = `<div class="text-xs text-red-500 mt-2">⚠️ ${isGreek ? 'Αποτυχία αυτόματης αποθήκευσης' : 'Autosave failed'}</div>`;
       }
     };
 
@@ -289,6 +336,20 @@ const backText = isEditMode
         resetIdleTimer();
       });
 
+      // Status-affecting inputs (publish date and published status)
+      const publishDateInput = form.querySelector('[name="publish_date"]');
+      const publishedSelect = form.querySelector('[name="published"]');
+      
+      publishDateInput?.addEventListener('change', () => {
+        updateStatusIndicator();
+        resetIdleTimer();
+      });
+      
+      publishedSelect?.addEventListener('change', () => {
+        updateStatusIndicator();
+        resetIdleTimer();
+      });
+
       // All form inputs for autosave
       document.querySelectorAll('#articleForm input, #articleForm textarea, #articleForm select').forEach((el) => {
         el.addEventListener('input', resetIdleTimer);
@@ -321,12 +382,15 @@ const backText = isEditMode
         const result = await res.json();
         
         const successMessage = isEditMode 
-          ? '✅ Article updated successfully!' 
-          : '✅ Article saved successfully!';
+          ? (isGreek ? '✅ Το άρθρο ενημερώθηκε επιτυχώς!' : '✅ Article updated successfully!')
+          : (isGreek ? '✅ Το άρθρο αποθηκεύτηκε επιτυχώς!' : '✅ Article saved successfully!');
           
         feedback.innerHTML = `<div class="p-3 rounded font-semibold mb-6 ${result.error ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
           ${result.error ? `❌ ${result.error}` : successMessage}
         </div>`;
+        
+        // Update status indicator after successful save
+        updateStatusIndicator();
         
         // Redirect after successful save/update
         if (!result.error && result.article) {
@@ -336,8 +400,9 @@ const backText = isEditMode
         }
       } catch (err) {
         console.error('Submission error:', err);
+        const errorMessage = isGreek ? '❌ Προέκυψε απροσδόκητο σφάλμα' : '❌ Unexpected error occurred';
         feedback.innerHTML = `<div class="p-3 rounded font-semibold mb-6 bg-red-100 text-red-700">
-          ❌ Unexpected error occurred
+          ${errorMessage}
         </div>`;
       }
     });
@@ -347,7 +412,8 @@ const backText = isEditMode
       const translateData = getCurrentData();
       
       try {
-        feedback.innerHTML = `<div class="text-xs text-blue-500 mt-2">🔄 Translating...</div>`;
+        const translatingMessage = isGreek ? '🔄 Μεταφράζεται...' : '🔄 Translating...';
+        feedback.innerHTML = `<div class="text-xs text-blue-500 mt-2">${translatingMessage}</div>`;
         
         const res = await fetch('/api/translate-article', {
           method: 'POST',
@@ -364,15 +430,18 @@ const backText = isEditMode
         if (!result.error && result.translated) {
           translatedContainer.classList.remove('hidden');
           translatedMarkdown.innerHTML = marked.parse(result.translated);
-          feedback.innerHTML = `<div class="text-xs text-green-500 mt-2">✅ Translation completed</div>`;
+          const successMessage = isGreek ? '✅ Η μετάφραση ολοκληρώθηκε' : '✅ Translation completed';
+          feedback.innerHTML = `<div class="text-xs text-green-500 mt-2">${successMessage}</div>`;
         } else {
           throw new Error(result.error || 'Translation failed');
         }
       } catch (err) {
         console.error('Translation error:', err);
-        translatedMarkdown.innerHTML = '<p class="text-red-600">❌ Translation failed.</p>';
+        const errorMessage = isGreek ? '❌ Η μετάφραση απέτυχε.' : '❌ Translation failed.';
+        translatedMarkdown.innerHTML = `<p class="text-red-600">${errorMessage}</p>`;
         translatedContainer.classList.remove('hidden');
-        feedback.innerHTML = `<div class="text-xs text-red-500 mt-2">❌ Translation failed</div>`;
+        const feedbackMessage = isGreek ? '❌ Η μετάφραση απέτυχε' : '❌ Translation failed';
+        feedback.innerHTML = `<div class="text-xs text-red-500 mt-2">${feedbackMessage}</div>`;
       }
     });
 
@@ -380,5 +449,6 @@ const backText = isEditMode
     initializeData();
     setupEventListeners();
     renderPreview(); // Initial render with any pre-filled content
+    updateStatusIndicator(); // Initial status indicator update
   </script>
 </Layout>
