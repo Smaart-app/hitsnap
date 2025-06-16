@@ -7,22 +7,35 @@ const { slug } = Astro.params
 
 const supabase = createServerClientWithCookies(Astro.cookies)
 
-const { data, error } = await supabase
-  .from('articles')
-  .select('*')
-  .eq('slug', slug)
-  .limit(1)
+const {
+  data: { user },
+} = await supabase.auth.getUser()
 
-console.log('🔍 Slug:', slug)
-console.log('🧾 Supabase result:', data)
-console.log('⚠️ Error:', error)
+let article = null
+let error = null
 
-const article = data?.[0] ?? null
+if (user) {
+  const { data, error: fetchError } = await supabase
+    .from('articles')
+    .select('*')
+    .eq('slug', slug)
+    .eq('user_id', user.id) // ✅ αναγκαστικά δικό σου άρθρο
+    .limit(1)
+
+  article = data?.[0] ?? null
+  error = fetchError
+} else {
+  error = { message: 'Not authenticated' }
+}
 ---
 
 <Layout title={`Επεξεργασία - ${article?.title || slug}`}>
   <main class="max-w-3xl mx-auto px-4 py-16">
-    {article ? (
+    {error ? (
+      <p class="text-red-600 text-center text-lg font-semibold">
+        ⚠️ Σφάλμα: {error.message}
+      </p>
+    ) : article ? (
       <EditorPage article={article} />
     ) : (
       <p class="text-red-600 text-center text-lg font-semibold">

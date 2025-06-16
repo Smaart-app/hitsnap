@@ -1,4 +1,4 @@
-import type { APIRoute } from 'astro';
+import type { APIRoute } from 'astro'; 
 import { createServerClient } from '@supabase/ssr';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
@@ -11,7 +11,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         set: (name, value, options) =>
           cookies.set(name, value, {
             path: '/',
-            httpOnly: false,
+            httpOnly: false, // μπορείς να βάλεις true για μεγαλύτερη ασφάλεια
             secure: true,
             sameSite: 'Lax',
             ...options,
@@ -33,6 +33,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       status: 401,
     });
   }
+
+  // 🧠 Αυτό είναι το μαγικό που έλειπε για να "γράψει" τα cookies:
+  await supabase.auth.getSession();
 
   return new Response(JSON.stringify({ success: true }), {
     status: 200,

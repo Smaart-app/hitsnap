@@ -11,15 +11,22 @@ export async function getStaticPaths() {
 }
 
 const { lang } = Astro.params;
-
 const supabase = createServerClientWithCookies(Astro.cookies);
 
-const now = new Date().toISOString();
+// Έλεγχος αυθεντικοποίησης
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+  return Astro.redirect('/login');
+}
 
 const { data: articles, error } = await supabase
   .from('articles')
   .select('*')
   .eq('lang', lang)
+  .eq('user_id', user.id)
   .order('publish_date', { ascending: false });
 
 const pageTitle = lang === 'en' ? 'Articles | Hitlift' : 'Άρθρα | Hitlift';
@@ -28,7 +35,6 @@ const pageDesc =
     ? 'Explore the latest articles from Hitlift about real estate, strategy and clarity.'
     : 'Δες τα τελευταία άρθρα της Hitlift για ακίνητα, στρατηγική και καθαρή σκέψη.';
 ---
-
 <Layout title={pageTitle} lang={lang}>
   <head slot="head">
     <meta charset="UTF-8" />
@@ -45,24 +51,38 @@ const pageDesc =
       {lang === 'en' ? 'Articles' : 'Άρθρα'}
     </h1>
 
-    {articles?.length === 0 ? (
+    {error ? (
+      <p class="text-red-500 text-center">⚠️ {error.message}</p>
+    ) : articles.length === 0 ? (
       <p class="text-center text-zinc-500">
-        {lang === 'en' ? 'No articles found.' : 'Δεν υπάρχουν άρθρα προς εμφάνιση.'}
+        {lang === 'en'
+          ? 'No articles found.'
+          : 'Δεν υπάρχουν άρθρα προς εμφάνιση.'}
       </p>
     ) : (
       <section class="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {articles.map((article) => (
-          <ArticleCard
-            client:load
-            title={article.title}
-            excerpt={article.excerpt}
-            image={article.cover_image}
-            href={`/${lang}/blog/${article.slug}`}
-            lang={lang}
-            altHref={`/${lang === 'el' ? 'en' : 'el'}/blog/${article.slug}`}
-            status={article.published ? (new Date(article.publish_date) > new Date() ? 'scheduled' : 'published') : 'draft'}
-          />
-        ))}
+        {articles.map((article) => {
+          const altLang = lang === 'el' ? 'en' : 'el';
+          const altHref = `/${altLang}/blog/${article.slug}`;
+          return (
+            <ArticleCard
+              client:load
+              title={article.title}
+              excerpt={article.excerpt}
+              image={article.cover_image}
+              href={`/${lang}/blog/${article.slug}`}
+              lang={lang}
+              altHref={altHref}
+              status={
+                article.published
+                  ? new Date(article.publish_date) > new Date()
+                    ? 'scheduled'
+                    : 'published'
+                  : 'draft'
+              }
+            />
+          );
+        })}
       </section>
     )}
   </main>

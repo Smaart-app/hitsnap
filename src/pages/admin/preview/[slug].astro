@@ -6,16 +6,28 @@ import { createServerClientWithCookies } from '../../../lib/createServerClient.t
 export const prerender = false;
 
 const { slug } = Astro.params;
-
 const supabase = createServerClientWithCookies(Astro.cookies);
 
-const { data: articles, error } = await supabase
-  .from('articles')
-  .select('*')
-  .eq('slug', slug)
-  .limit(1);
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 
-const article = articles?.[0];
+let article = null;
+let error = null;
+
+if (user) {
+  const { data, error: fetchError } = await supabase
+    .from('articles')
+    .select('*')
+    .eq('slug', slug)
+    .eq('user_id', user.id) // ✅ μόνο τα άρθρα σου
+    .limit(1);
+
+  article = data?.[0] ?? null;
+  error = fetchError;
+} else {
+  error = { message: 'Not authenticated' };
+}
 
 function getStatus(article) {
   if (!article?.published) return 'draft';
@@ -26,7 +38,11 @@ function getStatus(article) {
 
 <Layout title={article?.title || 'Preview'}>
   <main class="max-w-3xl mx-auto px-4 py-16">
-    {article ? (
+    {error ? (
+      <p class="text-red-600 text-center text-lg font-semibold">
+        ⚠️ Σφάλμα: {error.message}
+      </p>
+    ) : article ? (
       <>
         <h1 class="text-3xl font-bold mb-4">{article.title}</h1>
         <p class="text-zinc-500 text-sm mb-3">

@@ -16,6 +16,7 @@ export const POST: APIRoute = async (context: APIContext) => {
   const body = await request.json();
 
   const {
+    id,
     slug,
     title,
     content,
@@ -24,49 +25,33 @@ export const POST: APIRoute = async (context: APIContext) => {
     published,
     publish_date,
     cover_image,
-    translation_of
+    translation_of,
   } = body;
 
-  if (!slug || !lang || !title || !content) {
+  if (!id || !slug || !lang || !title || !content) {
     return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
   }
 
-  const publish_datetime = publish_date ? new Date(publish_date) : null;
-
+  // Check ownership before update
   const { data: existing, error: fetchError } = await supabase
     .from('articles')
-    .select('id')
-    .eq('slug', slug)
-    .eq('lang', lang)
-    .eq('user_id', user.id) // ✅ ΜΟΝΟ τα άρθρα σου
+    .select('id, user_id')
+    .eq('id', id)
     .maybeSingle();
 
   if (fetchError) {
     return new Response(JSON.stringify({ error: fetchError.message }), { status: 500 });
   }
 
-  let result;
+  if (!existing || existing.user_id !== user.id) {
+    return new Response(JSON.stringify({ error: 'Not authorized to edit this article' }), { status: 403 });
+  }
 
-  if (existing) {
-    const { error } = await supabase
-      .from('articles')
-      .update({
-        title,
-        content,
-        excerpt,
-        published,
-        publish_date: publish_datetime,
-        cover_image,
-        translation_of
-      })
-      .eq('id', existing.id);
+  const publish_datetime = publish_date ? new Date(publish_date) : null;
 
-    result = error
-      ? { error: error.message }
-      : { success: true, message: 'Article updated' };
-
-  } else {
-    const { error } = await supabase.from('articles').insert({
+  const { error: updateError } = await supabase
+    .from('articles')
+    .update({
       slug,
       title,
       content,
@@ -76,16 +61,19 @@ export const POST: APIRoute = async (context: APIContext) => {
       publish_date: publish_datetime,
       cover_image,
       translation_of,
-      user_id: user.id // ✅ Μπαίνει μόνο κατά το insert
-    });
+    })
+    .eq('id', id);
 
-    result = error
-      ? { error: error.message }
-      : { success: true, message: 'Article created' };
+  if (updateError) {
+    return new Response(JSON.stringify({ error: updateError.message }), { status: 500 });
   }
 
-  return new Response(JSON.stringify(result), {
-    status: result.error ? 500 : 200,
-    headers: { 'Content-Type': 'application/json' }
-  });
+  return new Response(
+    JSON.stringify({
+      success: true,
+      message: 'Article updated',
+      article: { slug, lang },
+    }),
+    { status: 200 }
+  );
 };
