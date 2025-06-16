@@ -172,14 +172,18 @@ const backText = isEditMode
     const translatedContainer = document.getElementById('translationPreview');
     const translatedMarkdown = document.getElementById('translatedMarkdown');
 
-    const fieldsToTrack = ['slug', 'title', 'excerpt', 'content'];
+    // Track ALL form fields for comprehensive autosave
+    const fieldsToTrack = [
+      'slug', 'title', 'excerpt', 'content', 'cover_image', 
+      'publish_date', 'lang', 'translation_of', 'published'
+    ];
     let lastSavedData = {};
     let idleTimer;
 
     const renderPreview = () => {
       const coverImageUrl = form.cover_image?.value;
       previewImageContainer.innerHTML = coverImageUrl
-        ? `<img src="${coverImageUrl}" alt="Cover Image" class="mb-4 rounded shadow max-h-64">`
+        ? `<img src="${coverImageUrl}" alt="Cover Image" class="mb-4 rounded shadow max-h-64 object-cover w-full">`
         : '';
       preview.innerHTML = marked.parse(input.value || '');
     };
@@ -187,9 +191,13 @@ const backText = isEditMode
     const getCurrentData = () => {
       const formData = new FormData(form);
       const data = Object.fromEntries(formData);
+      
+      // Proper type conversion and fallbacks
       data.published = data.published === 'true';
-      data.translation_of = data.translation_of || null;
-      data.publish_date = formData.get('publish_date') || null;
+      data.translation_of = data.translation_of?.trim() || null;
+      data.publish_date = data.publish_date || null;
+      data.cover_image = data.cover_image?.trim() || null;
+      data.excerpt = data.excerpt?.trim() || null;
       
       // Include edit mode info
       if (isEditMode) {
@@ -202,8 +210,9 @@ const backText = isEditMode
 
     const autosave = async () => {
       if (!hasChanged()) return;
+      
       const data = getCurrentData();
-      data.draft = true;
+      data.draft = true; // Mark as draft for autosave
 
       try {
         const endpoint = isEditMode ? '/api/update-article' : '/api/save-article';
@@ -212,63 +221,103 @@ const backText = isEditMode
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        
         const result = await res.json();
         
         if (!result.error) {
+          // Update lastSavedData with ALL tracked fields
           lastSavedData = fieldsToTrack.reduce((acc, key) => {
             acc[key] = data[key];
             return acc;
           }, {});
+          
           const now = new Date().toLocaleTimeString();
           feedback.innerHTML = `<div class="text-xs text-zinc-500 mt-2">💾 Autosaved at ${now}</div>`;
+        } else {
+          console.warn('Autosave error:', result.error);
         }
       } catch (err) {
-        console.warn('Autosave failed', err);
+        console.warn('Autosave failed:', err);
+        feedback.innerHTML = `<div class="text-xs text-red-500 mt-2">⚠️ Autosave failed</div>`;
       }
     };
 
     const hasChanged = () => {
       const current = getCurrentData();
-      return fieldsToTrack.some(field => current[field] !== lastSavedData[field]);
+      return fieldsToTrack.some(field => {
+        const currentValue = current[field];
+        const savedValue = lastSavedData[field];
+        
+        // Handle null/undefined/empty string comparisons
+        if (!currentValue && !savedValue) return false;
+        if (!currentValue || !savedValue) return true;
+        
+        return currentValue !== savedValue;
+      });
     };
 
     const resetIdleTimer = () => {
       clearTimeout(idleTimer);
-      idleTimer = setTimeout(autosave, 5000);
+      idleTimer = setTimeout(autosave, 5000); // Autosave after 5 seconds of inactivity
     };
 
-    // Initialize lastSavedData with current form values for edit mode
-    if (isEditMode) {
+    // Initialize lastSavedData with current form values
+    const initializeData = () => {
       const currentData = getCurrentData();
       lastSavedData = fieldsToTrack.reduce((acc, key) => {
         acc[key] = currentData[key];
         return acc;
       }, {});
-    }
+    };
 
-    input.addEventListener('input', () => {
-      renderPreview();
-      resetIdleTimer();
-    });
+    // Setup event listeners
+    const setupEventListeners = () => {
+      // Markdown input with preview update
+      input.addEventListener('input', () => {
+        renderPreview();
+        resetIdleTimer();
+      });
 
-    document.querySelectorAll('input, textarea, select').forEach((el) => {
-      el.addEventListener('input', resetIdleTimer);
-    });
+      // Cover image input with preview update
+      const coverImageInput = form.querySelector('[name="cover_image"]');
+      coverImageInput?.addEventListener('input', () => {
+        renderPreview();
+        resetIdleTimer();
+      });
 
-    setInterval(autosave, 30000);
-    renderPreview(); // Initial render with pre-filled content
+      // All form inputs for autosave
+      document.querySelectorAll('#articleForm input, #articleForm textarea, #articleForm select').forEach((el) => {
+        el.addEventListener('input', resetIdleTimer);
+        el.addEventListener('change', resetIdleTimer); // Important for select/datetime inputs
+      });
 
+      // Periodic autosave every 30 seconds
+      setInterval(autosave, 30000);
+    };
+
+    // Form submission handler
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const body = getCurrentData();
+      
+      const submitData = getCurrentData();
+      delete submitData.draft; // Remove draft flag for final submission
 
       try {
         const endpoint = isEditMode ? '/api/update-article' : '/api/save-article';
         const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
+          body: JSON.stringify(submitData)
         });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        
         const result = await res.json();
         
         const successMessage = isEditMode 
@@ -279,37 +328,57 @@ const backText = isEditMode
           ${result.error ? `❌ ${result.error}` : successMessage}
         </div>`;
         
-        // Optional: Redirect after successful save/update
+        // Redirect after successful save/update
         if (!result.error && result.article) {
           setTimeout(() => {
             window.location.href = `/${result.article.lang}/blog/${result.article.slug}`;
           }, 1500);
         }
       } catch (err) {
+        console.error('Submission error:', err);
         feedback.innerHTML = `<div class="p-3 rounded font-semibold mb-6 bg-red-100 text-red-700">
-          ❌ Unexpected error
+          ❌ Unexpected error occurred
         </div>`;
       }
     });
 
-    // Translation logic (preserved)
+    // Translation functionality
     document.getElementById('translateBtn')?.addEventListener('click', async () => {
-      const body = getCurrentData();
+      const translateData = getCurrentData();
+      
       try {
+        feedback.innerHTML = `<div class="text-xs text-blue-500 mt-2">🔄 Translating...</div>`;
+        
         const res = await fetch('/api/translate-article', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
+          body: JSON.stringify(translateData)
         });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        
         const result = await res.json();
+        
         if (!result.error && result.translated) {
           translatedContainer.classList.remove('hidden');
           translatedMarkdown.innerHTML = marked.parse(result.translated);
+          feedback.innerHTML = `<div class="text-xs text-green-500 mt-2">✅ Translation completed</div>`;
+        } else {
+          throw new Error(result.error || 'Translation failed');
         }
       } catch (err) {
+        console.error('Translation error:', err);
         translatedMarkdown.innerHTML = '<p class="text-red-600">❌ Translation failed.</p>';
         translatedContainer.classList.remove('hidden');
+        feedback.innerHTML = `<div class="text-xs text-red-500 mt-2">❌ Translation failed</div>`;
       }
     });
+
+    // Initialize everything
+    initializeData();
+    setupEventListeners();
+    renderPreview(); // Initial render with any pre-filled content
   </script>
 </Layout>

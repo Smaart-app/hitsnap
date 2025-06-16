@@ -31,14 +31,17 @@ export const POST: APIRoute = async (context: APIContext) => {
     return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
   }
 
+  const cleanedSlug = slug.trim(); // 💥 η κρίσιμη αλλαγή
   const publish_datetime = publish_date ? new Date(publish_date) : null;
+  const now = new Date().toISOString();
 
+  // Έλεγχος αν υπάρχει ήδη άρθρο με ίδιο slug/γλώσσα/χρήστη
   const { data: existing, error: fetchError } = await supabase
     .from('articles')
     .select('id')
-    .eq('slug', slug)
+    .eq('slug', cleanedSlug)
     .eq('lang', lang)
-    .eq('user_id', user.id) // ✅ ΜΟΝΟ τα άρθρα σου
+    .eq('user_id', user.id)
     .maybeSingle();
 
   if (fetchError) {
@@ -57,7 +60,9 @@ export const POST: APIRoute = async (context: APIContext) => {
         published,
         publish_date: publish_datetime,
         cover_image,
-        translation_of
+        translation_of,
+        updated_at: now,
+        user_id: user.id
       })
       .eq('id', existing.id);
 
@@ -67,7 +72,7 @@ export const POST: APIRoute = async (context: APIContext) => {
 
   } else {
     const { error } = await supabase.from('articles').insert({
-      slug,
+      slug: cleanedSlug,
       title,
       content,
       excerpt,
@@ -76,7 +81,8 @@ export const POST: APIRoute = async (context: APIContext) => {
       publish_date: publish_datetime,
       cover_image,
       translation_of,
-      user_id: user.id // ✅ Μπαίνει μόνο κατά το insert
+      user_id: user.id,
+      updated_at: now
     });
 
     result = error

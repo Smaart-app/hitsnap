@@ -1,46 +1,165 @@
 ---
-import Layout from '../../../layouts/Layout.astro'
-import EditorPage from '../../../components/editor/EditorPage.astro'
-import { createServerClientWithCookies } from '../../../lib/createServerClient.ts'
+import Layout from '../../../layouts/Layout.astro';
+import EditorPage from '../../../components/editor/EditorPage.astro';
+import { createServerClientWithCookies } from '../../../lib/createServerClient.ts';
 
-const { slug } = Astro.params
+export const prerender = false;
 
-const supabase = createServerClientWithCookies(Astro.cookies)
+const { slug, lang } = Astro.params;
+const supabase = createServerClientWithCookies(Astro.cookies);
 
 const {
   data: { user },
-} = await supabase.auth.getUser()
+} = await supabase.auth.getUser();
 
-let article = null
-let error = null
+let article = null;
+let error = null;
+let debugInfo = null;
 
 if (user) {
-  const { data, error: fetchError } = await supabase
+  // Προσπαθούμε να βρούμε το άρθρο με slug + lang + user
+  const { data: found, error: fetchError } = await supabase
     .from('articles')
     .select('*')
     .eq('slug', slug)
-    .eq('user_id', user.id) // ✅ αναγκαστικά δικό σου άρθρο
-    .limit(1)
+    .eq('lang', lang)
+    .eq('user_id', user.id)
+    .maybeSingle();
 
-  article = data?.[0] ?? null
-  error = fetchError
+  article = found ?? null;
+  error = fetchError;
+
+  // Debug info (μόνο σε dev περιβάλλον)
+  if (!article && process.env.NODE_ENV === 'development') {
+    const { data: allWithSlug } = await supabase
+      .from('articles')
+      .select('id, slug, title, published, user_id, created_at, updated_at')
+      .eq('slug', slug);
+    
+    const { data: allUserArticles } = await supabase
+      .from('articles')
+      .select('id, slug, title, published, user_id, created_at, updated_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(10);
+    
+    debugInfo = {
+      currentUserId: user.id,
+      searchedSlug: slug,
+      articlesWithThisSlug: allWithSlug,
+      recentUserArticles: allUserArticles,
+      totalUserArticles: allUserArticles?.length || 0
+    };
+  }
 } else {
-  error = { message: 'Not authenticated' }
+  error = { message: 'Not authenticated' };
 }
 ---
 
-<Layout title={`Επεξεργασία - ${article?.title || slug}`}>
-  <main class="max-w-3xl mx-auto px-4 py-16">
+<Layout title={`Επεξεργασία - ${article?.title || slug}`} lang={lang || article?.lang || 'el'} user={user}>
+  <main class="max-w-6xl mx-auto px-4 py-12">
     {error ? (
-      <p class="text-red-600 text-center text-lg font-semibold">
-        ⚠️ Σφάλμα: {error.message}
-      </p>
+      <div class="text-center">
+        <p class="text-red-600 text-lg font-semibold mb-4">
+          ⚠️ Σφάλμα: {error.message}
+        </p>
+        <a href={`/${lang || 'el'}/blog`} class="text-blue-600 hover:underline">
+          ← Επιστροφή στα άρθρα
+        </a>
+      </div>
     ) : article ? (
-      <EditorPage article={article} />
+      <>
+        {/* Quick Info Bar */}
+        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div class="flex justify-between items-center text-sm">
+            <div class="flex items-center gap-4">
+              <span class="font-semibold">✏️ Επεξεργασία: {article.title}</span>
+              <span class={`px-2 py-1 rounded text-xs font-medium ${
+                article.published 
+                  ? 'bg-green-100 text-green-800' 
+                  : 'bg-yellow-100 text-yellow-800'
+              }`}>
+                {article.published ? '✅ Δημοσιευμένο' : '📝 Πρόχειρο'}
+              </span>
+            </div>
+            <a 
+              href={`/${lang || article.lang || 'el'}/blog/preview/${article.slug}`}
+              class="text-blue-600 hover:underline"
+              target="_blank"
+            >
+              👁️ Προεπισκόπηση
+            </a>
+          </div>
+        </div>
+
+        {/* Editor Component */}
+        <EditorPage article={article} />
+      </>
     ) : (
-      <p class="text-red-600 text-center text-lg font-semibold">
-        ❌ Δεν βρέθηκε άρθρο με slug: <code>{slug}</code>
-      </p>
+      <div class="text-center">
+        <p class="text-red-600 text-lg font-semibold mb-4">
+          ❌ Δεν βρέθηκε άρθρο με slug: <code class="bg-gray-100 px-2 py-1 rounded">{slug}</code>
+        </p>
+
+        {/* Debug Information (Development Only) */}
+        {debugInfo && (
+          <div class="mt-8 mx-auto max-w-4xl">
+            <details class="bg-gray-50 border rounded-lg p-4 text-left">
+              <summary class="cursor-pointer font-semibold text-gray-700 hover:text-gray-900">
+                🔍 Debug Information (Click to expand)
+              </summary>
+              <div class="mt-4 space-y-4">
+                <div>
+                  <h4 class="font-semibold text-sm text-gray-700">Current User ID:</h4>
+                  <code class="text-xs bg-white p-2 rounded border block">{debugInfo.currentUserId}</code>
+                </div>
+                
+                <div>
+                  <h4 class="font-semibold text-sm text-gray-700">Searched Slug:</h4>
+                  <code class="text-xs bg-white p-2 rounded border block">{debugInfo.searchedSlug}</code>
+                </div>
+
+                <div>
+                  <h4 class="font-semibold text-sm text-gray-700">Articles with this slug ({debugInfo.articlesWithThisSlug?.length || 0}):</h4>
+                  <pre class="text-xs bg-white p-2 rounded border overflow-auto max-h-40">{JSON.stringify(debugInfo.articlesWithThisSlug, null, 2)}</pre>
+                </div>
+
+                <div>
+                  <h4 class="font-semibold text-sm text-gray-700">Your recent articles ({debugInfo.totalUserArticles}):</h4>
+                  <pre class="text-xs bg-white p-2 rounded border overflow-auto max-h-60">{JSON.stringify(debugInfo.recentUserArticles, null, 2)}</pre>
+                </div>
+              </div>
+            </details>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div class="mt-6 space-x-4">
+          <a 
+            href={`/${lang || 'el'}/blog`} 
+            class="inline-block bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
+          >
+            ← Επιστροφή στα άρθρα
+          </a>
+          <a 
+            href={`/${lang || 'el'}/admin/create`}
+            class="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+          >
+            📝 Δημιουργία νέου άρθρου
+          </a>
+        </div>
+
+        {/* Suggestion */}
+        <div class="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
+          <p class="font-semibold text-yellow-800 mb-2">💡 Πιθανές αιτίες:</p>
+          <ul class="text-yellow-700 space-y-1 text-left max-w-md mx-auto">
+            <li>• Το άρθρο δεν αποθηκεύτηκε με το σωστό user_id</li>
+            <li>• Το slug άλλαξε κατά την αποθήκευση</li>
+            <li>• Το άρθρο διαγράφηκε</li>
+            <li>• Πρόβλημα με το autosave</li>
+          </ul>
+        </div>
+      </div>
     )}
   </main>
 </Layout>
