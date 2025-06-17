@@ -5,7 +5,9 @@ import { createServerClientWithCookies } from '../../../lib/createServerClient.t
 
 export const prerender = false;
 
-const { slug, lang } = Astro.params;
+const slug = Astro.params.slug;
+const lang = Astro.url?.searchParams?.get('lang') || 'el'; // λαμβάνεται από το query param
+
 const supabase = createServerClientWithCookies(Astro.cookies);
 
 const {
@@ -16,8 +18,9 @@ let article = null;
 let error = null;
 let debugInfo = null;
 
-if (user) {
-  // Προσπαθούμε να βρούμε το άρθρο με slug + lang + user
+if (!slug) {
+  error = { message: 'Λείπει το slug από τη διαδρομή.' };
+} else if (user) {
   const { data: found, error: fetchError } = await supabase
     .from('articles')
     .select('*')
@@ -29,47 +32,45 @@ if (user) {
   article = found ?? null;
   error = fetchError;
 
-  // Debug info (μόνο σε dev περιβάλλον)
-  if (!article && process.env.NODE_ENV === 'development') {
+  if (!article && import.meta.env.DEV) {
     const { data: allWithSlug } = await supabase
       .from('articles')
       .select('id, slug, title, published, user_id, created_at, updated_at')
       .eq('slug', slug);
-    
+
     const { data: allUserArticles } = await supabase
       .from('articles')
       .select('id, slug, title, published, user_id, created_at, updated_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(10);
-    
+
     debugInfo = {
       currentUserId: user.id,
       searchedSlug: slug,
       articlesWithThisSlug: allWithSlug,
       recentUserArticles: allUserArticles,
-      totalUserArticles: allUserArticles?.length || 0
+      totalUserArticles: allUserArticles?.length || 0,
     };
   }
 } else {
-  error = { message: 'Not authenticated' };
+  error = { message: 'Δεν έχεις συνδεθεί.' };
 }
 ---
 
-<Layout title={`Επεξεργασία - ${article?.title || slug}`} lang={lang || article?.lang || 'el'} user={user}>
+<Layout title={`Επεξεργασία - ${article?.title || slug}`} lang={lang} user={user}>
   <main class="max-w-6xl mx-auto px-4 py-12">
     {error ? (
       <div class="text-center">
         <p class="text-red-600 text-lg font-semibold mb-4">
           ⚠️ Σφάλμα: {error.message}
         </p>
-        <a href={`/${lang || 'el'}/blog`} class="text-blue-600 hover:underline">
+        <a href={`/${lang}/blog`} class="text-blue-600 hover:underline">
           ← Επιστροφή στα άρθρα
         </a>
       </div>
     ) : article ? (
       <>
-        {/* Quick Info Bar */}
         <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <div class="flex justify-between items-center text-sm">
             <div class="flex items-center gap-4">
@@ -83,7 +84,7 @@ if (user) {
               </span>
             </div>
             <a 
-              href={`/${lang || article.lang || 'el'}/blog/preview/${article.slug}`}
+              href={`/${lang}/blog/preview/${article.slug}`}
               class="text-blue-600 hover:underline"
               target="_blank"
             >
@@ -92,7 +93,6 @@ if (user) {
           </div>
         </div>
 
-        {/* Editor Component */}
         <EditorPage article={article} />
       </>
     ) : (
@@ -101,7 +101,6 @@ if (user) {
           ❌ Δεν βρέθηκε άρθρο με slug: <code class="bg-gray-100 px-2 py-1 rounded">{slug}</code>
         </p>
 
-        {/* Debug Information (Development Only) */}
         {debugInfo && (
           <div class="mt-8 mx-auto max-w-4xl">
             <details class="bg-gray-50 border rounded-lg p-4 text-left">
@@ -133,23 +132,21 @@ if (user) {
           </div>
         )}
 
-        {/* Action Buttons */}
         <div class="mt-6 space-x-4">
           <a 
-            href={`/${lang || 'el'}/blog`} 
+            href={`/${lang}/blog`} 
             class="inline-block bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
           >
             ← Επιστροφή στα άρθρα
           </a>
           <a 
-            href={`/${lang || 'el'}/admin/create`}
+            href={`/${lang}/admin/create`}
             class="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
           >
             📝 Δημιουργία νέου άρθρου
           </a>
         </div>
 
-        {/* Suggestion */}
         <div class="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
           <p class="font-semibold text-yellow-800 mb-2">💡 Πιθανές αιτίες:</p>
           <ul class="text-yellow-700 space-y-1 text-left max-w-md mx-auto">

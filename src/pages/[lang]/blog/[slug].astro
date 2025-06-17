@@ -1,6 +1,4 @@
 ---
-// src/pages/[lang]/blog/[slug].astro
-
 import Layout from '../../../layouts/Layout.astro';
 import Markdown from '../../../components/Markdown.astro';
 import { createServerClientReadOnly } from '../../../lib/createServerClient.ts';
@@ -10,7 +8,19 @@ export const client = 'load';
 
 const { slug, lang } = Astro.params;
 
+// Validation: Ensure required params exist
+if (!slug || !lang) {
+  return new Response(null, {
+    status: 404,
+    statusText: 'Invalid parameters'
+  });
+}
+
 const supabase = createServerClientReadOnly(Astro.cookies);
+
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 
 const { data: articles } = await supabase
   .from('articles')
@@ -34,7 +44,7 @@ if (!article) {
 
   const alt = altArticles?.[0];
 
-  if (alt && alt.slug !== slug) {
+  if (alt && alt.slug === slug) {
     return Astro.redirect(`/${altLang}/blog/${alt.slug}`, 302);
   }
 
@@ -121,10 +131,21 @@ const markdown = article?.content ?? '';
       </div>
     )}
 
-    <div class="mt-12 text-center mb-24">
+    <div class="mt-12 text-center mb-8">
       <a href={`/${lang}/blog`} class="inline-block text-[#50c7c2] hover:underline">
         ← {lang === 'el' ? 'Επιστροφή στα άρθρα' : 'Back to blog'}
       </a>
     </div>
+
+    {user && article && (
+      <div class="text-center">
+        <a
+         href={`/admin/editor/${article.slug}?lang=${article.lang}`}
+          class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+        >
+          ✏️ {lang === 'el' ? 'Επεξεργασία' : 'Edit'}
+        </a>
+      </div>
+    )}
   </section>
 </Layout>
