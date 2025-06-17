@@ -1,0 +1,75 @@
+---
+import Layout from '../../../../layouts/Layout.astro';
+import { createServerClientWithCookies } from '../../../../lib/createServerClient.ts';
+
+export const prerender = false;
+
+const supabase = createServerClientWithCookies(Astro.cookies);
+
+const { data: articles, error } = await supabase
+  .from('articles')
+  .select('*')
+  .order('created_at', { ascending: false });
+
+function getStatus(article) {
+  if (!article?.published) return 'draft';
+  if (new Date(article.publish_date) > new Date()) return 'scheduled';
+  return 'published';
+}
+---
+
+<Layout title="Προεπισκοπήσεις Άρθρων">
+  <main class="max-w-6xl mx-auto px-4 py-16">
+    <h1 class="text-2xl font-bold mb-8">📋 Όλα τα άρθρα</h1>
+
+    {articles?.length === 0 ? (
+      <p class="text-zinc-500 text-center">Δεν υπάρχουν άρθρα.</p>
+    ) : (
+      <div class="space-y-6">
+        {articles.map((article) => {
+          const lang = article.lang ?? 'el';
+          return (
+            <div
+              class="p-4 border rounded shadow-sm flex items-center justify-between"
+              key={article.id}
+            >
+              <div>
+                <h2 class="text-lg font-semibold">{article.title}</h2>
+                <p class="text-sm text-zinc-500">
+                  🗓️ {new Date(article.publish_date).toLocaleString('el-GR')} | 🏷️{' '}
+                  {lang.toUpperCase()} | 📌{' '}
+                  {getStatus(article) === 'draft' && '📝 Πρόχειρο'}
+                  {getStatus(article) === 'scheduled' && '⏳ Προγραμματισμένο'}
+                  {getStatus(article) === 'published' && '✅ Δημοσιευμένο'}
+                </p>
+
+                <pre class="text-xs bg-gray-100 text-gray-800 mt-2 p-2 rounded max-w-md">
+slug: {article.slug}
+                </pre>
+              </div>
+
+              <div class="flex gap-3">
+                {article.slug && (
+                  <>
+                    <a
+                      href={`/${lang}/blog/${article.slug}`}
+                      class="text-sm text-blue-600 hover:underline"
+                    >
+                      👁️ Προβολή
+                    </a>
+                    <a
+                      href={`/${lang}/admin/edit/${article.slug}`}
+                      class="text-sm text-green-600 hover:underline"
+                    >
+                      ✏️ Επεξεργασία
+                    </a>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </main>
+</Layout>

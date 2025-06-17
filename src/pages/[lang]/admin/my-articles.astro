@@ -1,7 +1,7 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import ArticleCard from '../../components/ArticleCard.jsx';
-import { createServerClientWithCookies } from '../../lib/createServerClient.ts';
+import Layout from '../../../layouts/Layout.astro';
+import ArticleCard from '../../../components/ArticleCard.jsx';
+import { createServerClientWithCookies } from '../../../lib/createServerClient.ts';
 
 export async function getStaticPaths() {
   return [
@@ -35,6 +35,7 @@ const pageDesc =
     ? 'Explore the latest articles from Hitlift about real estate, strategy and clarity.'
     : 'Δες τα τελευταία άρθρα της Hitlift για ακίνητα, στρατηγική και καθαρή σκέψη.';
 ---
+
 <Layout title={pageTitle} lang={lang}>
   <head slot="head">
     <meta charset="UTF-8" />

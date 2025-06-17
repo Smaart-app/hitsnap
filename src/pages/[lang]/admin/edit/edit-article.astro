@@ -1,6 +1,6 @@
 ---
-import Layout from '../../../layouts/Layout.astro';
-import { createServerClientWithCookies } from '../../../lib/createServerClient.ts';
+import Layout from '../../../../layouts/Layout.astro';
+import { createServerClientWithCookies } from '../../../../lib/createServerClient.ts';
 
 export const prerender = false;
 
@@ -31,7 +31,7 @@ const { data, error: fetchError } = await supabase
   .from('articles')
   .select('*')
   .eq('slug', slug)
-  .eq('user_id', user.id) // Επιτρέπει μόνο δικά σου άρθρα
+  .eq('user_id', user.id)
   .maybeSingle();
 
 console.log('[EDITOR] Supabase query result:', data);
@@ -135,8 +135,37 @@ const isGreek = article?.lang === 'el';
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script type="module">
-    // (Διατηρώ ακριβώς όλο το script που μου έστειλες χωρίς αλλαγές)
-    // γιατί είναι απολύτως λειτουργικό και έξυπνα δομημένο
-    // Αν χρειαστείς fallback μετάφρασης ή πρόταση, το προσθέτουμε ξεχωριστά
+    const input = document.getElementById('markdownInput');
+    const preview = document.getElementById('markdownPreview');
+    const translated = document.getElementById('translatedMarkdown');
+    const previewContainer = document.getElementById('translationPreview');
+
+    function renderMarkdown(text, target) {
+      target.innerHTML = marked.parse(text);
+    }
+
+    input.addEventListener('input', async () => {
+      renderMarkdown(input.value, preview);
+
+      const lang = document.documentElement.lang || 'el';
+      const isGreek = lang === 'el';
+
+      try {
+        const response = await fetch('https://api.mymemory.translated.net/get?q=' +
+          encodeURIComponent(input.value.slice(0, 500)) +
+          '&langpair=' + (isGreek ? 'el|en' : 'en|el'));
+
+        const data = await response.json();
+        if (data?.responseData?.translatedText) {
+          previewContainer.classList.remove('hidden');
+          renderMarkdown(data.responseData.translatedText, translated);
+        }
+      } catch (err) {
+        console.warn('Translation failed:', err);
+      }
+    });
+
+    // Αρχική απόδοση
+    renderMarkdown(input.value, preview);
   </script>
 </Layout>

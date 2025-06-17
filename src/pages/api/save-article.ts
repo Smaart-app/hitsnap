@@ -1,97 +1,75 @@
-import type { APIRoute, APIContext } from 'astro';
-import { createServerClientWithCookies } from '../../lib/createServerClient';
+import type { APIRoute } from "astro";
+import { createServerClientWithCookies } from "../../lib/createServerClient.ts";
 
-export const POST: APIRoute = async (context: APIContext) => {
-  const { request, cookies } = context;
+export const prerender = false;
+
+// 🍃 Γεννήτρια slug από τίτλο
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export const POST: APIRoute = async ({ request, cookies }) => {
   const supabase = createServerClientWithCookies(cookies);
+  const body = await request.json();
+
+  const {
+    title,
+    excerpt,
+    content,
+    cover_image,
+    lang,
+    published,
+  } = body;
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
-  const body = await request.json();
+  // 🔧 Δημιουργία slug με γλώσσα
+  const baseSlug = generateSlug(title);
+  let fullSlug = `${baseSlug}-${lang}`;
 
-  const {
-    slug,
-    title,
-    content,
-    excerpt,
-    lang,
-    published,
-    publish_date,
-    cover_image,
-    translation_of
-  } = body;
+  // 🔍 Έλεγχος για υπάρχον slug
+  let index = 1;
+  while (true) {
+    const { data: existing } = await supabase
+      .from("articles")
+      .select("id")
+      .eq("slug", fullSlug)
+      .eq("user_id", user.id)
+      .maybeSingle();
 
-  if (!slug || !lang || !title || !content) {
-    return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
+    if (!existing) break; // Δεν υπάρχει, μπορούμε να το χρησιμοποιήσουμε
+    fullSlug = `${baseSlug}-${lang}-${index}`;
+    index++;
   }
 
-  const cleanedSlug = slug.trim(); // 💥 η κρίσιμη αλλαγή
-  const publish_datetime = publish_date ? new Date(publish_date) : null;
-  const now = new Date().toISOString();
-
-  // Έλεγχος αν υπάρχει ήδη άρθρο με ίδιο slug/γλώσσα/χρήστη
-  const { data: existing, error: fetchError } = await supabase
-    .from('articles')
-    .select('id')
-    .eq('slug', cleanedSlug)
-    .eq('lang', lang)
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  if (fetchError) {
-    return new Response(JSON.stringify({ error: fetchError.message }), { status: 500 });
-  }
-
-  let result;
-
-  if (existing) {
-    const { error } = await supabase
-      .from('articles')
-      .update({
-        title,
-        content,
-        excerpt,
-        published,
-        publish_date: publish_datetime,
-        cover_image,
-        translation_of,
-        updated_at: now,
-        user_id: user.id
-      })
-      .eq('id', existing.id);
-
-    result = error
-      ? { error: error.message }
-      : { success: true, message: 'Article updated' };
-
-  } else {
-    const { error } = await supabase.from('articles').insert({
-      slug: cleanedSlug,
+  const { error } = await supabase.from("articles").insert([
+    {
+      user_id: user.id,
       title,
-      content,
+      slug: fullSlug,
       excerpt,
+      content,
+      cover_image,
       lang,
       published,
-      publish_date: publish_datetime,
-      cover_image,
-      translation_of,
-      user_id: user.id,
-      updated_at: now
-    });
+      publish_date: new Date().toISOString(),
+    },
+  ]);
 
-    result = error
-      ? { error: error.message }
-      : { success: true, message: 'Article created' };
+  if (error) {
+    return new Response(error.message, { status: 500 });
   }
 
-  return new Response(JSON.stringify(result), {
-    status: result.error ? 500 : 200,
-    headers: { 'Content-Type': 'application/json' }
-  });
+  return new Response("OK");
 };

@@ -1,9 +1,0 @@
----
-export const prerender = false;
-import { requireUser } from '../../../lib/requireUser';
-import EditorPage from '../../../components/editor/EditorPage.astro';
-
-const user = await requireUser(Astro);
----
-
-<EditorPage user={user} />

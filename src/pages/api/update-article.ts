@@ -1,79 +1,77 @@
-import type { APIRoute, APIContext } from 'astro';
-import { createServerClientWithCookies } from '../../lib/createServerClient';
+import type { APIRoute } from "astro";
+import { createServerClientWithCookies } from "../../lib/createServerClient.ts";
 
-export const POST: APIRoute = async (context: APIContext) => {
-  const { request, cookies } = context;
+export const prerender = false;
+
+// 🍃 Γεννήτρια slug από τίτλο
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export const POST: APIRoute = async ({ request, cookies }) => {
   const supabase = createServerClientWithCookies(cookies);
+  const body = await request.json();
+
+  const {
+    id,
+    title,
+    excerpt,
+    content,
+    cover_image,
+    lang,
+    published,
+  } = body;
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
-  const body = await request.json();
+  // 🔧 Δημιουργία slug με γλώσσα
+  const baseSlug = generateSlug(title);
+  let fullSlug = `${baseSlug}-${lang}`;
 
-  const {
-    id,
-    slug,
-    title,
-    content,
-    excerpt,
-    lang,
-    published,
-    publish_date,
-    cover_image,
-    translation_of,
-  } = body;
+  // 🔍 Έλεγχος για conflict (εξαιρώντας το ίδιο άρθρο)
+  let index = 1;
+  while (true) {
+    const { data: existing } = await supabase
+      .from("articles")
+      .select("id")
+      .eq("slug", fullSlug)
+      .eq("user_id", user.id)
+      .neq("id", id)
+      .maybeSingle();
 
-  if (!id || !slug || !lang || !title || !content) {
-    return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
+    if (!existing) break;
+    fullSlug = `${baseSlug}-${lang}-${index}`;
+    index++;
   }
 
-  // Check ownership before update
-  const { data: existing, error: fetchError } = await supabase
-    .from('articles')
-    .select('id, user_id')
-    .eq('id', id)
-    .maybeSingle();
-
-  if (fetchError) {
-    return new Response(JSON.stringify({ error: fetchError.message }), { status: 500 });
-  }
-
-  if (!existing || existing.user_id !== user.id) {
-    return new Response(JSON.stringify({ error: 'Not authorized to edit this article' }), { status: 403 });
-  }
-
-  const publish_datetime = publish_date ? new Date(publish_date) : null;
-
-  const { error: updateError } = await supabase
-    .from('articles')
+  const { error } = await supabase
+    .from("articles")
     .update({
-      slug,
       title,
-      content,
+      slug: fullSlug,
       excerpt,
+      content,
+      cover_image,
       lang,
       published,
-      publish_date: publish_datetime,
-      cover_image,
-      translation_of,
     })
-    .eq('id', id);
+    .eq("id", id)
+    .eq("user_id", user.id);
 
-  if (updateError) {
-    return new Response(JSON.stringify({ error: updateError.message }), { status: 500 });
+  if (error) {
+    return new Response(error.message, { status: 500 });
   }
 
-  return new Response(
-    JSON.stringify({
-      success: true,
-      message: 'Article updated',
-      article: { slug, lang },
-    }),
-    { status: 200 }
-  );
+  return new Response("OK");
 };

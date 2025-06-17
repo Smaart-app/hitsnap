@@ -85,10 +85,10 @@ if (tab === 'published') {
               ? new Date(article.publish_date).toLocaleDateString(locale)
               : '—';
 
-            const editUrl = `/admin/editor/${article.slug}`;
+            const editUrl = `/${article.lang}/admin/editor/${article.slug}`;
             const altLang = article.lang === 'el' ? 'en' : 'el';
             const baseLang = article.lang;
-            const translateUrl = '/admin/editor/' + article.slug + '?base_lang=' + baseLang + '&lang=' + altLang;
+            const translateUrl = `/${altLang}/admin/editor/${article.slug}?base_lang=${baseLang}&lang=${altLang}`;
 
             return (
               <tr class="border-b border-gray-100 hover:bg-gray-50">
