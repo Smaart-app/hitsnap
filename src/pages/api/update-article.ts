@@ -1,9 +1,9 @@
 import type { APIRoute } from "astro";
 import { createServerClientWithCookies } from "../../lib/createServerClient.ts";
+import { createAdminClientNoCookies } from "../../lib/createAdminClientNoCookies.ts";
 
 export const prerender = false;
 
-// 🍃 Γεννήτρια slug από τίτλο
 function generateSlug(title: string): string {
   return title
     .toLowerCase()
@@ -14,19 +14,10 @@ function generateSlug(title: string): string {
 }
 
 export const POST: APIRoute = async ({ request, cookies }) => {
-  const supabase = createServerClientWithCookies(cookies);
   const body = await request.json();
+  const { id, title, excerpt, content, cover_image, lang, published } = body;
 
-  const {
-    id,
-    title,
-    excerpt,
-    content,
-    cover_image,
-    lang,
-    published,
-  } = body;
-
+  const supabase = createServerClientWithCookies(cookies);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -35,18 +26,36 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  // 🔧 Δημιουργία slug με γλώσσα
+  const admin = createAdminClientNoCookies();
+
+  // 👉 Φέρνουμε πρώτα το άρθρο
+  const { data: article, error: fetchError } = await admin
+    .from("articles")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (fetchError || !article) {
+    return new Response("❌ Δεν βρέθηκε άρθρο", { status: 404 });
+  }
+
+  // 🔒 Επίτρεψε update μόνο αν είσαι ο δημιουργός
+  if (article.user_id !== user.id) {
+    return new Response("🚫 Δεν έχεις δικαίωμα επεξεργασίας αυτού του άρθρου", {
+      status: 403,
+    });
+  }
+
+  // 🧠 Δημιουργία slug ΜΟΝΟ αν άλλαξε ο τίτλος
   const baseSlug = generateSlug(title);
   let fullSlug = `${baseSlug}-${lang}`;
-
-  // 🔍 Έλεγχος για conflict (εξαιρώντας το ίδιο άρθρο)
   let index = 1;
+
   while (true) {
-    const { data: existing } = await supabase
+    const { data: existing } = await admin
       .from("articles")
       .select("id")
       .eq("slug", fullSlug)
-      .eq("user_id", user.id)
       .neq("id", id)
       .maybeSingle();
 
@@ -55,7 +64,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     index++;
   }
 
-  const { error } = await supabase
+  const { error: updateError } = await admin
     .from("articles")
     .update({
       title,
@@ -65,13 +74,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       cover_image,
       lang,
       published,
+      updated_at: new Date().toISOString(),
     })
-    .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("id", id);
 
-  if (error) {
-    return new Response(error.message, { status: 500 });
+  if (updateError) {
+    return new Response(updateError.message, { status: 500 });
   }
 
-  return new Response("OK");
+  return new Response("✅ Το άρθρο ενημερώθηκε");
 };

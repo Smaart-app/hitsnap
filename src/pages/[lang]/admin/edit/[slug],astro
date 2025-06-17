@@ -1,4 +1,5 @@
 ---
+// src/pages/admin/edit/[slug].astro
 import { createAdminClientNoCookies } from "../../../lib/createAdminClientNoCookies.ts";
 
 export const prerender = false;
@@ -12,14 +13,6 @@ if (!slug || typeof slug !== "string") {
 }
 
 const supabase = createAdminClientNoCookies();
-
-const {
-  data: { user },
-} = await supabase.auth.getUser();
-
-if (!user) {
-  return Astro.redirect('/login', 302);
-}
 
 const { data: article, error } = await supabase
   .from("articles")

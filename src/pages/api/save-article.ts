@@ -1,9 +1,9 @@
 import type { APIRoute } from "astro";
 import { createServerClientWithCookies } from "../../lib/createServerClient.ts";
+import { createAdminClientNoCookies } from "../../lib/createAdminClientNoCookies.ts";
 
 export const prerender = false;
 
-// 🍃 Γεννήτρια slug από τίτλο
 function generateSlug(title: string): string {
   return title
     .toLowerCase()
@@ -14,7 +14,6 @@ function generateSlug(title: string): string {
 }
 
 export const POST: APIRoute = async ({ request, cookies }) => {
-  const supabase = createServerClientWithCookies(cookies);
   const body = await request.json();
 
   const {
@@ -26,6 +25,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     published,
   } = body;
 
+  const supabase = createServerClientWithCookies(cookies);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -34,26 +34,25 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  // 🔧 Δημιουργία slug με γλώσσα
+  const admin = createAdminClientNoCookies();
+
   const baseSlug = generateSlug(title);
   let fullSlug = `${baseSlug}-${lang}`;
-
-  // 🔍 Έλεγχος για υπάρχον slug
   let index = 1;
+
   while (true) {
-    const { data: existing } = await supabase
+    const { data: existing } = await admin
       .from("articles")
       .select("id")
       .eq("slug", fullSlug)
-      .eq("user_id", user.id)
       .maybeSingle();
 
-    if (!existing) break; // Δεν υπάρχει, μπορούμε να το χρησιμοποιήσουμε
+    if (!existing) break;
     fullSlug = `${baseSlug}-${lang}-${index}`;
     index++;
   }
 
-  const { error } = await supabase.from("articles").insert([
+  const { error } = await admin.from("articles").insert([
     {
       user_id: user.id,
       title,
@@ -64,6 +63,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       lang,
       published,
       publish_date: new Date().toISOString(),
+      created_at: new Date().toISOString(),
     },
   ]);
 
@@ -71,5 +71,5 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return new Response(error.message, { status: 500 });
   }
 
-  return new Response("OK");
+  return new Response("✅ Το άρθρο αποθηκεύτηκε επιτυχώς");
 };
