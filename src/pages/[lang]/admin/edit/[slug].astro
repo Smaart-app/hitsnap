@@ -38,15 +38,15 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
     <script src="https://unpkg.com/alpinejs" defer></script>
   </head>
   <body class="bg-gray-50 p-8">
-    <div class="max-w-3xl mx-auto bg-white p-6 rounded shadow" x-data="editor({ 
-        title: '{article.title}', 
-        slug: '{article.slug}', 
-        excerpt: `{article.excerpt}`, 
-        content: `{article.content}`, 
-        cover_image: '{article.cover_image}', 
-        published: {article.published}, 
-        publish_date: '{article.publish_date?.slice(0,16)}' 
-      })">
+    <div class="max-w-3xl mx-auto bg-white p-6 rounded shadow" x-data={editor({
+        title: article.title,
+        slug: article.slug,
+        excerpt: article.excerpt,
+        content: article.content,
+        cover_image: article.cover_image,
+        published: article.published,
+        publish_date: article.publish_date?.slice(0,16)
+      })}>
       <h1 class="text-2xl font-bold mb-4">✏️ Επεξεργασία άρθρου</h1>
       <form @submit.prevent="save()" class="space-y-4">
         <input type="hidden" x-ref="id" value={article.id}>
@@ -96,6 +96,7 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
     </div>
 
     <script>
+      
       function editor(data) {
         return {
           title: data.title ?? '',
