@@ -1,0 +1,16 @@
+---
+const { lang } = Astro.params;
+---
+
+<!DOCTYPE html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Route Test</title>
+  </head>
+  <body>
+    <h1>✅ Το route `/[lang]/admin/edit/test` λειτουργεί!</h1>
+    <p>Γλώσσα: {lang}</p>
+    <p>Αν βλέπεις αυτή τη σελίδα, ο φάκελος edit δουλεύει κανονικά.</p>
+  </body>
+</html>

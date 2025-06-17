@@ -1,0 +1,153 @@
+---
+import { createAdminClientNoCookies } from "../../../../lib/createAdminClientNoCookies.ts";
+
+export const prerender = false;
+
+const { slug, lang } = Astro.params;
+
+if (!slug || typeof slug !== 'string') {
+  return new Response('⛔ Invalid slug', { status: 400 });
+}
+
+const supabase = createAdminClientNoCookies();
+
+const { data: article, error } = await supabase
+  .from("articles")
+  .select("*")
+  .eq("slug", slug)
+  .eq("lang", lang || 'el')
+  .maybeSingle();
+
+if (error) {
+  return new Response(`❌ Σφάλμα Supabase: ${error.message}`, { status: 500 });
+}
+
+if (!article) {
+  return new Response(`📭 Δεν βρέθηκε άρθρο με slug: ${slug}`, { status: 404 });
+}
+
+const pageTitle = `Επεξεργασία: ${article.title}`;
+---
+
+<!DOCTYPE html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+  </head>
+  <body class="bg-gray-50 p-8">
+    <div class="max-w-3xl mx-auto bg-white p-6 rounded shadow" x-data="editor({ 
+        title: '{article.title}', 
+        slug: '{article.slug}', 
+        excerpt: `{article.excerpt}`, 
+        content: `{article.content}`, 
+        cover_image: '{article.cover_image}', 
+        published: {article.published}, 
+        publish_date: '{article.publish_date?.slice(0,16)}' 
+      })">
+      <h1 class="text-2xl font-bold mb-4">✏️ Επεξεργασία άρθρου</h1>
+      <form @submit.prevent="save()" class="space-y-4">
+        <input type="hidden" x-ref="id" value={article.id}>
+
+        <div>
+          <label class="block text-sm font-medium">Τίτλος</label>
+          <input x-model="title" type="text" class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium">Slug</label>
+          <input x-model="slug" type="text" class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium">Περίληψη</label>
+          <textarea x-model="excerpt" class="w-full border rounded px-3 py-2"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium">Εικόνα (URL)</label>
+          <input x-model="cover_image" type="url" class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium">Περιεχόμενο</label>
+          <textarea x-model="content" rows="10" class="w-full border rounded px-3 py-2 font-mono"></textarea>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <label class="inline-flex items-center">
+            <input type="checkbox" x-model="published" class="mr-2">
+            Δημοσιευμένο
+          </label>
+
+          <div>
+            <label class="block text-sm">Προγραμματισμός:</label>
+            <input type="datetime-local" x-model="publish_date" class="border rounded px-2 py-1">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-4">
+          <span x-text="status" class="text-sm text-gray-500"></span>
+          <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">💾 Αποθήκευση</button>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      function editor(data) {
+        return {
+          title: data.title ?? '',
+          slug: data.slug ?? '',
+          excerpt: data.excerpt ?? '',
+          content: data.content ?? '',
+          cover_image: data.cover_image ?? '',
+          published: !!data.published,
+          publish_date: data.publish_date ?? '',
+          status: '',
+
+          init() {
+            this.autosaveInterval = setInterval(() => this.autosave(), 15000);
+          },
+
+          async save() {
+            this.status = '⏳ Αποθήκευση...';
+            await this._send();
+            this.status = '✅ Αποθηκεύτηκε';
+          },
+
+          async autosave() {
+            if (document.activeElement.tagName === 'TEXTAREA') return;
+            this.status = '💾 Autosaving...';
+            await this._send(true);
+            this.status = '✔️ Autosaved';
+          },
+
+          async _send(silent = false) {
+            try {
+              await fetch('/api/update-article', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  id: this.$refs.id.value,
+                  title: this.title,
+                  slug: this.slug,
+                  excerpt: this.excerpt,
+                  content: this.content,
+                  cover_image: this.cover_image,
+                  lang: '{lang}',
+                  published: this.published,
+                  publish_date: this.publish_date || new Date().toISOString()
+                })
+              });
+            } catch (e) {
+              this.status = '❌ Σφάλμα αποθήκευσης';
+              if (!silent) alert('Σφάλμα: ' + e);
+            }
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
