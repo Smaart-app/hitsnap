@@ -84,7 +84,7 @@ let emailAttempted = '';
         if (res.ok) {
           // 🔁 Ανίχνευση γλώσσας από query ?lang=el ή default σε el
           const lang = new URLSearchParams(window.location.search).get('lang') || 'el';
-          window.location.href = `/${lang}/admin/editor`;
+          window.location.href = `/${lang}/admin/dashboard`;
         } else {
           const result = await res.json();
           errorBox.textContent = result.error || 'Login failed';

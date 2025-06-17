@@ -140,7 +140,7 @@ const markdown = article?.content ?? '';
     {user && article && (
       <div class="text-center">
         <a
-         href={`/admin/editor/${article.slug}?lang=${article.lang}`}
+         <a href={`/${article.lang}/admin/edit/${article.slug}`}>
           class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
         >
           ✏️ {lang === 'el' ? 'Επεξεργασία' : 'Edit'}
