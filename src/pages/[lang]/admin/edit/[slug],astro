@@ -1,5 +1,5 @@
 ---
-import { createServerClientWithCookies } from "../../../lib/createServerClient.ts";
+import { createAdminClientNoCookies } from "../../../lib/createAdminClientNoCookies.ts";
 
 export const prerender = false;
 
@@ -7,34 +7,25 @@ const { slug } = Astro.params;
 const { searchParams } = Astro.url;
 const lang = searchParams.get('lang') || 'el';
 
-console.log("[edit] Incoming slug param:", slug);
-console.log("[edit] Language param (from query):", lang);
-
 if (!slug || typeof slug !== "string") {
   return new Response("⛔ Invalid slug", { status: 400 });
 }
 
-const supabase = createServerClientWithCookies(Astro.cookies);
+const supabase = createAdminClientNoCookies();
 
-// 🔒 Έλεγχος authentication
 const {
   data: { user },
 } = await supabase.auth.getUser();
 
 if (!user) {
-  return Astro.redirect('/admin/login', 302);
+  return Astro.redirect('/login', 302);
 }
 
-// 🔍 Φόρτωσε το άρθρο με βάση slug + user
 const { data: article, error } = await supabase
   .from("articles")
   .select("*")
   .eq("slug", slug)
-  .eq("user_id", user.id)
   .single();
-
-console.log("[edit] Supabase query result:", article);
-console.log("[edit] Supabase error:", error);
 
 if (error || !article) {
   return new Response(`❌ Δεν βρέθηκε άρθρο με slug: ${slug}`, {
@@ -60,18 +51,8 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
         <div class="flex justify-between items-center mb-6">
           <h1 class="text-2xl font-bold text-gray-800">Επεξεργασία Άρθρου</h1>
           <div class="flex gap-2">
-            <a
-              href={`/${article.lang}/blog/${article.slug}`}
-              class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
-            >
-              👁️ Προεπισκόπηση
-            </a>
-            <a
-              href="/admin/dashboard"
-              class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-            >
-              ← Πίσω
-            </a>
+            <a href={`/${article.lang}/blog/${article.slug}`} class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">👁️ Προεπισκόπηση</a>
+            <a href="/admin/dashboard" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">← Πίσω</a>
           </div>
         </div>
 
@@ -136,36 +117,17 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Τίτλος *</label>
-            <input
-              type="text"
-              x-ref="titleInput"
-              x-model="title"
-              value={article.title}
-              required
-              class="w-full px-3 py-2 border rounded-md focus:ring-blue-500"
-            />
+            <input type="text" x-ref="titleInput" x-model="title" value={article.title} required class="w-full px-3 py-2 border rounded-md focus:ring-blue-500" />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Slug *</label>
-            <input
-              type="text"
-              x-ref="slugInput"
-              x-model="slug"
-              value={article.slug}
-              required
-              class="w-full px-3 py-2 border rounded-md focus:ring-blue-500"
-            />
+            <input type="text" x-ref="slugInput" x-model="slug" value={article.slug} required class="w-full px-3 py-2 border rounded-md focus:ring-blue-500" />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Γλώσσα *</label>
-            <select
-              x-ref="langInput"
-              x-model="lang"
-              required
-              class="w-full px-3 py-2 border rounded-md focus:ring-blue-500"
-            >
+            <select x-ref="langInput" x-model="lang" required class="w-full px-3 py-2 border rounded-md focus:ring-blue-500">
               <option value="el" selected={article.lang === 'el'}>Ελληνικά</option>
               <option value="en" selected={article.lang === 'en'}>English</option>
             </select>
@@ -173,56 +135,26 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Περίληψη</label>
-            <textarea
-              x-ref="excerptInput"
-              x-model="excerpt"
-              rows="3"
-              class="w-full px-3 py-2 border rounded-md focus:ring-blue-500"
-            >{article.excerpt || ''}</textarea>
+            <textarea x-ref="excerptInput" x-model="excerpt" rows="3" class="w-full px-3 py-2 border rounded-md focus:ring-blue-500">{article.excerpt || ''}</textarea>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Cover Image URL</label>
-            <input
-              type="url"
-              x-ref="coverImageInput"
-              x-model="coverImage"
-              value={article.cover_image || ''}
-              class="w-full px-3 py-2 border rounded-md focus:ring-blue-500"
-            />
+            <input type="url" x-ref="coverImageInput" x-model="coverImage" value={article.cover_image || ''} class="w-full px-3 py-2 border rounded-md focus:ring-blue-500" />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Περιεχόμενο (Markdown) *</label>
-            <textarea
-              x-ref="contentInput"
-              x-model="content"
-              rows="20"
-              required
-              class="w-full px-3 py-2 border rounded-md focus:ring-blue-500 font-mono text-sm"
-              placeholder="Γράψτε το άρθρο σας σε Markdown..."
-            >{article.content || ''}</textarea>
+            <textarea x-ref="contentInput" x-model="content" rows="20" required class="w-full px-3 py-2 border rounded-md focus:ring-blue-500 font-mono text-sm">{article.content || ''}</textarea>
           </div>
 
           <div class="flex items-center">
-            <input
-              type="checkbox"
-              x-ref="publishedInput"
-              x-model="published"
-              checked={article.published}
-              id="published"
-              class="mr-2"
-            />
+            <input type="checkbox" x-ref="publishedInput" x-model="published" checked={article.published} id="published" class="mr-2" />
             <label for="published" class="text-sm font-medium text-gray-700">Δημοσιευμένο</label>
           </div>
 
           <div class="flex justify-end gap-4">
-            <button
-              type="button"
-              @click="saveArticle()"
-              :disabled="saving"
-              class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 transition"
-            >
+            <button type="button" @click="saveArticle()" :disabled="saving" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 transition">
               <span x-show="!saving">💾 Αποθήκευση</span>
               <span x-show="saving">⏳ Αποθήκευση...</span>
             </button>
