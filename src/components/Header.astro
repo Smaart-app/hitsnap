@@ -13,9 +13,8 @@ const currentPath = Astro.url.pathname;
 const isHome = currentPath === '/';
 const isArticles = currentPath.includes('/blog') && !currentPath.includes('/editor');
 const isContact = currentPath.includes('/contact');
-const isDashboard = currentPath.includes('/dashboard');
-const isEditor = currentPath === '/admin/editor';
-const isPreview = currentPath === '/admin/preview';
+const isEditor = currentPath === `/${lang}/admin/editor`;
+const isPreview = currentPath === `/${lang}/admin/preview`;
 
 let langSwitchHref = isGreek ? '/en' : '/el';
 
@@ -39,8 +38,8 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
       <a href={`${base}/contact`} class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Επικοινωνία' : 'Contact'}</a>
       {user && (
         <>
-          <a href="/admin/preview" class={`px-2 py-1 rounded-sm transition ${isPreview ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2] hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>📋 Preview</a>
-          <a href="/admin/editor" class={`px-2 py-1 rounded-sm transition ${isEditor ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2] hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>✏️ {isGreek ? 'Νέο Άρθρο' : 'New Article'}</a>
+          <a href={`${base}/admin/preview`} class={`px-2 py-1 rounded-sm transition ${isPreview ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2] hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>📋 Preview</a>
+          <a href={`${base}/admin/editor`} class={`px-2 py-1 rounded-sm transition ${isEditor ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2] hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>✏️ {isGreek ? 'Νέο Άρθρο' : 'New Article'}</a>
         </>
       )}
       {!disableLangSwitch && (
@@ -62,8 +61,8 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
   <a href={`${base}/contact`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Επικοινωνία' : 'Contact'}</a>
   {user && (
     <>
-      <a href="/admin/preview" class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isPreview ? 'text-[#50c7c2] font-bold' : ''}`}>📋 Preview</a>
-      <a href="/admin/editor" class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isEditor ? 'text-[#50c7c2] font-bold' : ''}`}>✏️ {isGreek ? 'Νέο Άρθρο' : 'New Article'}</a>
+      <a href={`${base}/admin/preview`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isPreview ? 'text-[#50c7c2] font-bold' : ''}`}>📋 Preview</a>
+      <a href={`${base}/admin/editor`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isEditor ? 'text-[#50c7c2] font-bold' : ''}`}>✏️ {isGreek ? 'Νέο Άρθρο' : 'New Article'}</a>
     </>
   )}
   {!disableLangSwitch && (

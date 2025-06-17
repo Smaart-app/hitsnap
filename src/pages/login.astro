@@ -82,8 +82,9 @@ let emailAttempted = '';
         });
 
         if (res.ok) {
-          // ✨ redirect to editor index after successful login
-          window.location.href = '/admin/editor';
+          // 🔁 Ανίχνευση γλώσσας από query ?lang=el ή default σε el
+          const lang = new URLSearchParams(window.location.search).get('lang') || 'el';
+          window.location.href = `/${lang}/admin/editor`;
         } else {
           const result = await res.json();
           errorBox.textContent = result.error || 'Login failed';
