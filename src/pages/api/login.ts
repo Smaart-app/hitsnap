@@ -1,7 +1,7 @@
-import type { APIRoute } from 'astro'; 
+import type { APIRoute } from 'astro';
 import { createServerClient } from '@supabase/ssr';
 
-export const POST: APIRoute = async ({ request, cookies }) => {
+export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const supabase = createServerClient(
     import.meta.env.PUBLIC_SUPABASE_URL,
     import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
@@ -11,12 +11,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         set: (name, value, options) =>
           cookies.set(name, value, {
             path: '/',
-            httpOnly: false, // μπορείς να βάλεις true για μεγαλύτερη ασφάλεια
+            httpOnly: true, // ✅ Τώρα ο server θα βλέπει το session
             secure: true,
             sameSite: 'Lax',
             ...options,
           }),
-        remove: (name, options) => cookies.delete(name, { path: '/', ...options }),
+        remove: (name, options) =>
+          cookies.delete(name, { path: '/', ...options }),
       },
     }
   );
@@ -29,15 +30,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   });
 
   if (error || !data.session) {
-    return new Response(JSON.stringify({ error: error?.message || 'Login failed' }), {
-      status: 401,
-    });
+    return new Response(
+      JSON.stringify({ error: error?.message || 'Login failed' }),
+      { status: 401 }
+    );
   }
 
-  // 🧠 Αυτό είναι το μαγικό που έλειπε για να "γράψει" τα cookies:
-  await supabase.auth.getSession();
-
-  return new Response(JSON.stringify({ success: true }), {
-    status: 200,
-  });
+  // ✅ Redirect ώστε ο Layout.astro να πιάσει το session
+  return redirect('/el/admin/preview');
 };

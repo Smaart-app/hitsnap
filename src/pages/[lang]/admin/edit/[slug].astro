@@ -1,4 +1,5 @@
 ---
+import Layout from '@layouts/Layout.astro';
 import { createAdminClientNoCookies } from "../../../../lib/createAdminClientNoCookies.ts";
 
 export const prerender = false;
@@ -29,24 +30,12 @@ if (!article) {
 const pageTitle = `Επεξεργασία: ${article.title}`;
 ---
 
-<!DOCTYPE html>
-<html lang={lang}>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{pageTitle}</title>
-    <script src="https://unpkg.com/alpinejs" defer></script>
-  </head>
-  <body class="bg-gray-50 p-8">
-    <div class="max-w-3xl mx-auto bg-white p-6 rounded shadow" x-data={editor({
-        title: article.title,
-        slug: article.slug,
-        excerpt: article.excerpt,
-        content: article.content,
-        cover_image: article.cover_image,
-        published: article.published,
-        publish_date: article.publish_date?.slice(0,16)
-      })}>
+<Layout title={pageTitle}>
+  <script src="https://unpkg.com/alpinejs" defer></script>
+
+  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-6 p-6" x-data="editorData">
+    <!-- Φόρμα -->
+    <div class="bg-white p-6 rounded shadow">
       <h1 class="text-2xl font-bold mb-4">✏️ Επεξεργασία άρθρου</h1>
       <form @submit.prevent="save()" class="space-y-4">
         <input type="hidden" x-ref="id" value={article.id}>
@@ -95,60 +84,131 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
       </form>
     </div>
 
-    <script>
-      
-      function editor(data) {
-        return {
-          title: data.title ?? '',
-          slug: data.slug ?? '',
-          excerpt: data.excerpt ?? '',
-          content: data.content ?? '',
-          cover_image: data.cover_image ?? '',
-          published: !!data.published,
-          publish_date: data.publish_date ?? '',
-          status: '',
+    <!-- Προεπισκόπηση -->
+    <div class="bg-white p-6 rounded shadow space-y-4">
+      <h2 class="text-lg font-semibold">🔍 Προεπισκόπηση</h2>
 
-          init() {
-            this.autosaveInterval = setInterval(() => this.autosave(), 15000);
-          },
+      <template x-if="cover_image">
+        <img :src="cover_image" alt="cover" class="rounded w-full object-cover max-h-64" />
+      </template>
 
-          async save() {
-            this.status = '⏳ Αποθήκευση...';
-            await this._send();
-            this.status = '✅ Αποθηκεύτηκε';
-          },
+      <h3 class="text-xl font-bold" x-text="title"></h3>
 
-          async autosave() {
-            if (document.activeElement.tagName === 'TEXTAREA') return;
-            this.status = '💾 Autosaving...';
-            await this._send(true);
-            this.status = '✔️ Autosaved';
-          },
+      <div class="prose prose-sm max-w-none">
+        <div x-effect="$refs.preview.innerHTML = renderedContent">
+          <div x-ref="preview"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-          async _send(silent = false) {
-            try {
-              await fetch('/api/update-article', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  id: this.$refs.id.value,
-                  title: this.title,
-                  slug: this.slug,
-                  excerpt: this.excerpt,
-                  content: this.content,
-                  cover_image: this.cover_image,
-                  lang: '{lang}',
-                  published: this.published,
-                  publish_date: this.publish_date || new Date().toISOString()
-                })
-              });
-            } catch (e) {
-              this.status = '❌ Σφάλμα αποθήκευσης';
-              if (!silent) alert('Σφάλμα: ' + e);
-            }
+  <script is:inline define:vars={{
+    articleTitle: article.title || '',
+    articleSlug: article.slug || '',
+    articleExcerpt: article.excerpt || '',
+    articleContent: article.content || '',
+    articleCoverImage: article.cover_image || '',
+    articlePublished: !!article.published,
+    articlePublishDate: article.publish_date?.slice(0, 16) || '',
+    articleLang: lang || 'el',
+    articleId: article.id
+  }}>
+    import("https://cdn.jsdelivr.net/npm/marked/marked.min.js").then((m) => {
+      window.marked = m.marked;
+    });
+
+    window.articleData = {
+      title: articleTitle,
+      slug: articleSlug,
+      excerpt: articleExcerpt,
+      content: articleContent,
+      cover_image: articleCoverImage,
+      published: articlePublished,
+      publish_date: articlePublishDate,
+      lang: articleLang,
+      id: articleId
+    };
+
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('editorData', () => ({
+        title: window.articleData.title,
+        slug: window.articleData.slug,
+        excerpt: window.articleData.excerpt,
+        content: window.articleData.content,
+        cover_image: window.articleData.cover_image,
+        published: window.articleData.published === 'true',
+        publish_date: window.articleData.publish_date,
+        status: '',
+        renderedContent: '',
+
+        init() {
+          this.waitForMarked().then(() => {
+            this.renderMarkdown();
+          });
+          this.autosaveInterval = setInterval(() => this.autosave(), 15000);
+        },
+
+        waitForMarked() {
+          return new Promise((resolve) => {
+            const check = () => {
+              if (window.marked) resolve();
+              else setTimeout(check, 50);
+            };
+            check();
+          });
+        },
+
+        renderMarkdown() {
+          if (window.marked && this.content) {
+            this.renderedContent = window.marked.parse(this.content);
+          }
+        },
+
+        async save() {
+          this.status = '⏳ Αποθήκευση...';
+          await this._send();
+          this.status = '✅ Αποθηκεύτηκε';
+        },
+
+        async autosave() {
+          if (document.activeElement && document.activeElement.tagName === 'TEXTAREA') return;
+          this.status = '💾 Autosaving...';
+          await this._send(true);
+          this.status = '✔️ Autosaved';
+        },
+
+        async _send(silent = false) {
+          try {
+            const response = await fetch('/api/update-article', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: window.articleData.id,
+                title: this.title,
+                slug: this.slug,
+                excerpt: this.excerpt,
+                content: this.content,
+                cover_image: this.cover_image,
+                lang: window.articleData.lang,
+                published: this.published,
+                publish_date: this.publish_date || new Date().toISOString()
+              })
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          } catch (e) {
+            console.error('Save error:', e);
+            this.status = '❌ Σφάλμα αποθήκευσης';
+            if (!silent) alert('Σφάλμα: ' + e.message);
+          }
+        },
+
+        $watch: {
+          content() {
+            this.renderMarkdown();
           }
         }
-      }
-    </script>
-  </body>
-</html>
+      }));
+    });
+  </script>
+</Layout>
