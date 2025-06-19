@@ -1,19 +1,21 @@
 ---
-import Layout from '../../../layouts/Layout.astro';
-import { createAdminClientNoCookies } from '../../../lib/createAdminClientNoCookies';
+import Layout from '@layouts/Layout.astro';
+import { createServerClientWithCookies } from '@lib/createServerClient';
 
 export const prerender = false;
 
-const supabase = createAdminClientNoCookies();
+const supabase = createServerClientWithCookies(Astro.cookies);
 
 const {
   data: { user },
 } = await supabase.auth.getUser();
 
-if (!user) {
-  return Astro.redirect('/login');
-}
 const lang = Astro.params.lang || 'el';
+
+if (!user) {
+  return Astro.redirect(`/${lang}/login`);
+}
+
 const url = new URL(Astro.request.url);
 const tab = url.searchParams.get('tab') ?? 'all';
 
@@ -54,23 +56,22 @@ if (tab === 'published') {
   <main class="max-w-6xl mx-auto px-6 py-12">
     <div class="flex justify-between items-center mb-8">
       <h1 class="text-3xl font-bold">📋 Διαχείριση Άρθρων</h1>
-      <a href="/logout" class="text-sm text-red-500 hover:underline">Logout</a>
+      <a href={`/${lang}/logout`} class="text-sm text-red-500 hover:underline">Logout</a>
     </div>
 
     <div class="mb-6 flex gap-4 text-sm">
       <a href={`/${lang}/admin/dashboard`} class={tab === 'all' ? 'text-[#50c7c2] font-bold' : 'text-gray-500 hover:text-[#50c7c2]'}>
-  Όλα
-</a>
-<a href={`/${lang}/admin/dashboard?tab=published`} class={tab === 'published' ? 'text-[#50c7c2] font-bold' : 'text-gray-500 hover:text-[#50c7c2]'}>
-  Δημοσιευμένα
-</a>
-<a href={`/${lang}/admin/dashboard?tab=scheduled`} class={tab === 'scheduled' ? 'text-[#50c7c2] font-bold' : 'text-gray-500 hover:text-[#50c7c2]'}>
-  Προγραμματισμένα
-</a>
-<a href={`/${lang}/admin/dashboard?tab=drafts`} class={tab === 'drafts' ? 'text-[#50c7c2] font-bold' : 'text-gray-500 hover:text-[#50c7c2]'}>
-  Πρόχειρα
-</a>
-
+        Όλα
+      </a>
+      <a href={`/${lang}/admin/dashboard?tab=published`} class={tab === 'published' ? 'text-[#50c7c2] font-bold' : 'text-gray-500 hover:text-[#50c7c2]'}>
+        Δημοσιευμένα
+      </a>
+      <a href={`/${lang}/admin/dashboard?tab=scheduled`} class={tab === 'scheduled' ? 'text-[#50c7c2] font-bold' : 'text-gray-500 hover:text-[#50c7c2]'}>
+        Προγραμματισμένα
+      </a>
+      <a href={`/${lang}/admin/dashboard?tab=drafts`} class={tab === 'drafts' ? 'text-[#50c7c2] font-bold' : 'text-gray-500 hover:text-[#50c7c2]'}>
+        Πρόχειρα
+      </a>
     </div>
 
     {error ? (

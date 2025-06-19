@@ -8,8 +8,17 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { createServerClientReadOnly } from '../lib/createServerClient';
 
-const supabase = createServerClientReadOnly(Astro.cookies);
-const { data: { user } } = await supabase.auth.getUser();
+let user = null;
+try {
+  // Μόνο αν υπάρχουν headers (δηλ. όχι σε static build)
+  if (Astro.request?.headers) {
+    const supabase = createServerClientReadOnly(Astro.cookies);
+    const result = await supabase.auth.getUser();
+    user = result.data?.user || null;
+  }
+} catch (err) {
+  user = null;
+}
 ---
 
 <html lang={lang}>
@@ -26,7 +35,10 @@ const { data: { user } } = await supabase.auth.getUser();
     <link rel="manifest" href="/site.webmanifest" />
 
     <!-- ✅ Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
 
     <slot name="head" />
   </head>
@@ -52,9 +64,43 @@ const { data: { user } } = await supabase.auth.getUser();
         html.classList.add('dark');
       }
 
-      document.getElementById('toggle-theme')?.addEventListener('click', () => {
-        html.classList.toggle('dark');
-        localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+      document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('toggle-theme')?.addEventListener('click', () => {
+          html.classList.toggle('dark');
+          localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        });
+      });
+    </script>
+
+    <script is:client type="module">
+      import { createBrowserClient } from '/src/lib/createBrowserClient.js';
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        try {
+          const supabase = createBrowserClient();
+
+          supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log('🔐 Auth state changed:', event);
+            if (event === 'SIGNED_IN' && session) {
+              await fetch('/api/set-auth-cookie', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include', // ✅ Απαραίτητο για να γραφούν τα HttpOnly cookies
+                body: JSON.stringify({
+                  access_token: session.access_token,
+                  refresh_token: session.refresh_token,
+                }),
+              });
+              window.location.reload();
+            }
+
+            if (event === 'SIGNED_OUT') {
+              window.location.reload();
+            }
+          });
+        } catch (error) {
+          console.error('Auth monitoring error:', error);
+        }
       });
     </script>
   </body>

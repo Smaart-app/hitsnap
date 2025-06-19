@@ -46,7 +46,7 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
         <a href={langSwitchHref} class="px-2 py-1 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition hover:text-[#50c7c2]">{isGreek ? 'English 🇬🇧' : 'Ελληνικά 🇬🇷'}</a>
       )}
       <ThemeButton client:only="react" />
-      <a href={user ? "/logout" : "/login"} class="px-2 py-1 rounded-sm text-[#50c7c2] hover:underline transition hover:bg-zinc-100 dark:hover:bg-zinc-800">
+      <a href={user ? `${base}/logout` : `${base}/login`} class="px-2 py-1 rounded-sm text-[#50c7c2] hover:underline transition hover:bg-zinc-100 dark:hover:bg-zinc-800">
         {user ? '🚪 Έξοδος' : '🔐 ' + (isGreek ? 'Είσοδος' : 'Login')}
       </a>
     </nav>
@@ -71,7 +71,7 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
   <div class="w-full px-2 py-2">
     <ThemeButton client:only="react" />
   </div>
-  <a href={user ? "/logout" : "/login"} class="w-full px-2 py-2 rounded-sm text-[#50c7c2] hover:underline transition hover:bg-zinc-100 dark:hover:bg-zinc-800">
+  <a href={user ? `${base}/logout` : `${base}/login`} class="w-full px-2 py-2 rounded-sm text-[#50c7c2] hover:underline transition hover:bg-zinc-100 dark:hover:bg-zinc-800">
     {user ? '🚪 Έξοδος' : '🔐 ' + (isGreek ? 'Είσοδος' : 'Login')}
   </a>
 </nav>

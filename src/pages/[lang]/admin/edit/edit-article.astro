@@ -1,6 +1,6 @@
 ---
-import Layout from '../../../../layouts/Layout.astro';
-import { createServerClientWithCookies } from '../../../../lib/createServerClient.ts';
+import Layout from '@layouts/Layout.astro';
+import { createServerClientWithCookies } from '@lib/createServerClient.ts';
 
 export const prerender = false;
 
@@ -14,8 +14,10 @@ const {
   data: { user },
 } = await supabase.auth.getUser();
 
+const lang = Astro.params?.lang || 'el';
+
 if (!user) {
-  return Astro.redirect('/login');
+  return Astro.redirect(`/${lang}/login`);
 }
 
 let article = null;

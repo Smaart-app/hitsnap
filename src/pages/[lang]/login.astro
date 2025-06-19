@@ -1,11 +1,31 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from '@layouts/Layout.astro';
+import { createServerClientReadOnly } from '@lib/createServerClient';
 
 let error = '';
 let emailAttempted = '';
+let user = null;
+
+const lang = Astro.params?.lang || 'el';
+
+try {
+  const supabase = createServerClientReadOnly(Astro.cookies);
+  const result = await supabase.auth.getUser();
+  user = result.data?.user || null;
+
+  console.log('[LOGIN] Supabase user:', user);
+
+  // Αν υπάρχει ενεργό session, κάνε redirect
+  if (user && user.email) {
+    return Astro.redirect(`/${lang}/admin/dashboard`);
+  }
+} catch (err) {
+  console.warn('[LOGIN] Error fetching user:', err);
+  user = null;
+}
 ---
 
-<Layout title="🔐 Login">
+<Layout title="🔐 Login" lang={lang}>
   <main class="max-w-md mx-auto mt-24 p-6 bg-white rounded shadow">
     <h1 class="text-2xl font-bold mb-4">🔐 Login to Admin</h1>
 
@@ -82,8 +102,7 @@ let emailAttempted = '';
         });
 
         if (res.ok) {
-          // 🔁 Ανίχνευση γλώσσας από query ?lang=el ή default σε el
-          const lang = new URLSearchParams(window.location.search).get('lang') || 'el';
+          const lang = window.location.pathname.split('/')[1] || 'el';
           window.location.href = `/${lang}/admin/dashboard`;
         } else {
           const result = await res.json();

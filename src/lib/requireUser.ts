@@ -1,14 +1,16 @@
-// /src/lib/requireUser.ts
 import { createServerClientReadOnly } from './createServerClient';
 
 export async function requireUser(Astro: any) {
   const supabase = createServerClientReadOnly(Astro.cookies);
+
   const {
-    data: { user }
+    data: { user },
   } = await supabase.auth.getUser();
 
+  const lang = Astro.params?.lang || 'el';
+
   if (!user) {
-    return Astro.redirect('/login');
+    return Astro.redirect(`/${lang}/login`);
   }
 
   return user;

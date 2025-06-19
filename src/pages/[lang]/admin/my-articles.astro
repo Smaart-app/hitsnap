@@ -1,7 +1,7 @@
 ---
-import Layout from '../../../layouts/Layout.astro';
-import ArticleCard from '../../../components/ArticleCard.jsx';
-import { createServerClientWithCookies } from '../../../lib/createServerClient.ts';
+import Layout from '@layouts/Layout.astro';
+import ArticleCard from '@components/ArticleCard.jsx';
+import { createServerClientWithCookies } from '@lib/createServerClient.ts';
 
 export async function getStaticPaths() {
   return [
@@ -19,7 +19,7 @@ const {
 } = await supabase.auth.getUser();
 
 if (!user) {
-  return Astro.redirect('/login');
+  return Astro.redirect(`/${lang}/login`);
 }
 
 const { data: articles, error } = await supabase
