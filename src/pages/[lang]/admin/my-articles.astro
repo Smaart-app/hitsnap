@@ -3,6 +3,8 @@ import Layout from '@layouts/Layout.astro';
 import ArticleCard from '@components/ArticleCard.jsx';
 import { createServerClientWithCookies } from '@lib/createServerClient.ts';
 
+export const prerender = false;
+
 export async function getStaticPaths() {
   return [
     { params: { lang: 'el' } },

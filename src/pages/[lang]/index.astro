@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import { createServerClientReadOnly } from '../../lib/createServerClient';
 
-export const prerender = true;
+export const prerender = false;
 
 export async function getStaticPaths() {
   return [
@@ -40,7 +40,7 @@ const description = lang === 'el'
 const image = "https://hitlift.app/preview-og-final.png?v=2";
 ---
 
-<Layout title={title} lang={lang}>
+<Layout title={title} lang={lang} user={null}>
   <head slot="head">
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />

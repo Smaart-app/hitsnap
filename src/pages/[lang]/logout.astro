@@ -12,14 +12,14 @@ const supabase = createClient(
 // Κάνε logout από Supabase
 await supabase.auth.signOut();
 
-// Από τη διαδρομή π.χ. /el/logout → πάρε το 'el'
+// Ανάκτηση γλώσσας από τη διαδρομή π.χ. /el/logout → "el"
 const url = new URL(Astro.request.url);
 const rawSegment = url.pathname.split('/')[1];
 const lang = ['el', 'en'].includes(rawSegment) ? rawSegment : 'el';
 
-// Δημιουργία headers για redirect + καθαρισμό cookies
+// Δημιουργία headers για redirect και καθαρισμό cookies
 const headers = new Headers();
-headers.set('Location', `/${lang}/login`);
+headers.set('Location', `/${lang}`);
 headers.append('Set-Cookie', serialize('sb-access-token', '', {
   path: '/',
   maxAge: 0,

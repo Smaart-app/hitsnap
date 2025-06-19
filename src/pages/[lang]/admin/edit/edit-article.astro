@@ -28,12 +28,11 @@ if (!slug) {
   return Astro.redirect('/404');
 }
 
-// Αναζήτηση άρθρου που ανήκει στον χρήστη
+// ✅ ΝΕΟ QUERY: χωρίς φίλτρα user_id ή lang, για υποστήριξη draft χωρίς metadata
 const { data, error: fetchError } = await supabase
   .from('articles')
   .select('*')
   .eq('slug', slug)
-  .eq('user_id', user.id)
   .maybeSingle();
 
 console.log('[EDITOR] Supabase query result:', data);

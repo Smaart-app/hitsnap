@@ -10,11 +10,10 @@ import { createServerClientReadOnly } from '../lib/createServerClient';
 
 let user = null;
 try {
-  // Μόνο αν υπάρχουν headers (δηλ. όχι σε static build)
   if (Astro.request?.headers) {
     const supabase = createServerClientReadOnly(Astro.cookies);
-    const result = await supabase.auth.getUser();
-    user = result.data?.user || null;
+    const result = await supabase.auth.getSession();
+    user = result.session?.user || null;
   }
 } catch (err) {
   user = null;
@@ -85,7 +84,7 @@ try {
               await fetch('/api/set-auth-cookie', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                credentials: 'include', // ✅ Απαραίτητο για να γραφούν τα HttpOnly cookies
+                credentials: 'include',
                 body: JSON.stringify({
                   access_token: session.access_token,
                   refresh_token: session.refresh_token,

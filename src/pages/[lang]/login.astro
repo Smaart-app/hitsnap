@@ -2,6 +2,8 @@
 import Layout from '@layouts/Layout.astro';
 import { createServerClientReadOnly } from '@lib/createServerClient';
 
+export const prerender = false;
+
 let error = '';
 let emailAttempted = '';
 let user = null;
@@ -10,14 +12,14 @@ const lang = Astro.params?.lang || 'el';
 
 try {
   const supabase = createServerClientReadOnly(Astro.cookies);
-  const result = await supabase.auth.getUser();
-  user = result.data?.user || null;
+  const result = await supabase.auth.getSession(); // ✅ πιο ασφαλές από getUser()
+  user = result.session?.user || null;
 
   console.log('[LOGIN] Supabase user:', user);
 
-  // Αν υπάρχει ενεργό session, κάνε redirect
+  // Αν υπάρχει ενεργό session, δείχνουμε μόνο τη φόρμα (δεν κάνουμε redirect εδώ)
   if (user && user.email) {
-    return Astro.redirect(`/${lang}/admin/dashboard`);
+    console.log('[LOGIN] Already authenticated');
   }
 } catch (err) {
   console.warn('[LOGIN] Error fetching user:', err);
@@ -98,6 +100,7 @@ try {
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include', // ✅ Πρέπει να υπάρχει για να σωθούν τα cookies
           body: JSON.stringify({ email, password }),
         });
 
