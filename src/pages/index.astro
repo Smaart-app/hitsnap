@@ -24,8 +24,7 @@ export const prerender = true;
     <meta name="twitter:description" content="Not just real estate. A better way to choose." />
     <meta name="twitter:image" content="https://hitlift.app/preview-og-final.png?v=3" />
 
-    <!-- Redirect -->
-    <meta http-equiv="refresh" content="0; url=/en" />
+    <!-- JavaScript redirect -->
     <script>
       const userLang = navigator.language?.startsWith('el') ? 'el' : 'en';
       window.location.href = `/${userLang}`;
@@ -33,6 +32,6 @@ export const prerender = true;
   </head>
 
   <body style="font-family: sans-serif; text-align: center; padding: 5rem;">
-    <p>Redirecting...</p>
+    <p>Redirecting to your language version...</p>
   </body>
 </html>
