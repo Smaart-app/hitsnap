@@ -1,6 +1,6 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import { createAdminClientNoCookies } from "../../../../lib/createAdminClientNoCookies.ts";
+import { createAdminClientNoCookies } from '@lib/createAdminClientNoCookies';
 
 export const prerender = false;
 
@@ -95,9 +95,7 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
       <h3 class="text-xl font-bold" x-text="title"></h3>
 
       <div class="prose prose-sm max-w-none">
-        <div x-effect="$refs.preview.innerHTML = renderedContent">
-          <div x-ref="preview"></div>
-        </div>
+        <div x-ref="preview" x-html="renderedContent"></div>
       </div>
     </div>
   </div>
