@@ -12,7 +12,6 @@ if (!slug || typeof slug !== 'string') {
 
 const supabase = createServerClientWithCookies(Astro.cookies);
 
-// Παίρνουμε ταυτόχρονα το user και το άρθρο
 const [
   { data: { user }, error: userError },
   { data: article, error: articleError },
@@ -26,7 +25,6 @@ const [
     .maybeSingle(),
 ]);
 
-// Debug: Ας δούμε τι παίρνουμε
 console.log('User data:', user);
 console.log('User error:', userError);
 
@@ -38,7 +36,6 @@ if (!article) {
   return new Response(`📭 Δεν βρέθηκε άρθρο με slug: ${slug}`, { status: 404 });
 }
 
-// Έλεγχος αν ο χρήστης είναι admin (προστασία)
 if (!user) {
   return new Response('🔒 Απαιτείται είσοδος', { status: 401 });
 }
@@ -47,7 +44,6 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
 ---
 
 <Layout title={pageTitle} user={user}>
-  <!-- Debug info - αφαίρεσε αυτό μετά -->
   <div style="position: fixed; top: 0; right: 0; background: red; color: white; padding: 5px; z-index: 9999; font-size: 12px;">
     User: {user ? user.email || 'Logged in' : 'Not logged in'}
   </div>
@@ -55,7 +51,6 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
   <script src="https://unpkg.com/alpinejs" defer></script>
 
   <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-6 p-6" x-data="editorData">
-    <!-- Φόρμα -->
     <div class="bg-white p-6 rounded shadow">
       <h1 class="text-2xl font-bold mb-4">✏️ Επεξεργασία άρθρου</h1>
       <form @submit.prevent="save()" class="space-y-4">
@@ -105,7 +100,6 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
       </form>
     </div>
 
-    <!-- Προεπισκόπηση -->
     <div class="bg-white p-6 rounded shadow space-y-4">
       <h2 class="text-lg font-semibold">🔍 Προεπισκόπηση</h2>
 
@@ -122,6 +116,7 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
   </div>
 
   <script is:inline define:vars={{
+
     articleTitle: article.title || '',
     articleSlug: article.slug || '',
     articleExcerpt: article.excerpt || '',
@@ -131,6 +126,7 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
     articlePublishDate: article.publish_date?.slice(0, 16) || '',
     articleLang: lang || 'el',
     articleId: article.id
+
   }}>
     import("https://cdn.jsdelivr.net/npm/marked/marked.min.js").then((m) => {
       window.marked = m.marked;
@@ -179,6 +175,7 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
         },
 
         renderMarkdown() {
+          console.log('renderMarkdown content:', this.content);
           if (window.marked && this.content) {
             this.renderedContent = window.marked.parse(this.content);
           }
@@ -202,6 +199,7 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
             const response = await fetch('/api/update-article', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
               body: JSON.stringify({
                 id: window.articleData.id,
                 title: this.title,
@@ -224,7 +222,6 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
         }
       }));
 
-      // Watch for content changes
       Alpine.effect(() => {
         const data = Alpine.store('editorData') || document.querySelector('[x-data="editorData"]')?._x_dataStack?.[0];
         if (data?.content) {
