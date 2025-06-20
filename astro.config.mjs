@@ -1,4 +1,4 @@
-import { defineConfig } from "astro/config";
+import { defineConfig } from "astro/config"; 
 import tailwind from "@astrojs/tailwind";
 import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
@@ -16,6 +16,11 @@ export default defineConfig({
         "@components": path.resolve("./src/components"),
         "@utils": path.resolve("./src/utils"),
         "@layouts": path.resolve("./src/layouts") // ✅ πρόσθεσέ το εδώ
+      }
+    },
+    build: {
+      rollupOptions: {
+        external: ['formidable']
       }
     }
   }
