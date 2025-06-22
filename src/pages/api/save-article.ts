@@ -22,7 +22,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       title,
       excerpt,
       content,
-      cover_image,    // <-- ΣΩΖΕΤΑΙ ΣΩΣΤΑ
+      cover_image,
       lang,
       published,
       publish_date,
@@ -35,7 +35,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return new Response("Unauthorized", { status: 401 });
+      return new Response(
+        JSON.stringify({ article: null, error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json" } }
+      );
     }
 
     // Admin client για write rights
@@ -54,9 +57,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         .maybeSingle();
 
       if (slugError) {
-        return new Response(`Error checking slug: ${slugError.message}`, {
-          status: 500,
-        });
+        return new Response(
+          JSON.stringify({ article: null, error: `Error checking slug: ${slugError.message}` }),
+          { status: 500, headers: { "Content-Type": "application/json" } }
+        );
       }
       if (!existing) break;
 
@@ -64,8 +68,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       index++;
     }
 
-    // Εδώ το ΜΟΝΑΔΙΚΟ σημείο που κάνω add/διορθώνω:
-    // Αν δεν έχεις βάλει ήδη το cover_image, πρόσθεσέ το!
     const { error } = await admin.from("articles").insert([
       {
         user_id: user.id,
@@ -73,7 +75,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         slug: fullSlug,
         excerpt: excerpt || null,
         content,
-        cover_image: cover_image || null,  // <-- ΕΔΩ Η ΔΙΟΡΘΩΣΗ
+        cover_image: cover_image || null,
         lang,
         published: !!published,
         publish_date: publish_date || new Date().toISOString(),
@@ -82,12 +84,22 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     ]);
 
     if (error) {
-      return new Response(error.message, { status: 500 });
+      return new Response(
+        JSON.stringify({ article: null, error: error.message }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
     }
 
-    return new Response("Article saved successfully", { status: 200 });
-  } catch (e) {
+    // Το μόνο που επιστρέφω προς το παρόν είναι τα βασικά για redirect
+    return new Response(
+      JSON.stringify({ article: { slug: fullSlug, lang }, error: null }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  } catch (e: any) {
     console.error("Unhandled error in save-article:", e);
-    return new Response("Internal Server Error", { status: 500 });
+    return new Response(
+      JSON.stringify({ article: null, error: e?.message || "Internal Server Error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 };

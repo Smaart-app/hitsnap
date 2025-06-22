@@ -39,7 +39,8 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
       {user && (
         <>
           <a href={`${base}/admin/preview`} class={`px-2 py-1 rounded-sm transition ${isPreview ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2] hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>📋 Preview</a>
-          <a href={`${base}/admin/edit`} class={`px-2 py-1 rounded-sm transition ${isEditor ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2] hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>✏️ {isGreek ? 'Νέο Άρθρο' : 'New Article'}</a>
+          <!-- Η ΑΛΛΑΓΗ ΕΔΩ -->
+          <a href={`${base}/admin/new`} class={`px-2 py-1 rounded-sm transition ${isEditor ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2] hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>✏️ {isGreek ? 'Νέο Άρθρο' : 'New Article'}</a>
         </>
       )}
       {!disableLangSwitch && (
@@ -62,7 +63,8 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
   {user && (
     <>
       <a href={`${base}/admin/preview`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isPreview ? 'text-[#50c7c2] font-bold' : ''}`}>📋 Preview</a>
-      <a href={`${base}/admin/edit`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isEditor ? 'text-[#50c7c2] font-bold' : ''}`}>✏️ {isGreek ? 'Νέο Άρθρο' : 'New Article'}</a>
+      <!-- Η ΑΛΛΑΓΗ ΕΔΩ -->
+      <a href={`${base}/admin/new`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isEditor ? 'text-[#50c7c2] font-bold' : ''}`}>✏️ {isGreek ? 'Νέο Άρθρο' : 'New Article'}</a>
     </>
   )}
   {!disableLangSwitch && (

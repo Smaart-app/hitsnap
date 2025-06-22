@@ -24,7 +24,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     if (!id) {
       console.error("NO ARTICLE ID SENT!");
-      return new Response("Missing article ID", { status: 400 });
+      return new Response(
+        JSON.stringify({ article: null, error: "Missing article ID" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
     }
 
     // Fix id (cast to string and trim in case of invisible chars)
@@ -46,7 +49,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     if (!user) {
       console.error("User not authenticated.");
-      return new Response("Unauthorized", { status: 401 });
+      return new Response(
+        JSON.stringify({ article: null, error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json" } }
+      );
     }
 
     // Ενημέρωση άρθρου στη βάση (πάλι .in αντί για .eq)
@@ -68,15 +74,32 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     console.log("SUPABASE UPDATE RESULT:", { error, data });
 
     if (error) {
-      return new Response(error.message, { status: 500 });
+      return new Response(
+        JSON.stringify({ article: null, error: error.message }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
     }
     if (!data || data.length === 0) {
-      return new Response("No article updated (wrong ID?)", { status: 404 });
+      return new Response(
+        JSON.stringify({ article: null, error: "No article updated (wrong ID?)" }),
+        { status: 404, headers: { "Content-Type": "application/json" } }
+      );
     }
 
-    return new Response("Article updated successfully", { status: 200 });
-  } catch (e) {
+    // Επιστροφή του ενημερωμένου άρθρου (μόνο βασικά αν δεν θέλεις όλο)
+    const updated = data[0];
+    return new Response(
+      JSON.stringify({
+        article: { id: updated.id, slug: updated.slug, lang: updated.lang },
+        error: null,
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  } catch (e: any) {
     console.error("Unhandled error in update-article:", e);
-    return new Response("Internal Server Error", { status: 500 });
+    return new Response(
+      JSON.stringify({ article: null, error: e?.message || "Internal Server Error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 };
