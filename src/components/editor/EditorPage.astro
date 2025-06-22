@@ -46,7 +46,6 @@ const backText = isEditMode
 
     <div class="grid lg:grid-cols-2 gap-8">
       <form id="articleForm" class="space-y-4">
-        <!-- Hidden field for edit mode -->
         {isEditMode && (
           <input type="hidden" name="id" value={article.id} />
         )}
@@ -118,14 +117,19 @@ const backText = isEditMode
           >{article?.content || ''}</textarea>
         </div>
 
+        <!-- Εικόνα Εξωφύλλου (Cover Image URL) -->
         <div>
           <label class="block mb-1 font-semibold">{isGreek ? 'Εικόνα Εξωφύλλου (URL)' : 'Cover Image (URL)'}</label>
           <input 
-            type="url" 
+            type="text"
             name="cover_image" 
-            class="w-full p-2 border rounded" 
+            class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#50c7c2] focus:border-transparent" 
+            placeholder="https://example.com/image.jpg"
             value={article?.cover_image || ''} 
           />
+          <p class="text-xs text-gray-500 mt-1">
+            {isGreek ? 'Προσθέστε το URL μιας εικόνας για το εξώφυλλο του άρθρου' : 'Add an image URL for the article cover'}
+          </p>
         </div>
 
         <div class="flex items-center justify-between gap-4">
@@ -147,7 +151,6 @@ const backText = isEditMode
           </div>
         </div>
 
-        <!-- Timestamps Display (for edit mode) -->
         {isEditMode && article && (
           <div class="bg-gray-50 p-3 rounded text-sm text-gray-600 space-y-1">
             <div><strong>{isGreek ? 'Δημιουργήθηκε:' : 'Created:'}</strong> {new Date(article.created_at).toLocaleString()}</div>
@@ -168,9 +171,15 @@ const backText = isEditMode
       </form>
 
       <section class="prose prose-zinc dark:prose-invert p-4 border rounded shadow-sm overflow-auto max-h-[800px]">
-        <h2 class="text-xl font-bold mb-2">{isGreek ? 'Προεπισκόπηση' : 'Preview'}</h2>
-        <div id="previewImageContainer"></div>
+        <h2 class="text-xl font-bold mb-4">{isGreek ? 'Προεπισκόπηση' : 'Preview'}</h2>
+        
+        <!-- Cover Image Container με σταθερό styling -->
+        <div id="previewImageContainer" class="mb-4 rounded shadow overflow-hidden">
+          <!-- Η εικόνα προεπισκόπησης θα εμφανιστεί εδώ -->
+        </div>
+        
         <div id="markdownPreview" class="text-sm text-zinc-800 dark:text-zinc-200"></div>
+        
         <div id="translationPreview" class="mt-8 border-t pt-4 hidden">
           <h3 class="font-semibold mb-2">{isGreek ? 'Αγγλική Μετάφραση' : 'English Translation'}</h3>
           <div id="translatedMarkdown" class="text-sm text-zinc-800 dark:text-zinc-200"></div>
@@ -206,10 +215,28 @@ const backText = isEditMode
     };
 
     const renderPreview = () => {
-      const coverImageUrl = form.cover_image?.value;
-      previewImageContainer.innerHTML = coverImageUrl
-        ? `<img src="${coverImageUrl}" alt="Cover Image" class="mb-4 rounded shadow max-h-64 object-cover w-full">`
-        : '';
+      const coverImageUrl = form.cover_image?.value?.trim();
+      
+      // Διατηρούμε το container και ενημερώνουμε μόνο το περιεχόμενο
+      if (coverImageUrl) {
+        previewImageContainer.innerHTML = `
+          <img src="${coverImageUrl}" 
+               alt="Cover Image" 
+               class="w-full max-h-64 object-cover rounded" 
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <div class="text-red-500 text-sm p-2 bg-red-50 rounded hidden">
+            ${isGreek ? '⚠️ Η εικόνα δεν μπόρεσε να φορτωθεί' : '⚠️ Image failed to load'}
+          </div>
+        `;
+      } else {
+        previewImageContainer.innerHTML = `
+          <div class="text-gray-400 text-sm p-4 bg-gray-50 rounded text-center border-2 border-dashed">
+            ${isGreek ? '📷 Προσθέστε URL εικόνας για προεπισκόπηση' : '📷 Add image URL for preview'}
+          </div>
+        `;
+      }
+      
+      // Render markdown content
       preview.innerHTML = marked.parse(input.value || '');
     };
 
@@ -353,8 +380,7 @@ const backText = isEditMode
       // All form inputs for autosave
       document.querySelectorAll('#articleForm input, #articleForm textarea, #articleForm select').forEach((el) => {
         el.addEventListener('input', resetIdleTimer);
-        el.addEventListener('change', resetIdleTimer); // Important for select/datetime inputs
-      });
+        el.addEventListener('change', resetIdleTimer);
 
       // Periodic autosave every 30 seconds
       setInterval(autosave, 30000);

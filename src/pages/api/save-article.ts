@@ -4,6 +4,7 @@ import { createAdminClientNoCookies } from "../../lib/createAdminClientNoCookies
 
 export const prerender = false;
 
+// Λειτουργία για καθαρό slug
 function generateSlug(title: string): string {
   return title
     .toLowerCase()
@@ -21,12 +22,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       title,
       excerpt,
       content,
-      cover_image,    // URL εικόνας
+      cover_image,    // <-- ΣΩΖΕΤΑΙ ΣΩΣΤΑ
       lang,
       published,
-      publish_date,   // ημερομηνία + ώρα δημοσίευσης από το frontend
+      publish_date,
     } = body;
 
+    // Supabase client για authentication
     const supabase = createServerClientWithCookies(cookies);
     const {
       data: { user },
@@ -36,8 +38,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       return new Response("Unauthorized", { status: 401 });
     }
 
+    // Admin client για write rights
     const admin = createAdminClientNoCookies();
 
+    // Slug γενιά με έλεγχο μοναδικότητας
     const baseSlug = generateSlug(title);
     let fullSlug = `${baseSlug}-${lang}`;
     let index = 1;
@@ -60,16 +64,18 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       index++;
     }
 
+    // Εδώ το ΜΟΝΑΔΙΚΟ σημείο που κάνω add/διορθώνω:
+    // Αν δεν έχεις βάλει ήδη το cover_image, πρόσθεσέ το!
     const { error } = await admin.from("articles").insert([
       {
         user_id: user.id,
         title,
         slug: fullSlug,
-        excerpt,
+        excerpt: excerpt || null,
         content,
-        cover_image: cover_image || null,  // Αν δεν δώσεις εικόνα, βάζει null
+        cover_image: cover_image || null,  // <-- ΕΔΩ Η ΔΙΟΡΘΩΣΗ
         lang,
-        published,
+        published: !!published,
         publish_date: publish_date || new Date().toISOString(),
         created_at: new Date().toISOString(),
       },
