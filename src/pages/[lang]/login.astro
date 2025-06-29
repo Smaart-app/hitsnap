@@ -48,9 +48,9 @@ const lang = Astro.params?.lang || 'el';
     </form>
   </main>
   <script type="module" is:client>
-    import { createBrowserClient } from '/src/lib/createBrowserClient.js';
+    import { createBrowserClient } from '/createBrowserClient.js'; // <--- ΠΡΟΣΟΧΗ, αυτό!
 
-    const lang = "{lang}"; // <--- Εδώ είναι το μαγικό!
+    const lang = "{lang}";
 
     const form = document.getElementById('loginForm');
     const emailInput = document.getElementById('emailInput');
@@ -92,7 +92,6 @@ const lang = Astro.params?.lang || 'el';
               refresh_token: session.refresh_token,
             }),
           });
-          // Μετά το set-cookie, πήγαινε στο admin/preview ή όπου θες
           window.location.href = `/${lang}/admin/preview`;
         }
       });

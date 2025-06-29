@@ -17,6 +17,6 @@
     "strict": true,
     "noEmit": true
   },
-  "include": ["src"],
+  "include": ["src", "public/createBrowserClient.js"],
   "exclude": ["scripts"]
 }
