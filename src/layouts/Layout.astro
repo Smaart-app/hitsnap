@@ -16,9 +16,6 @@ if (!lang && Astro.url) {
   lang = match ? match[1] : 'el';
 }
 
-// === ΕΔΩ ΒΑΖΩ ΤΟ DEBUG ===
-console.log('SSR sees cookies:', Astro.cookies);
-
 try {
   const supabase = createServerClientReadOnly(Astro.cookies);
   const result = await supabase.auth.getSession();
@@ -27,7 +24,6 @@ try {
   user = null;
 }
 ---
-
 <html lang={lang}>
   <head>
     <meta charset="UTF-8" />
@@ -49,12 +45,6 @@ try {
   </head>
 
   <body class="bg-[#f4f3f0] text-[#1a1a1a] leading-relaxed relative overflow-x-visible min-h-screen">
-
-    <!-- DEBUG PANEL -->
-    <div style="position: fixed; top: 50px; right: 0; background: blue; color: white; padding: 5px; z-index: 9999; font-size: 12px;">
-      Layout User: {user ? user.email || 'Logged in' : 'Not logged in'}
-    </div>
-
     <Header lang={lang} user={user} />
 
     <main class="relative z-10">
@@ -65,10 +55,8 @@ try {
 
     <Footer lang={lang} />
 
-    <!-- ΜΟΝΟ theme script -->
     <script is:client>
       const html = document.documentElement;
-
       if (
         localStorage.getItem('theme') === 'dark' ||
         (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)

@@ -1,10 +1,9 @@
 import type { APIRoute } from "astro";
-import { createServerClientWithCookies } from "../../lib/createServerClient.ts";
 import { createAdminClientNoCookies } from "../../lib/createAdminClientNoCookies.ts";
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request, cookies }) => {
+export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
 
@@ -18,19 +17,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       published,
       publish_date,
     } = body;
-
-    // Supabase client για authentication
-    const supabase = createServerClientWithCookies(cookies);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return new Response(
-        JSON.stringify({ article: null, error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
-    }
 
     // Admin client για write rights
     const admin = createAdminClientNoCookies();
@@ -61,7 +47,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     const { error } = await admin.from("articles").insert([
       {
-        user_id: user.id,
         title,
         slug: fullSlug,
         excerpt: excerpt || null,

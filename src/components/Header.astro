@@ -1,7 +1,7 @@
 ---
 import ThemeButton from './ThemeButton.tsx';
+import UserStatus from '../components/UserStatus.jsx';
 
-const user = Astro.props?.user || null;
 const lang = Astro.props?.lang || 'el';
 const altArticle = Astro.props?.altArticle || null;
 const disableLangSwitch = Astro.props?.disableHeaderLangSwitch || false;
@@ -36,20 +36,12 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
       <a href="/" class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isHome ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Αρχική' : 'Home'}</a>
       <a href={`${base}/blog`} class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Άρθρα' : 'Articles'}</a>
       <a href={`${base}/contact`} class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Επικοινωνία' : 'Contact'}</a>
-      {user && (
-        <>
-          <a href={`${base}/admin/preview`} class={`px-2 py-1 rounded-sm transition ${isPreview ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2] hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>📋 Preview</a>
-          <!-- Η ΑΛΛΑΓΗ ΕΔΩ -->
-          <a href={`${base}/admin/new`} class={`px-2 py-1 rounded-sm transition ${isEditor ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2] hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>✏️ {isGreek ? 'Νέο Άρθρο' : 'New Article'}</a>
-        </>
-      )}
+      {/* ✏️ Εμφάνιση preview/new article όταν είσαι logged in (αν θέλεις μελλοντικά μπορείς να ελέγξεις το state μέσω UserStatus ή context) */}
       {!disableLangSwitch && (
         <a href={langSwitchHref} class="px-2 py-1 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition hover:text-[#50c7c2]">{isGreek ? 'English 🇬🇧' : 'Ελληνικά 🇬🇷'}</a>
       )}
       <ThemeButton client:only="react" />
-      <a href={user ? `${base}/logout` : `${base}/login`} class="px-2 py-1 rounded-sm text-[#50c7c2] hover:underline transition hover:bg-zinc-100 dark:hover:bg-zinc-800">
-        {user ? '🚪 Έξοδος' : '🔐 ' + (isGreek ? 'Είσοδος' : 'Login')}
-      </a>
+      <UserStatus client:load />
     </nav>
   </div>
 </header>
@@ -60,22 +52,13 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
   <a href="/" class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isHome ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Αρχική' : 'Home'}</a>
   <a href={`${base}/blog`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Άρθρα' : 'Articles'}</a>
   <a href={`${base}/contact`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Επικοινωνία' : 'Contact'}</a>
-  {user && (
-    <>
-      <a href={`${base}/admin/preview`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isPreview ? 'text-[#50c7c2] font-bold' : ''}`}>📋 Preview</a>
-      <!-- Η ΑΛΛΑΓΗ ΕΔΩ -->
-      <a href={`${base}/admin/new`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isEditor ? 'text-[#50c7c2] font-bold' : ''}`}>✏️ {isGreek ? 'Νέο Άρθρο' : 'New Article'}</a>
-    </>
-  )}
   {!disableLangSwitch && (
     <a href={langSwitchHref} class="w-full px-2 py-2 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition hover:text-[#50c7c2]">{isGreek ? 'English 🇬🇧' : 'Ελληνικά 🇬🇷'}</a>
   )}
   <div class="w-full px-2 py-2">
     <ThemeButton client:only="react" />
   </div>
-  <a href={user ? `${base}/logout` : `${base}/login`} class="w-full px-2 py-2 rounded-sm text-[#50c7c2] hover:underline transition hover:bg-zinc-100 dark:hover:bg-zinc-800">
-    {user ? '🚪 Έξοδος' : '🔐 ' + (isGreek ? 'Είσοδος' : 'Login')}
-  </a>
+  <UserStatus client:load />
 </nav>
 
 <style>

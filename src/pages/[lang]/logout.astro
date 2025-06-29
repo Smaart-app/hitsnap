@@ -9,7 +9,7 @@ const supabase = createClient(
   import.meta.env.PUBLIC_SUPABASE_ANON_KEY
 );
 
-// Κάνε logout από Supabase
+// Κάνε logout από Supabase (client-side tokens)
 await supabase.auth.signOut();
 
 // Ανάκτηση γλώσσας από τη διαδρομή π.χ. /el/logout → "el"
@@ -19,7 +19,8 @@ const lang = ['el', 'en'].includes(rawSegment) ? rawSegment : 'el';
 
 // Δημιουργία headers για redirect και καθαρισμό cookies
 const headers = new Headers();
-headers.set('Location', `/${lang}`);
+// Κάνε redirect στο login μετά το logout (όχι στην αρχική)
+headers.set('Location', `/${lang}/login`);
 headers.append('Set-Cookie', serialize('sb-access-token', '', {
   path: '/',
   maxAge: 0,
@@ -32,6 +33,8 @@ headers.append('Set-Cookie', serialize('sb-refresh-token', '', {
   httpOnly: true,
   sameSite: 'Lax'
 }));
+// Optionally: σβήσε και άλλα σχετικά cookies αν έχεις (π.χ. CSRF)
+// headers.append('Set-Cookie', serialize('sb-csrf-token', '', { path: '/', maxAge: 0, httpOnly: true, sameSite: 'Lax' }));
 
 return new Response(null, {
   status: 302,

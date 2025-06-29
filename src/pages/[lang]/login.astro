@@ -1,100 +1,12 @@
 ---
 import Layout from '@layouts/Layout.astro';
+import LoginForm from '../../components/LoginForm.jsx';
 const lang = Astro.params?.lang || 'el';
 ---
 
 <Layout title="🔐 Login" lang={lang}>
   <main class="max-w-md mx-auto mt-24 p-6 bg-white rounded shadow">
     <h1 class="text-2xl font-bold mb-4">🔐 Login to Admin</h1>
-    <form id="loginForm" class="space-y-4">
-      <input type="hidden" name="lang" value={lang} />
-      <div>
-        <label class="block font-semibold mb-1" for="emailInput">Email</label>
-        <input
-          type="email"
-          id="emailInput"
-          name="email"
-          class="w-full p-2 border rounded"
-          placeholder="anna@hitlift.com"
-          required
-        />
-      </div>
-      <div>
-        <label class="block font-semibold mb-1" for="passwordInput">Password</label>
-        <div class="relative">
-          <input
-            id="passwordInput"
-            type="password"
-            name="password"
-            class="w-full p-2 border rounded pr-10"
-            placeholder="••••••••••"
-            required
-          />
-          <button
-            type="button"
-            id="togglePassword"
-            class="absolute inset-y-0 right-0 px-3 text-sm text-gray-600"
-            tabindex="-1"
-          >👁</button>
-        </div>
-      </div>
-      <button
-        type="submit"
-        class="bg-[#50c7c2] text-white px-6 py-2 rounded hover:bg-[#3db2b0] transition font-semibold w-full"
-      >
-        Login
-      </button>
-      <div id="loginError" class="text-red-600 mt-2" style="display:none"></div>
-    </form>
+    <LoginForm lang={lang} client:load />
   </main>
-  <script type="module" is:client>
-    import { createBrowserClient } from '/createBrowserClient.js'; // <--- ΠΡΟΣΟΧΗ, αυτό!
-
-    const lang = "{lang}";
-
-    const form = document.getElementById('loginForm');
-    const emailInput = document.getElementById('emailInput');
-    const passwordInput = document.getElementById('passwordInput');
-    const errorDiv = document.getElementById('loginError');
-    const toggleBtn = document.getElementById('togglePassword');
-
-    toggleBtn.addEventListener('click', () => {
-      const type = passwordInput.type === 'password' ? 'text' : 'password';
-      passwordInput.type = type;
-      toggleBtn.textContent = type === 'password' ? '👁' : '🙈';
-    });
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      errorDiv.style.display = 'none';
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
-      const supabase = createBrowserClient();
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        errorDiv.textContent = "Λάθος email ή password.";
-        errorDiv.style.display = 'block';
-        return;
-      }
-
-      let hasSetAuthCookie = false;
-      supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('🔐 Auth state changed:', event);
-
-        if (event === 'SIGNED_IN' && !hasSetAuthCookie) {
-          hasSetAuthCookie = true;
-          await fetch('/api/set-auth-cookie', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-              access_token: session.access_token,
-              refresh_token: session.refresh_token,
-            }),
-          });
-          window.location.href = `/${lang}/admin/preview`;
-        }
-      });
-    });
-  </script>
 </Layout>
