@@ -1,30 +1,12 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import { createServerClientReadOnly } from '@lib/createServerClient';
-
-export const prerender = false;
-
-let error = '';
-let user = null;
-
 const lang = Astro.params?.lang || 'el';
-
-try {
-  const supabase = createServerClientReadOnly(Astro.cookies);
-  const result = await supabase.auth.getSession();
-  user = result.session?.user || null;
-} catch (err) {
-  user = null;
-}
 ---
 
 <Layout title="🔐 Login" lang={lang}>
   <main class="max-w-md mx-auto mt-24 p-6 bg-white rounded shadow">
     <h1 class="text-2xl font-bold mb-4">🔐 Login to Admin</h1>
-
-    {error && <div class="text-red-600 mb-4">{error}</div>}
-
-    <form method="POST" action="/api/login" class="space-y-4">
+    <form id="loginForm" class="space-y-4">
       <input type="hidden" name="lang" value={lang} />
       <div>
         <label class="block font-semibold mb-1" for="emailInput">Email</label>
@@ -37,7 +19,6 @@ try {
           required
         />
       </div>
-
       <div>
         <label class="block font-semibold mb-1" for="passwordInput">Password</label>
         <div class="relative">
@@ -57,23 +38,64 @@ try {
           >👁</button>
         </div>
       </div>
-
       <button
         type="submit"
         class="bg-[#50c7c2] text-white px-6 py-2 rounded hover:bg-[#3db2b0] transition font-semibold w-full"
       >
         Login
       </button>
+      <div id="loginError" class="text-red-600 mt-2" style="display:none"></div>
     </form>
   </main>
-  <script type="module">
-    const toggleBtn = document.getElementById('togglePassword');
+  <script type="module" is:client>
+    import { createBrowserClient } from '/src/lib/createBrowserClient.js';
+
+    const lang = "{lang}"; // <--- Εδώ είναι το μαγικό!
+
+    const form = document.getElementById('loginForm');
+    const emailInput = document.getElementById('emailInput');
     const passwordInput = document.getElementById('passwordInput');
+    const errorDiv = document.getElementById('loginError');
+    const toggleBtn = document.getElementById('togglePassword');
 
     toggleBtn.addEventListener('click', () => {
       const type = passwordInput.type === 'password' ? 'text' : 'password';
       passwordInput.type = type;
       toggleBtn.textContent = type === 'password' ? '👁' : '🙈';
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorDiv.style.display = 'none';
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+      const supabase = createBrowserClient();
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        errorDiv.textContent = "Λάθος email ή password.";
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      let hasSetAuthCookie = false;
+      supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log('🔐 Auth state changed:', event);
+
+        if (event === 'SIGNED_IN' && !hasSetAuthCookie) {
+          hasSetAuthCookie = true;
+          await fetch('/api/set-auth-cookie', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              access_token: session.access_token,
+              refresh_token: session.refresh_token,
+            }),
+          });
+          // Μετά το set-cookie, πήγαινε στο admin/preview ή όπου θες
+          window.location.href = `/${lang}/admin/preview`;
+        }
+      });
     });
   </script>
 </Layout>

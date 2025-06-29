@@ -16,6 +16,9 @@ if (!lang && Astro.url) {
   lang = match ? match[1] : 'el';
 }
 
+// === ΕΔΩ ΒΑΖΩ ΤΟ DEBUG ===
+console.log('SSR sees cookies:', Astro.cookies);
+
 try {
   const supabase = createServerClientReadOnly(Astro.cookies);
   const result = await supabase.auth.getSession();
@@ -62,6 +65,7 @@ try {
 
     <Footer lang={lang} />
 
+    <!-- ΜΟΝΟ theme script -->
     <script is:client>
       const html = document.documentElement;
 
@@ -77,38 +81,6 @@ try {
           html.classList.toggle('dark');
           localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
         });
-      });
-    </script>
-
-    <script is:client type="module">
-      import { createBrowserClient } from '/src/lib/createBrowserClient.js';
-
-      document.addEventListener('DOMContentLoaded', async () => {
-        try {
-          const supabase = createBrowserClient();
-
-          supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log('🔐 Auth state changed:', event);
-            if (event === 'SIGNED_IN' && session) {
-              await fetch('/api/set-auth-cookie', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                  access_token: session.access_token,
-                  refresh_token: session.refresh_token,
-                }),
-              });
-              window.location.reload();
-            }
-
-            if (event === 'SIGNED_OUT') {
-              window.location.reload();
-            }
-          });
-        } catch (error) {
-          console.error('Auth monitoring error:', error);
-        }
       });
     </script>
   </body>
