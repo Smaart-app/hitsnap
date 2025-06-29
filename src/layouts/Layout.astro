@@ -2,24 +2,26 @@
 import '../styles/global.css';
 
 const title = Astro.props?.title || 'Hitlift';
-const lang = Astro.props?.lang || 'el';
+let lang = Astro.props?.lang;
 
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { createServerClientReadOnly } from '../lib/createServerClient';
 
-let user = Astro.props?.user || null;
+let user = null;
 
-if (!user) {
-  try {
-    if (Astro.request?.headers) {
-      const supabase = createServerClientReadOnly(Astro.cookies);
-      const result = await supabase.auth.getSession();
-      user = result.session?.user || null;
-    }
-  } catch (err) {
-    user = null;
-  }
+// Αν το prop lang λείπει, πάρε από το URL
+if (!lang && Astro.url) {
+  const match = Astro.url.pathname.match(/^\/(\w+)\//);
+  lang = match ? match[1] : 'el';
+}
+
+try {
+  const supabase = createServerClientReadOnly(Astro.cookies);
+  const result = await supabase.auth.getSession();
+  user = result.session?.user || null;
+} catch (err) {
+  user = null;
 }
 ---
 
@@ -44,13 +46,12 @@ if (!user) {
   </head>
 
   <body class="bg-[#f4f3f0] text-[#1a1a1a] leading-relaxed relative overflow-x-visible min-h-screen">
-    <!-- Debug info - αφαίρεσε αυτό μετά -->
-    <!--
+
+    <!-- DEBUG PANEL -->
     <div style="position: fixed; top: 50px; right: 0; background: blue; color: white; padding: 5px; z-index: 9999; font-size: 12px;">
       Layout User: {user ? user.email || 'Logged in' : 'Not logged in'}
     </div>
-    -->
-    
+
     <Header lang={lang} user={user} />
 
     <main class="relative z-10">

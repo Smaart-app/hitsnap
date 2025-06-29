@@ -5,24 +5,15 @@ import { createServerClientReadOnly } from '@lib/createServerClient';
 export const prerender = false;
 
 let error = '';
-let emailAttempted = '';
 let user = null;
 
 const lang = Astro.params?.lang || 'el';
 
 try {
   const supabase = createServerClientReadOnly(Astro.cookies);
-  const result = await supabase.auth.getSession(); // ✅ πιο ασφαλές από getUser()
+  const result = await supabase.auth.getSession();
   user = result.session?.user || null;
-
-  console.log('[LOGIN] Supabase user:', user);
-
-  // Αν υπάρχει ενεργό session, δείχνουμε μόνο τη φόρμα (δεν κάνουμε redirect εδώ)
-  if (user && user.email) {
-    console.log('[LOGIN] Already authenticated');
-  }
 } catch (err) {
-  console.warn('[LOGIN] Error fetching user:', err);
   user = null;
 }
 ---
@@ -31,9 +22,10 @@ try {
   <main class="max-w-md mx-auto mt-24 p-6 bg-white rounded shadow">
     <h1 class="text-2xl font-bold mb-4">🔐 Login to Admin</h1>
 
-    <div id="errorBox" class="text-red-600 mb-4 hidden"></div>
+    {error && <div class="text-red-600 mb-4">{error}</div>}
 
-    <form id="loginForm" class="space-y-4">
+    <form method="POST" action="/api/login" class="space-y-4">
+      <input type="hidden" name="lang" value={lang} />
       <div>
         <label class="block font-semibold mb-1" for="emailInput">Email</label>
         <input
@@ -74,10 +66,7 @@ try {
       </button>
     </form>
   </main>
-
   <script type="module">
-    const form = document.getElementById('loginForm');
-    const errorBox = document.getElementById('errorBox');
     const toggleBtn = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('passwordInput');
 
@@ -85,37 +74,6 @@ try {
       const type = passwordInput.type === 'password' ? 'text' : 'password';
       passwordInput.type = type;
       toggleBtn.textContent = type === 'password' ? '👁' : '🙈';
-    });
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const formData = new FormData(form);
-      const email = formData.get('email');
-      const password = formData.get('password');
-
-      try {
-        const res = await fetch('/api/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include', // ✅ Πρέπει να υπάρχει για να σωθούν τα cookies
-          body: JSON.stringify({ email, password }),
-        });
-
-        if (res.ok) {
-          const lang = window.location.pathname.split('/')[1] || 'el';
-          window.location.href = `/${lang}/admin/dashboard`;
-        } else {
-          const result = await res.json();
-          errorBox.textContent = result.error || 'Login failed';
-          errorBox.classList.remove('hidden');
-        }
-      } catch (err) {
-        errorBox.textContent = '⚠️ Network error or invalid response';
-        errorBox.classList.remove('hidden');
-      }
     });
   </script>
 </Layout>

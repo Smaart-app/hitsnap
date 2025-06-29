@@ -1,4 +1,4 @@
-import type { APIRoute } from 'astro';
+import type { APIRoute } from 'astro';  
 import { createServerClient } from '@supabase/ssr';
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
@@ -11,8 +11,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         set: (name, value, options) =>
           cookies.set(name, value, {
             path: '/',
-            httpOnly: true, // ✅ Τώρα ο server θα βλέπει το session
-            secure: true,
+            httpOnly: true,
+            secure: false,
             sameSite: 'Lax',
             ...options,
           }),
@@ -22,7 +22,11 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     }
   );
 
-  const { email, password } = await request.json();
+  // ΔΙΑΒΑΖΕΙ ΤΩΡΑ ΑΠΟ FORM DATA, ΟΧΙ JSON!
+  const form = await request.formData();
+  const email = form.get('email');
+  const password = form.get('password');
+  const lang = form.get('lang');
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -36,6 +40,6 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     );
   }
 
-  // ✅ Redirect ώστε ο Layout.astro να πιάσει το session
-  return redirect('/el/admin/preview');
+  // Redirect στο σωστό locale dashboard
+  return redirect(`/${lang}/admin/preview`);
 };

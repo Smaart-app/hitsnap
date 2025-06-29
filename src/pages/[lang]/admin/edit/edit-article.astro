@@ -20,9 +20,6 @@ if (!user) {
   return Astro.redirect(`/${lang}/login`);
 }
 
-let article = null;
-let error = null;
-
 if (!slug) {
   console.warn('[EDITOR] Missing slug param!');
   return Astro.redirect('/404');
@@ -43,7 +40,7 @@ if (fetchError || !data) {
   return Astro.redirect('/404');
 }
 
-article = data;
+const article = data;
 const isGreek = article?.lang === 'el';
 ---
 

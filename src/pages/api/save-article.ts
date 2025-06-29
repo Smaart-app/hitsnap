@@ -4,21 +4,12 @@ import { createAdminClientNoCookies } from "../../lib/createAdminClientNoCookies
 
 export const prerender = false;
 
-// Λειτουργία για καθαρό slug
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     const body = await request.json();
 
     const {
+      slug,
       title,
       excerpt,
       content,
@@ -44,8 +35,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     // Admin client για write rights
     const admin = createAdminClientNoCookies();
 
-    // Slug γενιά με έλεγχο μοναδικότητας
-    const baseSlug = generateSlug(title);
+    // Έλεγχος μοναδικότητας slug (με βάση το slug που περνάει η φόρμα)
+    let baseSlug = slug;
     let fullSlug = `${baseSlug}-${lang}`;
     let index = 1;
 
@@ -90,7 +81,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
 
-    // Το μόνο που επιστρέφω προς το παρόν είναι τα βασικά για redirect
     return new Response(
       JSON.stringify({ article: { slug: fullSlug, lang }, error: null }),
       { status: 200, headers: { "Content-Type": "application/json" } }

@@ -1,10 +1,23 @@
 ---
 import Layout from '../../../../layouts/Layout.astro';
-const lang = 'el';
+import { createServerClientWithCookies } from '../../../../lib/createServerClient.ts';
+
+export const prerender = false;
+
+// Πάρε lang από params (αν θες να είναι dynamic)
+const lang = Astro.params?.lang || 'el';
 const isGreek = lang === 'el';
+
+// Server-side Supabase user check (authentication)
+const supabase = createServerClientWithCookies(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
+
+if (!user) {
+  return Astro.redirect(`/${lang}/login`);
+}
 ---
 
-<Layout title={isGreek ? 'Δημιουργία Άρθρου | Hitlift' : 'Create Article | Hitlift'} lang={lang}>
+<Layout title={isGreek ? 'Δημιουργία Άρθρου | Hitlift' : 'Create Article | Hitlift'} lang={lang} user={user}>
   <main class="max-w-6xl mx-auto px-4 py-12">
     <h1 class="text-2xl font-bold mb-6">{isGreek ? '📝 Δημιουργία Άρθρου' : '📝 Create New Article'}</h1>
     <div id="feedback"></div>

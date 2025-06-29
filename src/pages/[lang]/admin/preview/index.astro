@@ -5,6 +5,12 @@ import { createServerClientWithCookies } from '../../../../lib/createServerClien
 export const prerender = false;
 
 const supabase = createServerClientWithCookies(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
+const lang = Astro.params?.lang || 'el';
+
+if (!user) {
+  return Astro.redirect(`/${lang}/login`);
+}
 
 const { data: articles, error } = await supabase
   .from('articles')
@@ -18,7 +24,7 @@ function getStatus(article) {
 }
 ---
 
-<Layout title="Προεπισκοπήσεις Άρθρων">
+<Layout title="Προεπισκοπήσεις Άρθρων" user={user} lang={lang}>
   <main class="max-w-6xl mx-auto px-4 py-16">
     <h1 class="text-2xl font-bold mb-8">📋 Όλα τα άρθρα</h1>
 

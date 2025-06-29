@@ -25,9 +25,6 @@ const [
     .maybeSingle(),
 ]);
 
-console.log('User data:', user);
-console.log('User error:', userError);
-
 if (articleError) {
   return new Response(`❌ Σφάλμα Supabase: ${articleError.message}`, { status: 500 });
 }
@@ -44,6 +41,7 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
 ---
 
 <Layout title={pageTitle} user={user}>
+  <!-- Debug panel για σιγουριά! -->
   <div style="position: fixed; top: 0; right: 0; background: red; color: white; padding: 5px; z-index: 9999; font-size: 12px;">
     User: {user ? user.email || 'Logged in' : 'Not logged in'}
   </div>
@@ -73,7 +71,7 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
 
         <div>
           <label class="block text-sm font-medium">Εικόνα (URL)</label>
-          <input x-model="cover_image" type="text"full border rounded px-3 py-2">
+          <input x-model="cover_image" type="text" class="w-full border rounded px-3 py-2">
         </div>
 
         <div>
@@ -116,7 +114,6 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
   </div>
 
   <script is:inline define:vars={{
-
     articleTitle: article.title || '',
     articleSlug: article.slug || '',
     articleExcerpt: article.excerpt || '',
@@ -126,7 +123,6 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
     articlePublishDate: article.publish_date?.slice(0, 16) || '',
     articleLang: lang || 'el',
     articleId: article.id
-
   }}>
     import("https://cdn.jsdelivr.net/npm/marked/marked.min.js").then((m) => {
       window.marked = m.marked;
@@ -175,7 +171,6 @@ const pageTitle = `Επεξεργασία: ${article.title}`;
         },
 
         renderMarkdown() {
-          console.log('renderMarkdown content:', this.content);
           if (window.marked && this.content) {
             this.renderedContent = window.marked.parse(this.content);
           }
