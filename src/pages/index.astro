@@ -1,8 +1,32 @@
 ---
-export const prerender = false;
+export const prerender = true;
 
-// SSR redirect με βάση Accept-Language header
 const acceptLang = Astro.request.headers.get('accept-language') || '';
 const userLang = acceptLang.startsWith('el') ? 'el' : 'en';
-return Astro.redirect(`/${userLang}`, 302);
 ---
+
+<html lang="en">
+  <head>
+    <title>Hitlift | Αρχική</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body class="bg-[#f4f3f0] text-[#1a1a1a] flex flex-col items-center justify-center min-h-screen">
+    <main class="flex flex-col items-center justify-center gap-8">
+      <div class="text-4xl font-bold mb-2" style="font-family: 'Lora', serif;">
+        Καλωσήρθες στο <span class="text-[#50c7c2]">Hitlift</span>
+      </div>
+      <div class="flex gap-4">
+        <a href="/el" class="px-6 py-3 rounded-lg bg-[#50c7c2] text-white font-bold hover:bg-[#379b98] transition">
+          Ελληνικά
+        </a>
+        <a href="/en" class="px-6 py-3 rounded-lg bg-[#1a1a1a] text-white font-bold hover:bg-[#444] transition">
+          English
+        </a>
+      </div>
+      <div class="text-zinc-600 mt-6">
+        (Detected language: <b>{userLang}</b>)
+      </div>
+    </main>
+  </body>
+</html>
