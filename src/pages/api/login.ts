@@ -1,4 +1,4 @@
-import type { APIRoute } from 'astro';  
+import type { APIRoute } from 'astro';
 import { createServerClient } from '@supabase/ssr';
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
@@ -12,7 +12,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
           cookies.set(name, value, {
             path: '/',
             httpOnly: true,
-            secure: false,
+            secure: false, // false για local, true για prod με https
             sameSite: 'Lax',
             ...options,
           }),
@@ -22,11 +22,19 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     }
   );
 
-  // ΔΙΑΒΑΖΕΙ ΤΩΡΑ ΑΠΟ FORM DATA, ΟΧΙ JSON!
+  // Παίρνει από POST form
   const form = await request.formData();
-  const email = form.get('email');
-  const password = form.get('password');
-  const lang = form.get('lang');
+  const email = form.get('email') as string | null;
+  const password = form.get('password') as string | null;
+  const lang = form.get('lang') as string | null;
+
+  // Προσοχή: αν λείπουν πεδία, error!
+  if (!email || !password || !lang) {
+    return new Response(
+      JSON.stringify({ error: 'Λείπουν στοιχεία login.' }),
+      { status: 400 }
+    );
+  }
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -40,6 +48,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     );
   }
 
-  // Redirect στο σωστό locale dashboard
+  // Τα cookies μπαίνουν αυτόματα από τον Supabase client!
+  // Κάνε redirect μετά το login
   return redirect(`/${lang}/admin/preview`);
 };

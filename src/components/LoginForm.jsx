@@ -1,29 +1,15 @@
-import { useState } from 'react'
-import { createBrowserClient } from '../lib/createBrowserClient.js'
+import { useState } from 'react';
 
 export default function LoginForm({ lang }) {
-  const [error, setError] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    const supabase = createBrowserClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    setLoading(false)
-    if (error) {
-      setError('Λάθος email ή password.')
-      return
-    }
-    window.location.href = `/${lang}/admin/preview`
-  }
+  // Χρησιμοποιούμε state μόνο για το error που περνάει ως query param (αν θες)
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form
+      method="POST"
+      action="/api/login"
+      className="space-y-4"
+    >
       <input type="hidden" name="lang" value={lang} />
       <div>
         <label className="block font-semibold mb-1" htmlFor="emailInput">Email</label>
@@ -34,8 +20,6 @@ export default function LoginForm({ lang }) {
           className="w-full p-2 border rounded"
           placeholder="anna@hitlift.com"
           autoComplete="username"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
           required
         />
       </div>
@@ -49,8 +33,6 @@ export default function LoginForm({ lang }) {
             className="w-full p-2 border rounded pr-10"
             placeholder="••••••••••"
             autoComplete="current-password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
             required
           />
           <button
@@ -65,12 +47,15 @@ export default function LoginForm({ lang }) {
       </div>
       <button
         type="submit"
-        disabled={loading}
         className="bg-[#50c7c2] text-white px-6 py-2 rounded hover:bg-[#3db2b0] transition font-semibold w-full"
       >
-        {loading ? "Logging in..." : "Login"}
+        Login
       </button>
-      {error && <div className="text-red-600 mt-2">{error}</div>}
+      {/* 
+        Αν θέλεις να εμφανίζεις error μετά από αποτυχημένο login,
+        μπορείς να ελέγχεις το window.location.search (π.χ. ?error=1) και να δείχνεις ένα μήνυμα.
+        Αυτό το φτιάχνουμε μετά αν το χρειαστείς!
+      */}
     </form>
-  )
+  );
 }
