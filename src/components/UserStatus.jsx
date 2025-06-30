@@ -22,10 +22,6 @@ export default function UserStatus({ lang = 'el' }) {
     };
   }, []);
 
-  useEffect(() => {
-    console.log("Supabase user state", user);
-  }, [user]);
-
   const base = lang === 'el' ? '/el' : '/en';
 
   const handleLogout = async (e) => {

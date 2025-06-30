@@ -36,19 +36,21 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
       <a href="/" class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isHome ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Αρχική' : 'Home'}</a>
       <a href={`${base}/blog`} class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Άρθρα' : 'Articles'}</a>
       <a href={`${base}/contact`} class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Επικοινωνία' : 'Contact'}</a>
-      {/* ✏️ Εμφάνιση preview/new article όταν είσαι logged in (αν θέλεις μελλοντικά μπορείς να ελέγξεις το state μέσω UserStatus ή context) */}
       {!disableLangSwitch && (
         <a href={langSwitchHref} class="px-2 py-1 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition hover:text-[#50c7c2]">{isGreek ? 'English 🇬🇧' : 'Ελληνικά 🇬🇷'}</a>
       )}
       <ThemeButton client:only="react" />
-      <UserStatus client:load />
+      <UserStatus lang={lang} client:load />
     </nav>
   </div>
 </header>
 
 <div id="overlay" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-30"></div>
 
-<nav id="mainNav" class="hidden sm:hidden flex-col gap-2 items-start text-sm bg-white dark:bg-[#1a1a1a] w-full absolute top-[60px] left-0 px-6 py-4 border-b border-zinc-200 shadow-md z-40 animate-fadeIn">
+<nav
+  id="mainNav"
+  class="hidden sm:hidden flex-col gap-2 items-start text-sm bg-white dark:bg-[#1a1a1a] w-full absolute top-[60px] left-0 px-6 py-4 border-b border-zinc-200 shadow-md z-40 animate-fadeIn"
+>
   <a href="/" class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isHome ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Αρχική' : 'Home'}</a>
   <a href={`${base}/blog`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Άρθρα' : 'Articles'}</a>
   <a href={`${base}/contact`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Επικοινωνία' : 'Contact'}</a>
@@ -58,7 +60,9 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
   <div class="w-full px-2 py-2">
     <ThemeButton client:only="react" />
   </div>
-  <UserStatus client:load />
+  <div class="w-full px-2 py-2">
+    <UserStatus lang={lang} client:load />
+  </div>
 </nav>
 
 <style>
@@ -80,6 +84,7 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
 
   function closeMenu() {
     nav.classList.add('hidden');
+    nav.classList.remove('flex');
     overlay.classList.add('hidden');
     body.classList.remove('overflow-hidden');
     burger.textContent = '☰';
@@ -90,6 +95,7 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
   burger?.addEventListener('click', () => {
     open = !open;
     nav.classList.toggle('hidden');
+    nav.classList.toggle('flex');
     overlay.classList.toggle('hidden');
     body.classList.toggle('overflow-hidden');
     burger.textContent = open ? '✕' : '☰';

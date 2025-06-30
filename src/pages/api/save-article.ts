@@ -51,7 +51,15 @@ export const POST: APIRoute = async ({ request }) => {
       lang = '',
       published = false,
       publish_date = new Date().toISOString(),
+      user_id = '', // ΝΕΟ - Θέλεις αυτό το πεδίο!
     } = data;
+
+    if (!user_id) {
+      return new Response(
+        JSON.stringify({ article: null, error: "Λείπει το user_id! Δεν μπορεί να αποθηκευτεί το άρθρο." }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
 
     const admin = createAdminClientNoCookies();
 
@@ -78,7 +86,7 @@ export const POST: APIRoute = async ({ request }) => {
     const { error } = await admin.from("articles").insert([
       {
         title,
-        slug: slug.trim(), // ΤΕΛΟΣ, μόνο όπως το θες εσύ
+        slug: slug.trim(),
         excerpt: excerpt || null,
         content,
         cover_image: cover_image || null,
@@ -86,6 +94,7 @@ export const POST: APIRoute = async ({ request }) => {
         published: !!published,
         publish_date: publish_date || new Date().toISOString(),
         created_at: new Date().toISOString(),
+        user_id, // ΝΕΟ - Καταγραφή user_id
       },
     ]);
 
