@@ -1,37 +1,8 @@
 ---
-export const prerender = true;
+export const prerender = false;
+
+// SSR redirect με βάση Accept-Language header
+const acceptLang = Astro.request.headers.get('accept-language') || '';
+const userLang = acceptLang.startsWith('el') ? 'el' : 'en';
+return Astro.redirect(`/${userLang}`, 302);
 ---
-
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hitlift – The smart rise in real estate.</title>
-
-    <!-- Canonical -->
-    <link rel="canonical" href="https://hitlift.app/" />
-
-    <!-- Open Graph -->
-    <meta property="og:title" content="Hitlift – The smart rise in real estate." />
-    <meta property="og:description" content="Not just real estate. A better way to choose." />
-    <meta property="og:image" content="https://hitlift.app/preview-og-final.png?v=3" />
-    <meta property="og:url" content="https://hitlift.app/" />
-    <meta property="og:type" content="website" />
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Hitlift – The smart rise in real estate." />
-    <meta name="twitter:description" content="Not just real estate. A better way to choose." />
-    <meta name="twitter:image" content="https://hitlift.app/preview-og-final.png?v=3" />
-
-    <!-- JavaScript redirect -->
-    <script>
-      const userLang = navigator.language?.startsWith('el') ? 'el' : 'en';
-      window.location.href = `/${userLang}`;
-    </script>
-  </head>
-
-  <body style="font-family: sans-serif; text-align: center; padding: 5rem;">
-    <p>Redirecting to your language version...</p>
-  </body>
-</html>
