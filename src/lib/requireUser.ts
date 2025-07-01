@@ -1,7 +1,7 @@
-import { createServerClientReadOnly } from './createServerClient';
+import { createServerClientAstro } from './createServerClient';
 
 export async function requireUser(Astro: any) {
-  const supabase = createServerClientReadOnly(Astro.cookies);
+  const supabase = createServerClientAstro(Astro.cookies);
 
   const {
     data: { user },

@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { createServerClientWithCookies } from "../../lib/createServerClient.ts";
+import { createServerClientAstro } from "../../lib/createServerClient.ts";
 
 export const prerender = false;
 
@@ -29,7 +29,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     }
 
     // Έλεγχος χρήστη (πρέπει να είναι authenticated)
-    const supabase = createServerClientWithCookies(cookies);
+    const supabase = createServerClientAstro(cookies);
     const {
       data: { user },
       error: userError

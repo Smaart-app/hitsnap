@@ -3,17 +3,24 @@ import { createBrowserClient } from '../lib/createBrowserClient.js';
 
 export default function UserStatus({ lang = 'el' }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const supabase = createBrowserClient();
     let ignore = false;
 
     supabase.auth.getUser().then(({ data }) => {
-      if (!ignore) setUser(data.user);
+      if (!ignore) {
+        setUser(data.user);
+        setLoading(false);
+      }
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!ignore) setUser(session?.user || null);
+      if (!ignore) {
+        setUser(session?.user || null);
+        setLoading(false);
+      }
     });
 
     return () => {
@@ -31,6 +38,10 @@ export default function UserStatus({ lang = 'el' }) {
     window.location.href = `${base}/login`;
   };
 
+  if (loading) {
+    return <span style={{ minWidth: 68, display: "inline-block" }}>...</span>;
+  }
+
   if (user) {
     return (
       <a
@@ -43,6 +54,7 @@ export default function UserStatus({ lang = 'el' }) {
       </a>
     );
   }
+
   return (
     <a
       href={`${base}/login`}

@@ -1,7 +1,8 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import Markdown from '../../../components/Markdown.astro';
-import { createServerClientReadOnly } from '../../../lib/createServerClient.ts';
+// ΕΔΩ η διόρθωση:
+import { createServerClientAstro } from '../../../lib/createServerClient.ts';
 
 export const prerender = false;
 export const client = 'load';
@@ -16,7 +17,8 @@ if (!slug || !lang) {
   });
 }
 
-const supabase = createServerClientReadOnly(Astro.cookies);
+// ΕΔΩ η διόρθωση:
+const supabase = createServerClientAstro(Astro.cookies);
 
 const {
   data: { user },

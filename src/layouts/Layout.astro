@@ -6,7 +6,8 @@ let lang = Astro.props?.lang;
 
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { createServerClientReadOnly } from '../lib/createServerClient';
+// Χρησιμοποιούμε το ΣΩΣΤΟ export από το createServerClient.ts
+import { createServerClientAstro } from '../lib/createServerClient';
 
 let user = null;
 
@@ -17,12 +18,15 @@ if (!lang && Astro.url) {
 }
 
 try {
-  const supabase = createServerClientReadOnly(Astro.cookies);
+  const supabase = createServerClientAstro(Astro.cookies);
   const result = await supabase.auth.getSession();
   user = result.session?.user || null;
 } catch (err) {
   user = null;
 }
+
+// DEBUG PRINT (μπορείς να το βγάλεις όταν τελειώσουμε)
+console.log('SSR USER:', user);
 ---
 <html lang={lang}>
   <head>
@@ -45,6 +49,7 @@ try {
   </head>
 
   <body class="bg-[#f4f3f0] text-[#1a1a1a] leading-relaxed relative overflow-x-visible min-h-screen">
+    <!-- Περνάμε το user prop στον Header! -->
     <Header lang={lang} user={user} />
 
     <main class="relative z-10">

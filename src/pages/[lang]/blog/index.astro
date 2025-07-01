@@ -1,13 +1,15 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import ArticleCard from '../../../components/ArticleCard.jsx';
-import { createServerClientReadOnly } from '../../../lib/createServerClient.ts';
+// ΕΔΩ η διόρθωση:
+import { createServerClientAstro } from '../../../lib/createServerClient.ts';
 
 // 🚨 Μετατρέπουμε τη σελίδα σε Server-rendered
 export const prerender = false;
 
 const { lang } = Astro.params;
-const supabase = createServerClientReadOnly(Astro.cookies);
+// ΕΔΩ η διόρθωση:
+const supabase = createServerClientAstro(Astro.cookies);
 
 const now = new Date().toISOString();
 

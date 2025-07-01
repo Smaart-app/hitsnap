@@ -1,14 +1,14 @@
 ---
 import Layout from '../../../../layouts/Layout.astro';
 import EditorPage from '../../../../components/editor/EditorPage.astro';
-import { createServerClientWithCookies } from '../../../../lib/createServerClient.ts';
+import { createServerClientAstro } from '../../../../lib/createServerClient.ts';
 
 export const prerender = false;
 
 const slug = Astro.params.slug;
 const lang = Astro.url?.searchParams?.get('lang') || 'el'; // λαμβάνεται από το query param
 
-const supabase = createServerClientWithCookies(Astro.cookies);
+const supabase = createServerClientAstro(Astro.cookies);
 
 const {
   data: { user },

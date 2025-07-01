@@ -1,12 +1,12 @@
 ---
 import Layout from '../../../../layouts/Layout.astro';
 import Markdown from '../../../../components/Markdown.astro';
-import { createServerClientWithCookies } from '../../../../lib/createServerClient.ts';
+import { createServerClientAstro } from '../../../../lib/createServerClient.ts';
 
 export const prerender = false;
 
 const { slug, lang } = Astro.params;
-const supabase = createServerClientWithCookies(Astro.cookies);
+const supabase = createServerClientAstro(Astro.cookies);
 
 const {
   data: { user },

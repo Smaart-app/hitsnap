@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { createServerClientReadOnly } from '../../lib/createServerClient';
+// ΔΙΟΡΘΩΣΗ ΕΔΩ:
+import { createServerClientAstro } from '../../lib/createServerClient';
 
 export const prerender = false;
 
@@ -18,7 +19,8 @@ if (!lang || !supportedLangs.includes(lang)) {
   return Astro.redirect('/el', 302);
 }
 
-const supabase = createServerClientReadOnly(Astro.cookies);
+// ΔΙΟΡΘΩΣΗ ΕΔΩ:
+const supabase = createServerClientAstro(Astro.cookies);
 const todayISO = new Date().toISOString();
 
 const { data: articles } = await supabase

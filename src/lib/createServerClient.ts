@@ -1,63 +1,44 @@
 import { createServerClient } from '@supabase/ssr';
 import type { AstroCookies } from 'astro';
 
-// 🌍 Φόρτωσε .env μόνο αν λείπει (π.χ. σε build ή dev crash)
-if (!process.env.PUBLIC_SUPABASE_URL || !process.env.PUBLIC_SUPABASE_ANON_KEY) {
-  try {
-    const dotenv = await import('dotenv');
-    dotenv.config();
-    console.log('✅ .env loaded from createServerClient.ts');
-  } catch (err) {
-    console.error('❌ Failed to load dotenv:', err);
+// Αυτή είναι η function που χρησιμοποιείς παντού!
+export function createServerClientAstro(cookies: AstroCookies) {
+  // ΠΑΙΡΝΕΙ τα env variables ΣΩΣΤΑ!
+  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+  // ΕΛΕΓΧΟΣ αν έχεις τα σωστά κλειδιά
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('❌ Missing Supabase environment variables:');
+    console.error('PUBLIC_SUPABASE_URL:', supabaseUrl ? '✅ Set' : '❌ Missing');
+    console.error('PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? '✅ Set' : '❌ Missing');
+    throw new Error('Missing required Supabase environment variables');
   }
-}
 
-export function createServerClientReadOnly(cookies: AstroCookies) {
   return createServerClient(
-    process.env.PUBLIC_SUPABASE_URL!,
-    process.env.PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         get(name) {
-          return cookies.get(name)?.value;
+          const cookie = cookies.get(name);
+          return cookie?.value;
         },
-        set() {},
-        remove() {},
-      },
-    }
-  );
-}
-
-export function createServerClientFull(cookies: AstroCookies) {
-  return createServerClient(
-    process.env.PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      cookies: {
-        get(name) {
-          return cookies.get(name)?.value;
+        set(name, value, options) {
+          cookies.set(name, value, {
+            ...options,
+            httpOnly: false, // false για dev, true για prod αν θέλεις!
+            secure: import.meta.env.PROD,
+            sameSite: 'lax',
+            path: '/',
+          });
         },
-        set() {},
-        remove() {},
-      },
-    }
-  );
-}
-
-// ✅ Αυτό είναι το ΣΩΣΤΟ για authenticated χρήστες
-export const createServerClientWithCookies = createServerClientReadOnly;
-
-export function createAdminClientNoCookies() {
-  return createServerClient(
-    process.env.PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      cookies: {
-        get() {
-          return undefined;
+        remove(name, options) {
+          cookies.delete(name, {
+            ...options,
+            path: '/',
+          });
         },
-        set() {},
-        remove() {},
       },
     }
   );

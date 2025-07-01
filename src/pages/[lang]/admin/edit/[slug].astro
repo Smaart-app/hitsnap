@@ -1,6 +1,6 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import { createServerClientWithCookies } from '@lib/createServerClient';
+import { createServerClientAstro } from '@lib/createServerClient';
 
 export const prerender = false;
 
@@ -10,7 +10,7 @@ if (!slug || typeof slug !== 'string') {
   return new Response('⛔ Invalid slug', { status: 400 });
 }
 
-const supabase = createServerClientWithCookies(Astro.cookies);
+const supabase = createServerClientAstro(Astro.cookies);
 
 const [
   { data: { user }, error: userError },

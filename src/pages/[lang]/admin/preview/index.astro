@@ -1,6 +1,6 @@
 ---
 import Layout from '../../../../layouts/Layout.astro';
-import { createServerClientWithCookies } from '../../../../lib/createServerClient.ts';
+import { createServerClientAstro } from '../../../../lib/createServerClient.ts';
 
 export const prerender = false;
 
@@ -9,7 +9,7 @@ for (const name of ['sb-access-token', 'sb-refresh-token']) {
   console.log(`[DEBUG] Cookie ${name}:`, Astro.cookies.get(name)?.value);
 }
 
-const supabase = createServerClientWithCookies(Astro.cookies);
+const supabase = createServerClientAstro(Astro.cookies);
 
 console.log('[DEBUG] BEFORE getUser: access', Astro.cookies.get('sb-access-token')?.value, 'refresh', Astro.cookies.get('sb-refresh-token')?.value);
 
