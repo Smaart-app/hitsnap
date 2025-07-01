@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { createBrowserClient } from '../lib/createBrowserClient.js';
+import { getBrowserClient } from '../lib/createBrowserClient.js';
 
 export default function UserStatus({ lang = 'el' }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const supabase = createBrowserClient();
+    const supabase = getBrowserClient();
     let ignore = false;
 
     supabase.auth.getUser().then(({ data }) => {
@@ -33,7 +33,7 @@ export default function UserStatus({ lang = 'el' }) {
 
   const handleLogout = async (e) => {
     e.preventDefault();
-    const supabase = createBrowserClient();
+    const supabase = getBrowserClient();
     await supabase.auth.signOut();
     window.location.href = `${base}/login`;
   };

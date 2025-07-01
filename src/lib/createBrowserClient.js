@@ -1,10 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 
 let supabase = null;
 
-export function createBrowserClient() {
+export function getBrowserClient() {
   if (!supabase) {
-    supabase = createClient(
+    supabase = createBrowserClient(
       import.meta.env.PUBLIC_SUPABASE_URL,
       import.meta.env.PUBLIC_SUPABASE_ANON_KEY
     );
