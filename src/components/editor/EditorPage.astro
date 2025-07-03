@@ -170,7 +170,7 @@ const backText = isEditMode
         </div>
       </form>
 
-      <section class="prose prose-zinc dark:prose-invert p-4 border rounded shadow-sm overflow-auto max-h-[800px]">
+      <section class="prose prose-zinc dark:prose-invert max-w-none p-4 border rounded shadow-sm overflow-auto max-h-[800px]">
         <h2 class="text-xl font-bold mb-4">{isGreek ? 'Προεπισκόπηση' : 'Preview'}</h2>
         
         <!-- Cover Image Container με σταθερό styling -->
@@ -178,11 +178,11 @@ const backText = isEditMode
           <!-- Η εικόνα προεπισκόπησης θα εμφανιστεί εδώ -->
         </div>
         
-        <div id="markdownPreview" class="text-sm text-zinc-800 dark:text-zinc-200"></div>
+        <div id="markdownPreview" class="prose prose-zinc dark:prose-invert max-w-none"></div>
         
         <div id="translationPreview" class="mt-8 border-t pt-4 hidden">
           <h3 class="font-semibold mb-2">{isGreek ? 'Αγγλική Μετάφραση' : 'English Translation'}</h3>
-          <div id="translatedMarkdown" class="text-sm text-zinc-800 dark:text-zinc-200"></div>
+          <div id="translatedMarkdown" class="prose prose-zinc dark:prose-invert max-w-none"></div>
         </div>
       </section>
     </div>
@@ -381,6 +381,7 @@ const backText = isEditMode
       document.querySelectorAll('#articleForm input, #articleForm textarea, #articleForm select').forEach((el) => {
         el.addEventListener('input', resetIdleTimer);
         el.addEventListener('change', resetIdleTimer);
+      });
 
       // Periodic autosave every 30 seconds
       setInterval(autosave, 30000);
