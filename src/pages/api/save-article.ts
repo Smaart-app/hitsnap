@@ -4,29 +4,19 @@ import { createAdminClientNoCookies } from "../../lib/createAdminClientNoCookies
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
-  // Debug
-  console.log('[SAVE-ARTICLE] Content-Type:', request.headers.get('content-type'));
   try {
     let raw;
-    try {
-      if (request.clone) {
-        const clone = request.clone();
-        raw = await clone.text();
-      } else {
-        raw = await request.text();
-      }
-      console.log('[SAVE-ARTICLE] RAW BODY:', raw);
-    } catch (e) {
-      console.log('[SAVE-ARTICLE] Body read error:', e);
+    if (request.clone) {
+      const clone = request.clone();
+      raw = await clone.text();
+    } else {
+      raw = await request.text();
     }
 
     let data: any = {};
-    let isJson = false;
-
     const contentType = request.headers.get('content-type') || '';
     if (contentType.includes('application/json')) {
       data = JSON.parse(raw);
-      isJson = true;
     } else if (
       contentType.includes('multipart/form-data') ||
       contentType.includes('application/x-www-form-urlencoded')
@@ -39,9 +29,7 @@ export const POST: APIRoute = async ({ request }) => {
       throw new Error(`Unsupported Content-Type: ${contentType}`);
     }
 
-    // DEBUG
-    console.log('[SAVE-ARTICLE] PARSED DATA:', data);
-
+    // Λήψη όλων των απαραίτητων πεδίων από το frontend
     const {
       slug = '',
       title = '',
@@ -51,9 +39,11 @@ export const POST: APIRoute = async ({ request }) => {
       lang = '',
       published = false,
       publish_date = new Date().toISOString(),
-      user_id = '', // ΝΕΟ - Θέλεις αυτό το πεδίο!
+      user_id = '',
+      translation_of = null, // <--- Εδώ θα μπαίνει το id του "πρωτογενούς" άρθρου (ελληνικού)
     } = data;
 
+    // Βεβαιώσου ότι έχει user_id
     if (!user_id) {
       return new Response(
         JSON.stringify({ article: null, error: "Λείπει το user_id! Δεν μπορεί να αποθηκευτεί το άρθρο." }),
@@ -63,11 +53,12 @@ export const POST: APIRoute = async ({ request }) => {
 
     const admin = createAdminClientNoCookies();
 
-    // Check if slug already exists (χωρίς -el/-en)
+    // ΕΛΕΓΧΟΣ αν υπάρχει ήδη άρθρο με ΙΔΙΟ slug ΚΑΙ ΙΔΙΑ γλώσσα
     const { data: existing, error: slugError } = await admin
       .from("articles")
       .select("id")
       .eq("slug", slug)
+      .eq("lang", lang)
       .maybeSingle();
 
     if (slugError) {
@@ -78,28 +69,27 @@ export const POST: APIRoute = async ({ request }) => {
     }
     if (existing) {
       return new Response(
-        JSON.stringify({ article: null, error: "Υπάρχει ήδη άρθρο με αυτό το slug!" }),
+        JSON.stringify({ article: null, error: "Υπάρχει ήδη άρθρο με αυτό το slug και γλώσσα!" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    const { error } = await admin.from("articles").insert([
-      {
-        title,
-        slug: slug.trim(),
-        excerpt: excerpt || null,
-        content,
-        cover_image: cover_image || null,
-        lang,
-        published: !!published,
-        publish_date: publish_date || new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        user_id, // ΝΕΟ - Καταγραφή user_id
-      },
-    ]);
+    // ΚΑΤΑΧΩΡΗΣΗ νέου άρθρου, με πλήρη υποστήριξη translation_of
+    const { error } = await admin.from("articles").insert([{
+      title,
+      slug: slug.trim(),
+      excerpt: excerpt || null,
+      content,
+      cover_image: cover_image || null,
+      lang,
+      published: !!published,
+      publish_date: publish_date || new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      user_id,
+      translation_of: translation_of || null // <--- Εδώ μπαίνει το id του ελληνικού άρθρου (αν υπάρχει)
+    }]);
 
     if (error) {
-      console.error('[SAVE-ARTICLE] DB error:', error);
       return new Response(
         JSON.stringify({ article: null, error: error.message }),
         { status: 500, headers: { "Content-Type": "application/json" } }
@@ -111,7 +101,6 @@ export const POST: APIRoute = async ({ request }) => {
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (e: any) {
-    console.error("[SAVE-ARTICLE] Unhandled error in save-article:", e);
     return new Response(
       JSON.stringify({ article: null, error: e?.message || "Internal Server Error" }),
       { status: 500, headers: { "Content-Type": "application/json" } }

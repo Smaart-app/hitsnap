@@ -1,0 +1,169 @@
+---
+export interface Props {
+  article?: any,
+  user?: any,
+  mode?: "new" | "edit" | "translate",
+  onSuccessUrl?: string,
+  lang?: string,
+}
+const {
+  article = {},
+  user = {},
+  mode = "new",
+  onSuccessUrl = "/el/blog",
+  lang = "el",
+} = Astro.props;
+
+const languages = [
+  { value: "el", label: "🇬🇷 Ελληνικά" },
+  { value: "en", label: "🇬🇧 English" },
+  { value: "nl", label: "🇳🇱 Nederlands" },
+  { value: "fr", label: "🇫🇷 Français" },
+  { value: "de", label: "🇩🇪 Deutsch" },
+];
+
+const initial = {
+  title: article.title || "",
+  slug: article.slug || "",
+  excerpt: article.excerpt || "",
+  content: article.content || "",
+  cover_image: article.cover_image || "",
+  lang: article.lang || lang || "el",
+  translation_of: article.translation_of || "",
+  published: article.published ? "true" : "false",
+  publish_date: article.publish_date?.slice(0, 16) || "",
+  user_id: user?.id || "",
+  id: article.id || "",
+};
+---
+
+<!-- DEBUG info πάνω από τη φόρμα -->
+<div style="background:#ffc; color:#c00; margin-bottom:1rem; padding:8px; font-size:13px;">
+  DEBUG user: <b>{JSON.stringify(user)}</b>
+  <br/>user_id: <b>{user && user.id ? user.id : '(λείπει!)'}</b>
+  <br/>DEBUG lang: <b>{initial.lang}</b>
+</div>
+
+<!-- Hack: Γράψε το user_id στο input όταν φορτώνει η σελίδα -->
+<script is:inline>
+  window.HITLIFT_USER_ID = "{user && user.id ? user.id : ''}";
+  document.addEventListener('DOMContentLoaded', function() {
+    var input = document.getElementById('user_id_input');
+    if (input && window.HITLIFT_USER_ID) {
+      input.value = window.HITLIFT_USER_ID;
+      input.setAttribute('value', window.HITLIFT_USER_ID);
+    }
+  });
+</script>
+
+<form
+  id="articleForm"
+  class="space-y-4"
+  method="post"
+  action={mode === "edit" ? "/api/update-article" : "/api/save-article"}
+>
+  <input type="hidden" name="user_id" id="user_id_input" value={initial.user_id} />
+  {initial.id && <input type="hidden" name="id" value={initial.id} />}
+
+  <!-- ΠΑΝΤΑ ΠΑΝΩ-ΠΑΝΩ το dropdown Γλώσσας -->
+  <div>
+    <label class="block font-semibold mb-1">Γλώσσα</label>
+    <select name="lang" required class="w-full border rounded px-3 py-2">
+      {languages.map(l =>
+        <option value={l.value} selected={l.value === initial.lang}>{l.label}</option>
+      )}
+    </select>
+    <p class="text-xs text-gray-600 mt-1">
+      Διάλεξε τη γλώσσα του άρθρου πριν το αποθηκεύσεις.
+    </p>
+  </div>
+
+  <div>
+    <label class="block font-semibold mb-1">Τίτλος</label>
+    <input type="text" name="title" class="w-full border rounded px-3 py-2" value={initial.title} required />
+  </div>
+  <div>
+    <label class="block font-semibold mb-1">Slug (URL)</label>
+    <input type="text" name="slug" class="w-full border rounded px-3 py-2" value={initial.slug} required />
+  </div>
+  <div>
+    <label class="block font-semibold mb-1">Απόσπασμα</label>
+    <textarea name="excerpt" class="w-full border rounded px-3 py-2" rows="3">{initial.excerpt}</textarea>
+  </div>
+  <div>
+    <label class="block font-semibold mb-1">Περιεχόμενο (Markdown)</label>
+    <textarea name="content" id="markdownInput" class="w-full border rounded font-mono text-sm px-3 py-2" rows="12">{initial.content}</textarea>
+  </div>
+  <div>
+    <label class="block font-semibold mb-1">Εικόνα Εξωφύλλου (URL)</label>
+    <input type="text" name="cover_image" class="w-full border rounded px-3 py-2" value={initial.cover_image} />
+  </div>
+  <div>
+    <label class="block font-semibold mb-1">UUID Πρωτότυπου Άρθρου (αν είναι μετάφραση)</label>
+    <input type="text" name="translation_of" class="w-full border rounded px-3 py-2"
+      value={initial.translation_of}
+      placeholder="Άσε το κενό αν είναι πρωτότυπο"
+    />
+    <p class="text-xs text-gray-500 mt-1">
+      Συμπλήρωσε μόνο αν το άρθρο είναι μετάφραση (uuid ελληνικού/άλλου άρθρου)
+    </p>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="block font-semibold mb-1">Ημερομηνία Δημοσίευσης</label>
+      <input type="datetime-local" name="publish_date" class="w-full border rounded"
+        value={initial.publish_date} />
+    </div>
+    <div>
+      <label class="block font-semibold mb-1">Κατάσταση</label>
+      <select name="published" class="w-full border rounded">
+        <option value="false" selected={initial.published !== "true"}>📝 Πρόχειρο</option>
+        <option value="true" selected={initial.published === "true"}>✅ Δημοσιευμένο</option>
+      </select>
+    </div>
+  </div>
+  <div class="flex gap-4">
+    <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded font-semibold hover:bg-green-700 transition">
+      💾 Αποθήκευση
+    </button>
+    <a href={onSuccessUrl} class="bg-gray-500 text-white px-6 py-2 rounded font-semibold hover:bg-gray-600 transition">
+      ← Ακύρωση
+    </a>
+  </div>
+</form>
+
+<section class="prose prose-zinc dark:prose-invert p-4 border rounded shadow-sm mt-8 max-h-[600px] overflow-auto">
+  <h2 class="text-xl font-bold mb-2">Προεπισκόπηση</h2>
+  <div id="previewImageContainer">
+    {initial.cover_image && (
+      <img src={initial.cover_image} alt="cover" class="mb-4 rounded shadow max-h-64 w-full object-cover" />
+    )}
+  </div>
+  <div id="markdownPreview" class="text-sm text-zinc-800 dark:text-zinc-200"></div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script is:inline>
+  // Hack: Βάζει το user_id στο πεδίο με JS (όχι μόνο στο render)
+  window.HITLIFT_USER_ID = "{user && user.id ? user.id : ''}";
+  document.addEventListener('DOMContentLoaded', function() {
+    var input = document.getElementById('user_id_input');
+    if (input && window.HITLIFT_USER_ID) {
+      input.value = window.HITLIFT_USER_ID;
+      input.setAttribute('value', window.HITLIFT_USER_ID);
+    }
+  });
+
+  // Markdown preview
+  const input = document.getElementById('markdownInput');
+  const preview = document.getElementById('markdownPreview');
+  function renderMarkdown(text, target) {
+    if (window.marked) {
+      target.innerHTML = window.marked.parse(text);
+    }
+  }
+  if (input && preview) {
+    input.addEventListener('input', () => renderMarkdown(input.value, preview));
+    renderMarkdown(input.value, preview);
+  }
+</script>

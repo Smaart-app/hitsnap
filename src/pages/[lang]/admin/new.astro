@@ -1,17 +1,17 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import { createServerClientAstro } from '@lib/createServerClient';
+import ArticleForm from '../../../components/editor/ArticleForm.astro';
 
 export const prerender = false;
 
 const lang = Astro.params.lang || 'el';
 
-// Server-side Supabase auth: πάντα διαβάζεις τον user εδώ
 const supabase = createServerClientAstro(Astro.cookies);
 const { data: { user } } = await supabase.auth.getUser();
 
-// Redirect αν δεν είσαι logged in
-if (!user) {
+if (!user || !user.id) {
+  // Αν δεν υπάρχει user ή δεν έχει id, redirect σε login με καθαρό session.
   return Astro.redirect(`/${lang}/admin/login`);
 }
 
@@ -19,115 +19,21 @@ const pageTitle = lang === 'el' ? 'Νέο Άρθρο' : 'New Article';
 ---
 
 <Layout title={pageTitle} user={user}>
-  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-6 p-6">
-    <div class="bg-white p-6 rounded shadow">
-      <h1 class="text-2xl font-bold mb-4">📝 {pageTitle}</h1>
-      <form id="newArticleForm" class="space-y-4">
-        <input type="hidden" name="lang" value={lang} />
-        <!-- Βάζουμε το user_id ως hidden input -->
-        <input type="hidden" name="user_id" value={user.id} />
-        <div>
-          <label class="block text-sm font-medium">Τίτλος</label>
-          <input name="title" type="text" required class="w-full border rounded px-3 py-2">
-        </div>
-        <div>
-          <label class="block text-sm font-medium">Slug</label>
-          <input name="slug" type="text" required class="w-full border rounded px-3 py-2">
-        </div>
-        <div>
-          <label class="block text-sm font-medium">Περίληψη</label>
-          <textarea name="excerpt" class="w-full border rounded px-3 py-2"></textarea>
-        </div>
-        <div>
-          <label class="block text-sm font-medium">Εικόνα (URL)</label>
-          <input name="cover_image" type="text" class="w-full border rounded px-3 py-2">
-        </div>
-        <div>
-          <label class="block text-sm font-medium">Περιεχόμενο</label>
-          <textarea name="content" rows="10" required class="w-full border rounded px-3 py-2 font-mono"></textarea>
-        </div>
-        <div class="flex items-center gap-4">
-          <label class="inline-flex items-center">
-            <input type="checkbox" name="published" class="mr-2">
-            Δημοσιευμένο
-          </label>
-          <div>
-            <label class="block text-sm">Προγραμματισμός:</label>
-            <input type="datetime-local" name="publish_date" class="border rounded px-2 py-1">
-          </div>
-        </div>
-        <div class="flex justify-end gap-4">
-          <span id="status" class="text-sm text-gray-500"></span>
-          <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">💾 Αποθήκευση</button>
-        </div>
-      </form>
+  <main class="max-w-3xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-6">📝 {pageTitle}</h1>
+
+    <!-- DEBUG: Βλέπεις τι περνάει το parent στο ArticleForm -->
+    <div style="background:#ffe8e8; color:#c00; margin-bottom:1rem; padding:8px; font-size:13px;">
+      <b>DEBUG user prop (parent):</b>
+      <pre>{JSON.stringify(user, null, 2)}</pre>
+      <b>DEBUG lang param:</b> {lang}
     </div>
 
-    <div class="bg-white p-6 rounded shadow space-y-4">
-      <h2 class="text-lg font-semibold">🔍 Προεπισκόπηση</h2>
-      <template id="coverImagePreview"></template>
-      <h3 id="previewTitle" class="text-xl font-bold"></h3>
-      <div class="prose prose-sm max-w-none">
-        <div id="previewContent"></div>
-      </div>
-    </div>
-  </div>
-
-  <script is:inline>
-    import("https://cdn.jsdelivr.net/npm/marked/marked.min.js").then((m) => {
-      window.marked = m.marked;
-    });
-
-    const form = document.getElementById('newArticleForm');
-    const status = document.getElementById('status');
-    const previewTitle = document.getElementById('previewTitle');
-    const previewContent = document.getElementById('previewContent');
-    const coverImagePreview = document.getElementById('coverImagePreview');
-
-    function renderPreview() {
-      previewTitle.textContent = form.title.value;
-      if (window.marked) {
-        previewContent.innerHTML = window.marked.parse(form.content.value || '');
-      }
-      // Προεπισκόπηση εικόνας
-      const url = form.cover_image.value;
-      if (url) {
-        coverImagePreview.innerHTML = `<img src="${url}" alt="cover" class="rounded w-full object-cover max-h-64" />`;
-      } else {
-        coverImagePreview.innerHTML = '';
-      }
-    }
-
-    ['input', 'change'].forEach(event =>
-      form.addEventListener(event, renderPreview, true)
-    );
-
-    renderPreview();
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      status.textContent = '⏳ Αποθήκευση...';
-
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData);
-      data.published = form.published.checked;
-
-      try {
-        const res = await fetch('/api/save-article', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        status.textContent = '✅ Αποθηκεύτηκε!';
-        const result = await res.json();
-        setTimeout(() => {
-          window.location.href = `/${data.lang}/blog/${result.article.slug}`;
-        }, 1200);
-      } catch (err) {
-        status.textContent = '❌ Σφάλμα αποθήκευσης';
-        alert('Σφάλμα: ' + err.message);
-      }
-    });
-  </script>
+    <ArticleForm 
+      user={user} 
+      mode="new" 
+      onSuccessUrl={`/${lang}/blog`} 
+      lang={lang}   {/* ΠΕΡΝΑ το lang ως prop εδώ */}
+    />
+  </main>
 </Layout>

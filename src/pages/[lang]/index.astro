@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-// ΔΙΟΡΘΩΣΗ ΕΔΩ:
+import ArticleCard from '../../components/ArticleCard.jsx';
 import { createServerClientAstro } from '../../lib/createServerClient';
 
 export const prerender = false;
@@ -19,7 +19,6 @@ if (!lang || !supportedLangs.includes(lang)) {
   return Astro.redirect('/el', 302);
 }
 
-// ΔΙΟΡΘΩΣΗ ΕΔΩ:
 const supabase = createServerClientAstro(Astro.cookies);
 const todayISO = new Date().toISOString();
 
@@ -88,29 +87,29 @@ const image = "https://hitlift.app/preview-og-final.png?v=2";
 
     {featured && (
       <div class="flex justify-center mb-12 fade-in-left" style="animation-delay: 0.4s;">
-        <div class="bg-white shadow-md rounded-lg p-4 w-full max-w-md">
-          <a href={`/${lang}/blog/${featured.slug}`} class="block hover:underline">
-            <h2 class="text-lg font-bold text-gray-900 mb-1 leading-tight">{featured.title}</h2>
-            <p class="text-sm text-gray-600 mb-2">{featured.excerpt?.split('.')[0] + '...'}</p>
-            <span class="text-sm text-primary font-semibold">
-              {lang === 'el' ? 'Δες περισσότερα →' : 'Read more →'}
-            </span>
-          </a>
+        <div class="w-full max-w-[420px] sm:max-w-[480px]">
+          <ArticleCard
+            title={featured.title}
+            excerpt={featured.excerpt}
+            image={featured.cover_image}
+            href={`/${lang}/blog/${featured.slug}`}
+            lang={lang}
+          />
         </div>
       </div>
     )}
 
     {rest.length > 0 && (
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 fade-in-up" style="animation-delay: 0.6s;">
+      <div class="flex flex-col items-center gap-10 max-w-5xl mx-auto fade-in-up" style="animation-delay: 0.6s;">
         {rest.map((article) => (
-          <div class="bg-white rounded-md shadow-sm p-3">
-            <a href={`/${lang}/blog/${article.slug}`} class="block hover:underline">
-              <h3 class="text-sm font-semibold text-gray-900 mb-1">{article.title}</h3>
-              <p class="text-sm text-gray-600 mb-2">{article.excerpt?.split('.')[0] + '...'}</p>
-              <span class="text-sm text-[#50c7c2] font-medium">
-                {lang === 'el' ? 'Περισσότερα →' : 'More →'}
-              </span>
-            </a>
+          <div key={article.id} class="w-full max-w-[420px] sm:max-w-[480px]">
+            <ArticleCard
+              title={article.title}
+              excerpt={article.excerpt}
+              image={article.cover_image}
+              href={`/${lang}/blog/${article.slug}`}
+              lang={lang}
+            />
           </div>
         ))}
       </div>
