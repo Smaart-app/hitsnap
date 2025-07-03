@@ -13,9 +13,19 @@ const currentPath = Astro.url.pathname;
 const isHome = currentPath === '/';
 const isArticles = currentPath.includes('/blog') && !currentPath.includes('/edit');
 const isContact = currentPath.includes('/contact');
-const isEditor = currentPath === `/${lang}/admin/edit`;
-const isPreview = currentPath === `/${lang}/admin/preview`;
+const isAdmin = currentPath.includes('/admin');
+const isEditor = currentPath.includes('/admin/edit') && currentPath.split('/').length === 5; // /el/admin/edit/[slug]
+const isPreview = currentPath.includes('/admin/preview') && currentPath.split('/').length === 5; // /el/admin/preview/[slug]
+const isArticleList = currentPath.endsWith('/admin/preview');
+const isNewArticle = currentPath.endsWith('/admin/editor');
+let slug = null;
 
+const slugMatch = currentPath.match(/\/admin\/(?:edit|preview)\/([^/]+)/);
+if (slugMatch) {
+  slug = slugMatch[1];
+}
+
+// Εναλλαγή γλώσσας
 let langSwitchHref = isGreek ? '/en' : '/el';
 
 if (isArticles && altArticle?.slug && altArticle?.lang) {
@@ -25,6 +35,20 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
   langSwitchHref = `/${isGreek ? 'en' : 'el'}${pathWithoutLang}`;
 }
 ---
+
+{isAdmin && (
+  <nav class="admin-nav-bar flex gap-3 items-center px-4 py-2 bg-[#faf8f5] border-b border-[#e4e4e7]">
+    <a href={`/${lang}/admin/preview`} class={`px-2 py-1 rounded transition ${isArticleList ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Λίστα άρθρων</a>
+    <a href={`/${lang}/admin/editor`} class={`px-2 py-1 rounded transition ${isNewArticle ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Νέο άρθρο</a>
+    {slug && (
+      <>
+        <a href={`/${lang}/admin/preview/${slug}`} class={`px-2 py-1 rounded transition ${isPreview ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Προεπισκόπηση</a>
+        <a href={`/${lang}/admin/edit/${slug}`} class={`px-2 py-1 rounded transition ${isEditor ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Επεξεργασία</a>
+      </>
+    )}
+    <a href={`/${lang}/logout`} class="px-2 py-1 ml-auto text-red-600 hover:underline">Έξοδος</a>
+  </nav>
+)}
 
 <header class="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white dark:bg-[#1a1a1a] text-black dark:text-white shadow-sm transition-colors duration-300">
   <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
@@ -72,6 +96,25 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
   }
   .animate-fadeIn {
     animation: fadeIn 0.3s ease-out;
+  }
+  .admin-nav-bar {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    background: #faf8f5;
+    border-bottom: 1px solid #e4e4e7;
+    margin-bottom: -1px;
+    min-height: 46px;
+  }
+  .admin-nav-bar a {
+    font-size: 1rem;
+  }
+  @media (max-width: 640px) {
+    .admin-nav-bar {
+      flex-wrap: wrap;
+      padding: 0.7rem 0.5rem;
+      font-size: 0.95rem;
+    }
   }
 </style>
 

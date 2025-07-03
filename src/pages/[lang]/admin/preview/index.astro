@@ -4,18 +4,9 @@ import { createServerClientAstro } from '../../../../lib/createServerClient.ts';
 
 export const prerender = false;
 
-// 🔍 DEBUG: Τι cookies βλέπει ο Astro server;
-for (const name of ['sb-access-token', 'sb-refresh-token']) {
-  console.log(`[DEBUG] Cookie ${name}:`, Astro.cookies.get(name)?.value);
-}
-
 const supabase = createServerClientAstro(Astro.cookies);
 
-console.log('[DEBUG] BEFORE getUser: access', Astro.cookies.get('sb-access-token')?.value, 'refresh', Astro.cookies.get('sb-refresh-token')?.value);
-
 const { data: { user }, error } = await supabase.auth.getUser();
-
-console.log('[DEBUG] getUser result:', user, error);
 
 const lang = Astro.params?.lang || 'el';
 
@@ -37,7 +28,8 @@ function getStatus(article) {
 
 <Layout title="Προεπισκοπήσεις Άρθρων" user={user} lang={lang}>
   <main class="max-w-6xl mx-auto px-4 py-16">
-    <!-- Κουμπιά Νέο άρθρο & Προεπισκόπηση πάνω από τον τίτλο -->
+    {/*
+    // ΠΑΛΙΟ NAVIGATION – αφαιρέθηκε γιατί πλέον το admin navigation μπαίνει στο header!
     <div class="flex justify-end gap-3 mb-6">
       <a
         href={`/${lang}/admin/new`}
@@ -52,6 +44,7 @@ function getStatus(article) {
         👁️ Προεπισκόπηση
       </a>
     </div>
+    */}
 
     <h1 class="text-2xl font-bold mb-8">📋 Όλα τα άρθρα</h1>
 

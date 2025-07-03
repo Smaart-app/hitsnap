@@ -236,8 +236,13 @@ const backText = isEditMode
         `;
       }
       
-      // Render markdown content
-      preview.innerHTML = marked.parse(input.value || '');
+      // Render markdown content - ΕΔΩ ΗΤΑΝ ΤΟ ΠΡΟΒΛΗΜΑ!
+      const markdownContent = input.value || '';
+      if (markdownContent.trim()) {
+        preview.innerHTML = marked.parse(markdownContent);
+      } else {
+        preview.innerHTML = `<p class="text-gray-400 italic">${isGreek ? 'Γράψτε κάτι για να δείτε την προεπισκόπηση...' : 'Write something to see the preview...'}</p>`;
+      }
     };
 
     const updateStatusIndicator = () => {
@@ -348,7 +353,7 @@ const backText = isEditMode
       }, {});
     };
 
-    // Setup event listeners
+    // Setup event listeners - ΔΙΟΡΘΩΜΕΝΟ!
     const setupEventListeners = () => {
       // Markdown input with preview update
       input.addEventListener('input', () => {
@@ -382,10 +387,10 @@ const backText = isEditMode
         el.addEventListener('input', resetIdleTimer);
         el.addEventListener('change', resetIdleTimer);
       });
-
-      // Periodic autosave every 30 seconds
-      setInterval(autosave, 30000);
     };
+
+    // Periodic autosave every 30 seconds
+    setInterval(autosave, 30000);
 
     // Form submission handler
     form.addEventListener('submit', async (e) => {
