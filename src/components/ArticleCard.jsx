@@ -1,3 +1,5 @@
+import ReactMarkdown from 'react-markdown';
+
 export default function ArticleCard({
   title,
   excerpt,
@@ -7,7 +9,6 @@ export default function ArticleCard({
   lang = 'el',
   icon = null,
 }) {
-  // Emoji/σημαία ανά γλώσσα (μπορείς να αλλάξεις ή να περάσεις το δικό σου icon)
   const langIcon =
     lang === 'en' ? '🇬🇧'
     : lang === 'el' ? '🏠'
@@ -51,10 +52,9 @@ export default function ArticleCard({
             {title}
           </h2>
         </div>
-        <p className="text-sm sm:text-base text-zinc-600 line-clamp-3 leading-relaxed mb-2">
-          {excerpt}
-        </p>
-
+        <div className="text-sm sm:text-base text-zinc-600 line-clamp-3 leading-relaxed mb-2 prose prose-zinc max-w-none">
+          <ReactMarkdown>{excerpt}</ReactMarkdown>
+        </div>
         <div className="mt-2 flex flex-col gap-1 text-sm text-center sm:text-left">
           <a
             href={href}

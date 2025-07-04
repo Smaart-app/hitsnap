@@ -22,13 +22,14 @@ const languages = [
   { value: "de", label: "🇩🇪 Deutsch" },
 ];
 
+const hasArticleLang = typeof article.lang === "string" && article.lang !== "" && article.lang !== undefined;
 const initial = {
   title: article.title || "",
   slug: article.slug || "",
   excerpt: article.excerpt || "",
   content: article.content || "",
   cover_image: article.cover_image || "",
-  lang: article.lang || lang || "el",
+  lang: hasArticleLang ? article.lang : "", // Κενό αν είναι νέο άρθρο!
   translation_of: article.translation_of || "",
   published: article.published ? "true" : "false",
   publish_date: article.publish_date?.slice(0, 16) || "",
@@ -37,11 +38,31 @@ const initial = {
 };
 ---
 
+<!-- === DEBUG SNIPPET: Εμφανίζεται ΠΑΝΩ-ΠΑΝΩ === -->
+<div style="background: #ffa; padding: 12px; border: 2px solid #da0; font-size:20px; margin-bottom: 8px">
+  ΠΡΕΠΕΙ να βλέπεις αυτό το μήνυμα πάνω από το dropdown γλώσσας!<br/>
+  <b>Αν δεν το βλέπεις, αυτό το component δεν renderάρει!</b>
+</div>
+<div>
+  <label>Γλώσσα (test snippet!)</label>
+  <select name="lang" required style="font-size: 18px; margin-bottom:8px">
+    <option value="" selected>-- Διάλεξε γλώσσα --</option>
+    <option value="el">🇬🇷 Ελληνικά</option>
+    <option value="en">🇬🇧 English</option>
+    <option value="nl">🇳🇱 Nederlands</option>
+    <option value="fr">🇫🇷 Français</option>
+    <option value="de">🇩🇪 Deutsch</option>
+  </select>
+</div>
+<!-- === /DEBUG SNIPPET === -->
+
 <!-- DEBUG info πάνω από τη φόρμα -->
 <div style="background:#ffc; color:#c00; margin-bottom:1rem; padding:8px; font-size:13px;">
   DEBUG user: <b>{JSON.stringify(user)}</b>
-  <br/>user_id: <b>{user && user.id ? user.id : '(λείπει!)'}</b>
-  <br/>DEBUG lang: <b>{initial.lang}</b>
+  <br/>DEBUG article.lang: <b>{JSON.stringify(article.lang)}</b>
+  <br/>DEBUG prop lang: <b>{JSON.stringify(lang)}</b>
+  <br/>DEBUG initial.lang (θα είναι κενό σε νέο άρθρο): <b>{JSON.stringify(initial.lang)}</b>
+  <br/>DEBUG article: <pre>{JSON.stringify(article, null, 2)}</pre>
 </div>
 
 <!-- Hack: Γράψε το user_id στο input όταν φορτώνει η σελίδα -->
@@ -69,6 +90,7 @@ const initial = {
   <div>
     <label class="block font-semibold mb-1">Γλώσσα</label>
     <select name="lang" required class="w-full border rounded px-3 py-2">
+      <option value="" selected={initial.lang === ""}>-- Διάλεξε γλώσσα --</option>
       {languages.map(l =>
         <option value={l.value} selected={l.value === initial.lang}>{l.label}</option>
       )}
@@ -88,7 +110,7 @@ const initial = {
   </div>
   <div>
     <label class="block font-semibold mb-1">Απόσπασμα</label>
-    <textarea name="excerpt" class="w-full border rounded px-3 py-2" rows="3">{initial.excerpt}</textarea>
+    <textarea name="excerpt" id="excerptInput" class="w-full border rounded px-3 py-2" rows="3">{initial.excerpt}</textarea>
   </div>
   <div>
     <label class="block font-semibold mb-1">Περιεχόμενο (Markdown)</label>
@@ -139,6 +161,9 @@ const initial = {
       <img src={initial.cover_image} alt="cover" class="mb-4 rounded shadow max-h-64 w-full object-cover" />
     )}
   </div>
+  <!-- Απόσπασμα (markdown) -->
+  <div id="excerptPreview" class="text-zinc-600 mb-4"></div>
+  <!-- Περιεχόμενο (markdown) -->
   <div id="markdownPreview" class="text-sm text-zinc-800 dark:text-zinc-200"></div>
 </section>
 
@@ -154,7 +179,20 @@ const initial = {
     }
   });
 
-  // Markdown preview
+  // Markdown preview για excerpt
+  const excerptInput = document.getElementById('excerptInput');
+  const excerptPreview = document.getElementById('excerptPreview');
+  function renderExcerpt(text, target) {
+    if (window.marked) {
+      target.innerHTML = window.marked.parse(text || "");
+    }
+  }
+  if (excerptInput && excerptPreview) {
+    excerptInput.addEventListener('input', () => renderExcerpt(excerptInput.value, excerptPreview));
+    renderExcerpt(excerptInput.value, excerptPreview);
+  }
+
+  // Markdown preview για περιεχόμενο
   const input = document.getElementById('markdownInput');
   const preview = document.getElementById('markdownPreview');
   function renderMarkdown(text, target) {
