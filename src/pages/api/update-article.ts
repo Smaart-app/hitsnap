@@ -3,6 +3,11 @@ import { createServerClientAstro } from "../../lib/createServerClient.ts";
 
 export const prerender = false;
 
+// Basic UUID v4 validation
+function isValidUUID(uuid: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid);
+}
+
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     const body = await request.json();
@@ -20,10 +25,18 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       publish_date,
     } = body;
 
-    if (!id) {
-      console.error("[UPDATE-ARTICLE] No article ID sent!");
+    // --- ΕΠΑΓΓΕΛΜΑΤΙΚΟΙ ΕΛΕΓΧΟΙ INPUTS ---
+    if (!id || typeof id !== "string" || !isValidUUID(id.trim())) {
+      console.error("[UPDATE-ARTICLE] No valid article ID sent!");
       return new Response(
-        JSON.stringify({ article: null, error: "Missing article ID" }),
+        JSON.stringify({ article: null, error: "Missing or invalid article ID (UUID)" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!lang || typeof lang !== "string" || lang.length < 2) {
+      return new Response(
+        JSON.stringify({ article: null, error: "Λείπει ή είναι λάθος το lang code!" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
@@ -35,10 +48,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       error: userError
     } = await supabase.auth.getUser();
 
-    if (userError || !user) {
-      console.error("[UPDATE-ARTICLE] User not authenticated.");
+    if (userError || !user || !user.id || !isValidUUID(user.id)) {
+      console.error("[UPDATE-ARTICLE] User not authenticated or missing/invalid UUID.");
       return new Response(
-        JSON.stringify({ article: null, error: "Unauthorized" }),
+        JSON.stringify({ article: null, error: "Unauthorized or invalid user" }),
         { status: 401, headers: { "Content-Type": "application/json" } }
       );
     }
@@ -56,8 +69,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         publish_date: publish_date || new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
-      .eq("id", id)
-      .eq("user_id", user.id) // <-- update μόνο αν ανήκει στον χρήστη
+      .eq("id", id.trim())
+      .eq("user_id", user.id.trim()) // <-- update μόνο αν ανήκει στον χρήστη
       .select();
 
     console.log("[UPDATE-ARTICLE] SUPABASE UPDATE RESULT:", { error, data });

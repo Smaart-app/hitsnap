@@ -1,0 +1,133 @@
+---
+import Layout from '../../../../layouts/Layout.astro';
+import { createServerClientAstro } from '../../../../lib/createServerClient.ts';
+
+export const prerender = false;
+
+const lang = Astro.params?.lang || 'el';
+const isGreek = lang === 'el';
+
+const supabase = createServerClientAstro(Astro.cookies);
+const { data: { user } } = await supabase.auth.getUser();
+
+// Πάρε το article από τα props ή από fetch αν είναι edit/[slug].astro
+const article = Astro.props.article || {};
+
+if (!user) {
+  return Astro.redirect(`/${lang}/login`);
+}
+---
+
+<Layout title={isGreek ? 'Επεξεργασία Άρθρου | Hitlift' : 'Edit Article | Hitlift'} lang={lang} user={user}>
+  <main class="max-w-6xl mx-auto px-4 py-12">
+    <h1 class="text-2xl font-bold mb-6">{isGreek ? '✏️ Επεξεργασία Άρθρου' : '✏️ Edit Article'}</h1>
+    <div id="feedback"></div>
+    <div class="grid lg:grid-cols-2 gap-8">
+      <!-- EDIT FORM -->
+      <form id="articleForm" class="space-y-4" autocomplete="off">
+        <input type="hidden" name="user_id" value={user.id} />
+        <input type="hidden" name="id" value={article.id} />
+        <div>
+          <label class="block mb-1 font-semibold">{isGreek ? 'Γλώσσα' : 'Language'}</label>
+          <select name="lang" required class="w-full border rounded px-3 py-2">
+            <option value="el" selected={article.lang === "el"}>🇬🇷 Ελληνικά</option>
+            <option value="en" selected={article.lang === "en"}>🇬🇧 English</option>
+            <option value="nl" selected={article.lang === "nl"}>🇳🇱 Nederlands</option>
+            <option value="fr" selected={article.lang === "fr"}>🇫🇷 Français</option>
+            <option value="de" selected={article.lang === "de"}>🇩🇪 Deutsch</option>
+          </select>
+        </div>
+        <div>
+          <label class="block mb-1 font-semibold">{isGreek ? 'Τίτλος' : 'Title'}</label>
+          <input type="text" name="title" class="w-full border rounded px-3 py-2" value={article.title || ""} required />
+        </div>
+        <div>
+          <label class="block mb-1 font-semibold">{isGreek ? 'Slug (URL)' : 'Slug (URL)'}</label>
+          <input type="text" name="slug" class="w-full border rounded px-3 py-2" value={article.slug || ""} required />
+        </div>
+        <div>
+          <label class="block mb-1 font-semibold">{isGreek ? 'Απόσπασμα' : 'Excerpt'}</label>
+          <textarea name="excerpt" id="editExcerptInput" maxlength="240" rows="4" class="w-full border rounded px-3 py-2" placeholder={isGreek ? 'Προαιρετικό απόσπασμα...' : 'Optional excerpt...'}>{article.excerpt || ""}</textarea>
+        </div>
+        <div>
+          <label class="block mb-1 font-semibold">{isGreek ? 'Πλήρες Κείμενο (Markdown)' : 'Full Text (Markdown)'}</label>
+          <textarea name="content" id="editMarkdownInput" class="w-full border rounded font-mono text-sm px-3 py-2" rows="14">{article.content || ""}</textarea>
+        </div>
+        <div>
+          <label class="block mb-1 font-semibold">{isGreek ? 'Εικόνα Εξωφύλλου (URL)' : 'Cover Image (URL)'}</label>
+          <input type="text" name="cover_image" class="w-full border rounded px-3 py-2" value={article.cover_image || ""} />
+        </div>
+        <div class="flex gap-4">
+          <div class="w-full">
+            <label class="block mb-1 font-semibold">{isGreek ? 'Ημερομηνία Δημοσίευσης' : 'Publish Date'}</label>
+            <input type="datetime-local" name="publish_date" class="w-full border rounded" value={article.publish_date?.slice(0, 16) || ""} />
+          </div>
+          <div class="w-full">
+            <label class="block mb-1 font-semibold">{isGreek ? 'Κατάσταση' : 'Published'}</label>
+            <select name="published" class="w-full border rounded">
+              <option value="true" selected={article.published === true || article.published === "true"}>{isGreek ? 'Ναι' : 'Yes'}</option>
+              <option value="false" selected={article.published === false || article.published === "false"}>{isGreek ? 'Όχι' : 'No'}</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="bg-[#50c7c2] text-white px-6 py-2 rounded font-semibold">
+          {isGreek ? 'Ενημέρωση' : 'Update'}
+        </button>
+      </form>
+
+      <!-- PREVIEW -->
+      <section class="prose prose-zinc dark:prose-invert p-4 border rounded shadow-sm max-h-[800px] overflow-auto">
+        <h2 class="text-xl font-bold mb-2">{isGreek ? 'Προεπισκόπηση' : 'Preview'}</h2>
+        <div id="editExcerptPreview" class="text-zinc-600 mb-4"></div>
+        <div id="editMarkdownPreview" class="text-sm text-zinc-800 dark:text-zinc-200"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Scripts για Preview -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script is:inline>
+    const excerptInput = document.getElementById('editExcerptInput');
+    const excerptPreview = document.getElementById('editExcerptPreview');
+    const markdownInput = document.getElementById('editMarkdownInput');
+    const markdownPreview = document.getElementById('editMarkdownPreview');
+    function renderEditPreview() {
+      if (window.marked) {
+        excerptPreview.innerHTML = window.marked.parse(excerptInput.value || "");
+        markdownPreview.innerHTML = window.marked.parse(markdownInput.value || "");
+      }
+    }
+    if (excerptInput && excerptPreview && markdownInput && markdownPreview) {
+      excerptInput.addEventListener('input', renderEditPreview);
+      markdownInput.addEventListener('input', renderEditPreview);
+      renderEditPreview();
+    }
+  </script>
+
+  <!-- Script για Submit (update-article) -->
+  <script type="module">
+    const form = document.getElementById('articleForm');
+    const feedback = document.getElementById('feedback');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form));
+      data.published = data.published === 'true';
+      try {
+        const res = await fetch('/api/update-article', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const result = await res.json();
+        feedback.innerHTML = `<div class="p-3 rounded font-semibold mb-6 ${result.error ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
+          ${result.error ? `❌ ${result.error}` : '✅ Article updated successfully!'}
+        </div>`;
+        if (!result.error && result.article && result.article.slug) {
+          window.location.href = `/${data.lang}/blog/${data.slug}`;
+        }
+      } catch {
+        feedback.innerHTML = `<div class="p-3 rounded font-semibold mb-6 bg-red-100 text-red-700">❌ Unexpected error</div>`;
+      }
+    });
+  </script>
+</Layout>

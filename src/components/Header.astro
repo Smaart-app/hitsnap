@@ -39,7 +39,7 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
 {isAdmin && (
   <nav class="admin-nav-bar flex gap-3 items-center px-4 py-2 bg-[#faf8f5] border-b border-[#e4e4e7]">
     <a href={`/${lang}/admin/preview`} class={`px-2 py-1 rounded transition ${isArticleList ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Λίστα άρθρων</a>
-    <a href={`/${lang}/admin/editor`} class={`px-2 py-1 rounded transition ${isNewArticle ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Νέο άρθρο</a>
+    <a href={`/${lang}/admin/new`} class={`px-2 py-1 rounded transition ${isNewArticle ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Νέο άρθρο</a>
     {slug && (
       <>
         <a href={`/${lang}/admin/preview/${slug}`} class={`px-2 py-1 rounded transition ${isPreview ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Προεπισκόπηση</a>

@@ -1,7 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import Markdown from '../../../components/Markdown.astro';
-// ΕΔΩ η διόρθωση:
 import { createServerClientAstro } from '../../../lib/createServerClient.ts';
 
 export const prerender = false;
@@ -17,7 +16,6 @@ if (!slug || !lang) {
   });
 }
 
-// ΕΔΩ η διόρθωση:
 const supabase = createServerClientAstro(Astro.cookies);
 
 const {
@@ -97,7 +95,7 @@ const markdown = article?.content ?? '';
   </head>
 
   <section class="max-w-3xl mx-auto py-12 px-4">
-    <article class="prose prose-zinc max-w-none">
+    <article>
       <h1 class="text-2xl sm:text-3xl font-bold text-black"
           style="font-family: 'Playfair Display', serif;">
         {article.title}
@@ -117,7 +115,9 @@ const markdown = article?.content ?? '';
         />
       )}
 
-      <Markdown content={markdown} />
+      <div class="prose prose-zinc dark:prose-invert max-w-none">
+        <Markdown content={markdown} />
+      </div>
     </article>
 
     {hasAltVersion && (
@@ -142,7 +142,7 @@ const markdown = article?.content ?? '';
     {user && article && (
       <div class="text-center">
         <a
-         <a href={`/${article.lang}/admin/edit/${article.slug}`}>
+          href={`/${article.lang}/admin/edit/${article.slug}`}
           class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
         >
           ✏️ {lang === 'el' ? 'Επεξεργασία' : 'Edit'}

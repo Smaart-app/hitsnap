@@ -1,7 +1,12 @@
-import type { APIRoute } from "astro";
+import type { APIRoute } from "astro"; 
 import { createAdminClientNoCookies } from "../../lib/createAdminClientNoCookies.ts";
 
 export const prerender = false;
+
+function isValidUUID(uuid: string) {
+  // Basic UUID v4 validation (accepts all valid UUIDs)
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid);
+}
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -40,13 +45,34 @@ export const POST: APIRoute = async ({ request }) => {
       published = false,
       publish_date = new Date().toISOString(),
       user_id = '',
-      translation_of = null, // <--- Εδώ θα μπαίνει το id του "πρωτογενούς" άρθρου (ελληνικού)
+      translation_of = null,
     } = data;
 
-    // Βεβαιώσου ότι έχει user_id
-    if (!user_id) {
+    // ----- ΕΠΑΓΓΕΛΜΑΤΙΚΟΣ ΕΛΕΓΧΟΣ user_id -----
+    // ΜΗΝ ΔΕΧΕΣΑΙ ποτέ template string/undefined/null/""
+    if (
+      !user_id ||
+      typeof user_id !== "string" ||
+      user_id.includes("{") ||
+      user_id.includes("}") ||
+      user_id.trim() === "" ||
+      user_id.trim().toLowerCase() === "undefined" ||
+      user_id.trim().toLowerCase() === "null" ||
+      !isValidUUID(user_id.trim())
+    ) {
       return new Response(
-        JSON.stringify({ article: null, error: "Λείπει το user_id! Δεν μπορεί να αποθηκευτεί το άρθρο." }),
+        JSON.stringify({
+          article: null,
+          error: "Invalid or missing user_id (UUID)!",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // Επαγγελματικός έλεγχος lang
+    if (!lang || typeof lang !== "string" || lang.length < 2) {
+      return new Response(
+        JSON.stringify({ article: null, error: "Λείπει ή είναι λάθος το lang code!" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
@@ -85,8 +111,8 @@ export const POST: APIRoute = async ({ request }) => {
       published: !!published,
       publish_date: publish_date || new Date().toISOString(),
       created_at: new Date().toISOString(),
-      user_id,
-      translation_of: translation_of || null // <--- Εδώ μπαίνει το id του ελληνικού άρθρου (αν υπάρχει)
+      user_id: user_id.trim(),
+      translation_of: translation_of || null
     }]);
 
     if (error) {

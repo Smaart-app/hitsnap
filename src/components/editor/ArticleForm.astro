@@ -22,6 +22,28 @@ const languages = [
   { value: "de", label: "🇩🇪 Deutsch" },
 ];
 
+// ΣΩΣΤΗ ΜΕΤΑΤΡΟΠΗ ΗΜΕΡΟΜΗΝΙΑΣ ΓΙΑ datetime-local
+function getLocalDatetimeString(dateStr) {
+  if (!dateStr) return "";
+  // Αν είναι ήδη σωστό format (π.χ. 2025-07-04T12:34)
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(dateStr)) {
+    return dateStr;
+  }
+  // ISO με seconds/timezone ή λάθος format (π.χ. 2025-07-04T12:34:00+00:00)
+  try {
+    const d = new Date(dateStr);
+    // Υπολογίζουμε local (όχι UTC)
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const da = String(d.getDate()).padStart(2, "0");
+    const h = String(d.getHours()).padStart(2, "0");
+    const mi = String(d.getMinutes()).padStart(2, "0");
+    return `${y}-${m}-${da}T${h}:${mi}`;
+  } catch {
+    return "";
+  }
+}
+
 const hasArticleLang = typeof article.lang === "string" && article.lang !== "" && article.lang !== undefined;
 const initial = {
   title: article.title || "",
@@ -29,53 +51,14 @@ const initial = {
   excerpt: article.excerpt || "",
   content: article.content || "",
   cover_image: article.cover_image || "",
-  lang: hasArticleLang ? article.lang : "", // Κενό αν είναι νέο άρθρο!
+  lang: hasArticleLang ? article.lang : "",
   translation_of: article.translation_of || "",
   published: article.published ? "true" : "false",
-  publish_date: article.publish_date?.slice(0, 16) || "",
+  publish_date: getLocalDatetimeString(article.publish_date),
   user_id: user?.id || "",
   id: article.id || "",
 };
 ---
-
-<!-- === DEBUG SNIPPET: Εμφανίζεται ΠΑΝΩ-ΠΑΝΩ === -->
-<div style="background: #ffa; padding: 12px; border: 2px solid #da0; font-size:20px; margin-bottom: 8px">
-  ΠΡΕΠΕΙ να βλέπεις αυτό το μήνυμα πάνω από το dropdown γλώσσας!<br/>
-  <b>Αν δεν το βλέπεις, αυτό το component δεν renderάρει!</b>
-</div>
-<div>
-  <label>Γλώσσα (test snippet!)</label>
-  <select name="lang" required style="font-size: 18px; margin-bottom:8px">
-    <option value="" selected>-- Διάλεξε γλώσσα --</option>
-    <option value="el">🇬🇷 Ελληνικά</option>
-    <option value="en">🇬🇧 English</option>
-    <option value="nl">🇳🇱 Nederlands</option>
-    <option value="fr">🇫🇷 Français</option>
-    <option value="de">🇩🇪 Deutsch</option>
-  </select>
-</div>
-<!-- === /DEBUG SNIPPET === -->
-
-<!-- DEBUG info πάνω από τη φόρμα -->
-<div style="background:#ffc; color:#c00; margin-bottom:1rem; padding:8px; font-size:13px;">
-  DEBUG user: <b>{JSON.stringify(user)}</b>
-  <br/>DEBUG article.lang: <b>{JSON.stringify(article.lang)}</b>
-  <br/>DEBUG prop lang: <b>{JSON.stringify(lang)}</b>
-  <br/>DEBUG initial.lang (θα είναι κενό σε νέο άρθρο): <b>{JSON.stringify(initial.lang)}</b>
-  <br/>DEBUG article: <pre>{JSON.stringify(article, null, 2)}</pre>
-</div>
-
-<!-- Hack: Γράψε το user_id στο input όταν φορτώνει η σελίδα -->
-<script is:inline>
-  window.HITLIFT_USER_ID = "{user && user.id ? user.id : ''}";
-  document.addEventListener('DOMContentLoaded', function() {
-    var input = document.getElementById('user_id_input');
-    if (input && window.HITLIFT_USER_ID) {
-      input.value = window.HITLIFT_USER_ID;
-      input.setAttribute('value', window.HITLIFT_USER_ID);
-    }
-  });
-</script>
 
 <form
   id="articleForm"
@@ -83,16 +66,15 @@ const initial = {
   method="post"
   action={mode === "edit" ? "/api/update-article" : "/api/save-article"}
 >
-  <input type="hidden" name="user_id" id="user_id_input" value={initial.user_id} />
+  <input type="hidden" name="user_id" id="user_id_input" value={user?.id || ''} />
   {initial.id && <input type="hidden" name="id" value={initial.id} />}
 
-  <!-- ΠΑΝΤΑ ΠΑΝΩ-ΠΑΝΩ το dropdown Γλώσσας -->
   <div>
     <label class="block font-semibold mb-1">Γλώσσα</label>
-    <select name="lang" required class="w-full border rounded px-3 py-2">
+    <select name="lang" required class="w-full border rounded px-3 py-2" defaultValue={initial.lang}>
       <option value="" selected={initial.lang === ""}>-- Διάλεξε γλώσσα --</option>
       {languages.map(l =>
-        <option value={l.value} selected={l.value === initial.lang}>{l.label}</option>
+        <option value={l.value}>{l.label}</option>
       )}
     </select>
     <p class="text-xs text-gray-600 mt-1">
@@ -102,11 +84,11 @@ const initial = {
 
   <div>
     <label class="block font-semibold mb-1">Τίτλος</label>
-    <input type="text" name="title" class="w-full border rounded px-3 py-2" value={initial.title} required />
+    <input type="text" name="title" class="w-full border rounded px-3 py-2" defaultValue={initial.title} required />
   </div>
   <div>
     <label class="block font-semibold mb-1">Slug (URL)</label>
-    <input type="text" name="slug" class="w-full border rounded px-3 py-2" value={initial.slug} required />
+    <input type="text" name="slug" class="w-full border rounded px-3 py-2" defaultValue={initial.slug} required />
   </div>
   <div>
     <label class="block font-semibold mb-1">Απόσπασμα</label>
@@ -118,12 +100,12 @@ const initial = {
   </div>
   <div>
     <label class="block font-semibold mb-1">Εικόνα Εξωφύλλου (URL)</label>
-    <input type="text" name="cover_image" class="w-full border rounded px-3 py-2" value={initial.cover_image} />
+    <input type="text" name="cover_image" id="coverImageInput" class="w-full border rounded px-3 py-2" defaultValue={initial.cover_image} />
   </div>
   <div>
     <label class="block font-semibold mb-1">UUID Πρωτότυπου Άρθρου (αν είναι μετάφραση)</label>
     <input type="text" name="translation_of" class="w-full border rounded px-3 py-2"
-      value={initial.translation_of}
+      defaultValue={initial.translation_of}
       placeholder="Άσε το κενό αν είναι πρωτότυπο"
     />
     <p class="text-xs text-gray-500 mt-1">
@@ -134,13 +116,13 @@ const initial = {
     <div>
       <label class="block font-semibold mb-1">Ημερομηνία Δημοσίευσης</label>
       <input type="datetime-local" name="publish_date" class="w-full border rounded"
-        value={initial.publish_date} />
+        defaultValue={initial.publish_date} />
     </div>
     <div>
       <label class="block font-semibold mb-1">Κατάσταση</label>
-      <select name="published" class="w-full border rounded">
-        <option value="false" selected={initial.published !== "true"}>📝 Πρόχειρο</option>
-        <option value="true" selected={initial.published === "true"}>✅ Δημοσιευμένο</option>
+      <select name="published" class="w-full border rounded" defaultValue={initial.published}>
+        <option value="false">📝 Πρόχειρο</option>
+        <option value="true">✅ Δημοσιευμένο</option>
       </select>
     </div>
   </div>
@@ -152,33 +134,22 @@ const initial = {
       ← Ακύρωση
     </a>
   </div>
+  <div id="formError" class="text-red-600 font-semibold mt-2" style="display:none"></div>
 </form>
 
 <section class="prose prose-zinc dark:prose-invert p-4 border rounded shadow-sm mt-8 max-h-[600px] overflow-auto">
   <h2 class="text-xl font-bold mb-2">Προεπισκόπηση</h2>
   <div id="previewImageContainer">
     {initial.cover_image && (
-      <img src={initial.cover_image} alt="cover" class="mb-4 rounded shadow max-h-64 w-full object-cover" />
+      <img src={initial.cover_image} alt="cover" class="mb-4 rounded shadow max-h-64 w-full object-cover" id="previewCoverImage"/>
     )}
   </div>
-  <!-- Απόσπασμα (markdown) -->
   <div id="excerptPreview" class="text-zinc-600 mb-4"></div>
-  <!-- Περιεχόμενο (markdown) -->
   <div id="markdownPreview" class="text-sm text-zinc-800 dark:text-zinc-200"></div>
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script is:inline>
-  // Hack: Βάζει το user_id στο πεδίο με JS (όχι μόνο στο render)
-  window.HITLIFT_USER_ID = "{user && user.id ? user.id : ''}";
-  document.addEventListener('DOMContentLoaded', function() {
-    var input = document.getElementById('user_id_input');
-    if (input && window.HITLIFT_USER_ID) {
-      input.value = window.HITLIFT_USER_ID;
-      input.setAttribute('value', window.HITLIFT_USER_ID);
-    }
-  });
-
   // Markdown preview για excerpt
   const excerptInput = document.getElementById('excerptInput');
   const excerptPreview = document.getElementById('excerptPreview');
@@ -197,11 +168,48 @@ const initial = {
   const preview = document.getElementById('markdownPreview');
   function renderMarkdown(text, target) {
     if (window.marked) {
-      target.innerHTML = window.marked.parse(text);
+      target.innerHTML = window.marked.parse(text || "");
     }
   }
   if (input && preview) {
     input.addEventListener('input', () => renderMarkdown(input.value, preview));
     renderMarkdown(input.value, preview);
+  }
+
+  // Preview για εικόνα εξωφύλλου
+  const coverInput = document.getElementById('coverImageInput');
+  const previewImageContainer = document.getElementById('previewImageContainer');
+  function renderCoverImage(url) {
+    if (!url) {
+      previewImageContainer.innerHTML = "";
+      return;
+    }
+    previewImageContainer.innerHTML = `<img src="${url}" alt="cover" class="mb-4 rounded shadow max-h-64 w-full object-cover" />`;
+  }
+  if (coverInput) {
+    coverInput.addEventListener('input', () => renderCoverImage(coverInput.value));
+    renderCoverImage(coverInput.value);
+  }
+
+  // AJAX submit (χωρίς refresh, εμφανίζει error αν υπάρξει)
+  const form = document.getElementById('articleForm');
+  const formError = document.getElementById('formError');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      formError.style.display = "none";
+      const formData = new FormData(form);
+      const res = await fetch(form.action, {
+        method: "POST",
+        body: formData,
+      });
+      const result = await res.json().catch(() => ({}));
+      if (res.ok && result.success) {
+        window.location.href = "{onSuccessUrl}";
+      } else {
+        formError.textContent = (result.error || "Σφάλμα αποθήκευσης. Δοκίμασε ξανά.");
+        formError.style.display = "block";
+      }
+    });
   }
 </script>
