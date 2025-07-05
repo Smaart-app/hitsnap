@@ -10,11 +10,32 @@ function isValidUUID(uuid: string) {
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
-    const body = await request.json();
+    // LOG headers and method!
+    console.log("[UPDATE-ARTICLE] HEADERS:", request.headers);
+    console.log("[UPDATE-ARTICLE] METHOD:", request.method);
+
+    let body: any;
+    try {
+      body = await request.json();
+    } catch (jsonErr) {
+      console.error("[UPDATE-ARTICLE] Failed to parse JSON body!", jsonErr);
+      return new Response(
+        JSON.stringify({ article: null, error: "Σφάλμα ανάγνωσης δεδομένων (μήπως δεν στέλνεις JSON;)" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!body || typeof body !== "object") {
+      console.error("[UPDATE-ARTICLE] Empty or invalid body:", body);
+      return new Response(
+        JSON.stringify({ article: null, error: "Δεν ελήφθησαν δεδομένα για ενημέρωση." }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
 
     console.log("[UPDATE-ARTICLE] BODY RECEIVED:", body);
 
-    const {
+    let {
       id,
       title,
       excerpt,
@@ -41,6 +62,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
 
+    // Ελέγχουμε το published ώστε να είναι ΠΑΝΤΑ boolean!
+    if (typeof published === "string") {
+      published = published === "true";
+    }
+    published = !!published; // fallback
+
     // Έλεγχος χρήστη (πρέπει να είναι authenticated)
     const supabase = createServerClientAstro(cookies);
     const {
@@ -56,6 +83,11 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
 
+    // Log τι θα ενημερώσεις!
+    console.log("[UPDATE-ARTICLE] GOING TO UPDATE WITH:", {
+      id: id.trim(), user_id: user.id.trim(), title, excerpt, content, cover_image, lang, published, publish_date
+    });
+
     // Ενημέρωση άρθρου στη βάση
     const { error, data } = await supabase
       .from("articles")
@@ -65,7 +97,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         content,
         cover_image: cover_image || null,
         lang,
-        published: !!published,
+        published,
         publish_date: publish_date || new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })

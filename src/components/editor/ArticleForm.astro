@@ -22,17 +22,13 @@ const languages = [
   { value: "de", label: "🇩🇪 Deutsch" },
 ];
 
-// ΣΩΣΤΗ ΜΕΤΑΤΡΟΠΗ ΗΜΕΡΟΜΗΝΙΑΣ ΓΙΑ datetime-local
 function getLocalDatetimeString(dateStr) {
   if (!dateStr) return "";
-  // Αν είναι ήδη σωστό format (π.χ. 2025-07-04T12:34)
   if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(dateStr)) {
     return dateStr;
   }
-  // ISO με seconds/timezone ή λάθος format (π.χ. 2025-07-04T12:34:00+00:00)
   try {
     const d = new Date(dateStr);
-    // Υπολογίζουμε local (όχι UTC)
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, "0");
     const da = String(d.getDate()).padStart(2, "0");
@@ -65,6 +61,8 @@ const initial = {
   class="space-y-4"
   method="post"
   action={mode === "edit" ? "/api/update-article" : "/api/save-article"}
+  autocomplete="off"
+  data-success-url={onSuccessUrl}
 >
   <input type="hidden" name="user_id" id="user_id_input" value={user?.id || ''} />
   {initial.id && <input type="hidden" name="id" value={initial.id} />}
@@ -192,24 +190,54 @@ const initial = {
   }
 
   // AJAX submit (χωρίς refresh, εμφανίζει error αν υπάρξει)
-  const form = document.getElementById('articleForm');
-  const formError = document.getElementById('formError');
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      formError.style.display = "none";
-      const formData = new FormData(form);
-      const res = await fetch(form.action, {
-        method: "POST",
-        body: formData,
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('articleForm');
+    const formError = document.getElementById('formError');
+    const onSuccessUrl = form?.getAttribute('data-success-url') || "/";
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        formError.style.display = "none";
+
+        const formData = new FormData(form);
+        const payload = {};
+        formData.forEach((v, k) => payload[k] = v);
+
+        if (payload.published) payload.published = payload.published === "true";
+        Object.keys(payload).forEach(k => {
+          if (payload[k] === "") payload[k] = null;
+        });
+
+        // DEBUG
+        console.log("== Θα κάνω fetch στο:", form.action, "με payload:", payload);
+
+        const res = await fetch(form.action, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        let result;
+        try {
+          result = await res.json();
+        } catch {
+          result = {};
+        }
+        console.log("== Απάντηση API:", result);
+
+        if (res.ok && !result.error) {
+          // *** ΝΕΟ: Redirect στο σωστό slug/lang ***
+          if (result.article && result.article.slug && result.article.lang) {
+            window.location.href = `/${result.article.lang}/admin/edit/${result.article.slug}`;
+          } else {
+            window.location.href = onSuccessUrl;
+          }
+        } else {
+          formError.textContent = (result.error || "Σφάλμα αποθήκευσης. Δοκίμασε ξανά.");
+          formError.style.display = "block";
+          alert("Σφάλμα κατά την αποθήκευση: " + (result.error || "(κανένα error από API)"));
+        }
       });
-      const result = await res.json().catch(() => ({}));
-      if (res.ok && result.success) {
-        window.location.href = "{onSuccessUrl}";
-      } else {
-        formError.textContent = (result.error || "Σφάλμα αποθήκευσης. Δοκίμασε ξανά.");
-        formError.style.display = "block";
-      }
-    });
-  }
+    }
+  });
 </script>
