@@ -69,10 +69,10 @@ const initial = {
 
   <div>
     <label class="block font-semibold mb-1">Γλώσσα</label>
-    <select name="lang" required class="w-full border rounded px-3 py-2" defaultValue={initial.lang}>
-      <option value="" selected={initial.lang === ""}>-- Διάλεξε γλώσσα --</option>
+    <select name="lang" required class="w-full border rounded px-3 py-2" value={initial.lang}>
+      <option value="" disabled selected={initial.lang === ""}>-- Διάλεξε γλώσσα --</option>
       {languages.map(l =>
-        <option value={l.value}>{l.label}</option>
+        <option value={l.value} selected={initial.lang === l.value}>{l.label}</option>
       )}
     </select>
     <p class="text-xs text-gray-600 mt-1">
@@ -82,11 +82,11 @@ const initial = {
 
   <div>
     <label class="block font-semibold mb-1">Τίτλος</label>
-    <input type="text" name="title" class="w-full border rounded px-3 py-2" defaultValue={initial.title} required />
+    <input type="text" name="title" class="w-full border rounded px-3 py-2" value={initial.title} required />
   </div>
   <div>
     <label class="block font-semibold mb-1">Slug (URL)</label>
-    <input type="text" name="slug" class="w-full border rounded px-3 py-2" defaultValue={initial.slug} required />
+    <input type="text" name="slug" class="w-full border rounded px-3 py-2" value={initial.slug} required />
   </div>
   <div>
     <label class="block font-semibold mb-1">Απόσπασμα</label>
@@ -98,12 +98,12 @@ const initial = {
   </div>
   <div>
     <label class="block font-semibold mb-1">Εικόνα Εξωφύλλου (URL)</label>
-    <input type="text" name="cover_image" id="coverImageInput" class="w-full border rounded px-3 py-2" defaultValue={initial.cover_image} />
+    <input type="text" name="cover_image" id="coverImageInput" class="w-full border rounded px-3 py-2" value={initial.cover_image} />
   </div>
   <div>
     <label class="block font-semibold mb-1">UUID Πρωτότυπου Άρθρου (αν είναι μετάφραση)</label>
     <input type="text" name="translation_of" class="w-full border rounded px-3 py-2"
-      defaultValue={initial.translation_of}
+      value={initial.translation_of}
       placeholder="Άσε το κενό αν είναι πρωτότυπο"
     />
     <p class="text-xs text-gray-500 mt-1">
@@ -114,13 +114,13 @@ const initial = {
     <div>
       <label class="block font-semibold mb-1">Ημερομηνία Δημοσίευσης</label>
       <input type="datetime-local" name="publish_date" class="w-full border rounded"
-        defaultValue={initial.publish_date} />
+        value={initial.publish_date} />
     </div>
     <div>
       <label class="block font-semibold mb-1">Κατάσταση</label>
-      <select name="published" class="w-full border rounded" defaultValue={initial.published}>
-        <option value="false">📝 Πρόχειρο</option>
-        <option value="true">✅ Δημοσιευμένο</option>
+      <select name="published" class="w-full border rounded" value={initial.published}>
+        <option value="false" selected={initial.published === "false"}>📝 Πρόχειρο</option>
+        <option value="true" selected={initial.published === "true"}>✅ Δημοσιευμένο</option>
       </select>
     </div>
   </div>

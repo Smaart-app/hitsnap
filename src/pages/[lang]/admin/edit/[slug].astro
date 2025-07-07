@@ -1,4 +1,5 @@
 ---
+import Layout from '../../../../layouts/Layout.astro';
 import EditorPage from '../../../../components/editor/EditorPage.astro';
 
 const { slug, lang } = Astro.params;
@@ -55,4 +56,6 @@ const fixedArticle = {
 };
 ---
 
-<EditorPage user={user} article={fixedArticle} />
+<Layout title={fixedArticle?.title ? `Επεξεργασία: ${fixedArticle.title}` : "Επεξεργασία άρθρου"} lang={lang} user={user}>
+  <EditorPage user={user} article={fixedArticle} />
+</Layout>

@@ -1,5 +1,4 @@
 ---
-import Layout from '../../layouts/Layout.astro';
 import ArticleForm from './ArticleForm.astro';
 
 const { user, article } = Astro.props;
@@ -20,28 +19,25 @@ const backText = isEditMode
   : (isGreek ? '← Επιστροφή στα άρθρα' : '← Back to blog');
 ---
 
-<Layout title={`${pageTitle} | Hitlift`} lang={lang} user={user}>
-  <main class="max-w-6xl mx-auto px-4 py-12">
-    <a href={backUrl} class="inline-block text-sm text-[#50c7c2] hover:underline mb-4">
-      {backText}
-    </a>
+<main class="max-w-6xl mx-auto px-4 py-12">
+  <a href={backUrl} class="inline-block text-sm text-[#50c7c2] hover:underline mb-4">
+    {backText}
+  </a>
 
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold">
-        {isEditMode ? '✏️' : '📝'} {pageTitle}
-      </h1>
-      <div id="statusIndicator" class="px-3 py-1 rounded-full text-sm font-medium border"></div>
-    </div>
-    
-    <div id="feedback"></div>
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">
+      {isEditMode ? '✏️' : '📝'} {pageTitle}
+    </h1>
+    <div id="statusIndicator" class="px-3 py-1 rounded-full text-sm font-medium border"></div>
+  </div>
+  
+  <div id="feedback"></div>
 
-    <!-- Εδώ μόνο το ArticleForm, χωρίς δικό σου <form> ή id="articleForm"! -->
-    <ArticleForm
-      article={article}
-      user={user}
-      mode={isEditMode ? "edit" : "new"}
-      onSuccessUrl={backUrl}
-      lang={lang}
-    />
-  </main>
-</Layout>
+  <ArticleForm
+    article={article}
+    user={user}
+    mode={isEditMode ? "edit" : "new"}
+    onSuccessUrl={backUrl}
+    lang={lang}
+  />
+</main>
