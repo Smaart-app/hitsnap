@@ -6,12 +6,10 @@ let lang = Astro.props?.lang;
 
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-// Χρησιμοποιούμε το ΣΩΣΤΟ export από το createServerClient.ts
 import { createServerClientAstro } from '../lib/createServerClient';
 
 let user = null;
 
-// Αν το prop lang λείπει, πάρε από το URL
 if (!lang && Astro.url) {
   const match = Astro.url.pathname.match(/^\/(\w+)\//);
   lang = match ? match[1] : 'el';
@@ -24,9 +22,6 @@ try {
 } catch (err) {
   user = null;
 }
-
-// DEBUG PRINT (σχολιασμένο - βάλ' το αν το χρειαστείς ποτέ για troubleshooting)
-// console.log('SSR USER:', user);
 ---
 
 <html lang={lang}>
@@ -34,6 +29,20 @@ try {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
+
+    <meta name="description" content="Not just real estate. A better way to choose." />
+    <!-- Open Graph (Facebook, LinkedIn, Slack, Viber κλπ) -->
+    <meta property="og:title" content="Hitlift — The smart rise in real estate" />
+    <meta property="og:description" content="Not just real estate. A better way to choose." />
+    <meta property="og:image" content="https://hitlift.app/preview-og-final.png" />
+    <meta property="og:url" content="https://hitlift.app/" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Hitlift — The smart rise in real estate" />
+    <meta name="twitter:description" content="Not just real estate. A better way to choose." />
+    <meta name="twitter:image" content="https://hitlift.app/preview-og-final.png" />
 
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -50,7 +59,6 @@ try {
   </head>
 
   <body class="bg-[#f4f3f0] text-[#1a1a1a] leading-relaxed relative overflow-x-visible min-h-screen">
-    <!-- Περνάμε το user prop στον Header! -->
     <Header lang={lang} user={user} />
 
     <main class="relative z-10">
