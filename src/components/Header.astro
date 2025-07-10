@@ -14,8 +14,8 @@ const isHome = currentPath === '/';
 const isArticles = currentPath.includes('/blog') && !currentPath.includes('/edit');
 const isContact = currentPath.includes('/contact');
 const isAdmin = currentPath.includes('/admin');
-const isEditor = currentPath.includes('/admin/edit') && currentPath.split('/').length === 5; // /el/admin/edit/[slug]
-const isPreview = currentPath.includes('/admin/preview') && currentPath.split('/').length === 5; // /el/admin/preview/[slug]
+const isEditor = currentPath.includes('/admin/edit') && currentPath.split('/').length === 5;
+const isPreview = currentPath.includes('/admin/preview') && currentPath.split('/').length === 5;
 const isArticleList = currentPath.endsWith('/admin/preview');
 const isNewArticle = currentPath.endsWith('/admin/new');
 let slug = null;
@@ -25,7 +25,6 @@ if (slugMatch) {
   slug = slugMatch[1];
 }
 
-// Εναλλαγή γλώσσας
 let langSwitchHref = isGreek ? '/en' : '/el';
 
 if (isArticles && altArticle?.slug && altArticle?.lang) {
@@ -47,7 +46,12 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
       <a href={`${base}/blog`} class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Άρθρα' : 'Articles'}</a>
       <a href={`${base}/contact`} class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Επικοινωνία' : 'Contact'}</a>
       {!disableLangSwitch && (
-        <a href={langSwitchHref} class="px-2 py-1 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition hover:text-[#50c7c2]">{isGreek ? 'English 🇬🇧' : 'Ελληνικά 🇬🇷'}</a>
+        <a href={langSwitchHref} class="px-2 py-1 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition hover:text-[#50c7c2]">
+          <span class="inline-flex items-center gap-1.5">
+            <span>{isGreek ? 'English' : 'Ελληνικά'}</span>
+            <span class="flag-emoji">{isGreek ? '🇬🇧' : '🇬🇷'}</span>
+          </span>
+        </a>
       )}
 
       {isAdmin && (
@@ -80,7 +84,12 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
   <a href={`${base}/blog`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Άρθρα' : 'Articles'}</a>
   <a href={`${base}/contact`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Επικοινωνία' : 'Contact'}</a>
   {!disableLangSwitch && (
-    <a href={langSwitchHref} class="w-full px-2 py-2 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition hover:text-[#50c7c2]">{isGreek ? 'English 🇬🇧' : 'Ελληνικά 🇬🇷'}</a>
+    <a href={langSwitchHref} class="w-full px-2 py-2 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition hover:text-[#50c7c2]">
+      <span class="inline-flex items-center gap-1.5">
+        <span>{isGreek ? 'English' : 'Ελληνικά'}</span>
+        <span class="flag-emoji">{isGreek ? '🇬🇧' : '🇬🇷'}</span>
+      </span>
+    </a>
   )}
   {isAdmin && (
     <>
@@ -110,6 +119,17 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
   }
   .animate-fadeIn {
     animation: fadeIn 0.3s ease-out;
+  }
+  .flag-emoji {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Android Emoji", "EmojiSymbols", "EmojiOne Mozilla", "Twemoji Mozilla", "Segoe UI Symbol", "Noto Emoji", sans-serif;
+    font-size: 1rem;
+    line-height: 1;
+    display: inline-block;
+    vertical-align: middle;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
   }
 </style>
 
