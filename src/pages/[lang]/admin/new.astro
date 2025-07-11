@@ -1,4 +1,5 @@
 ---
+// File: /src/pages/[lang]/admin/new.astro
 import Layout from '@layouts/Layout.astro';
 import { createServerClientAstro } from '@lib/createServerClient';
 import ArticleForm from '../../../components/editor/ArticleForm.astro';
@@ -22,18 +23,20 @@ const pageTitle = lang === 'el' ? 'Νέο Άρθρο' : 'New Article';
   <main class="max-w-3xl mx-auto p-6">
     <h1 class="text-2xl font-bold mb-6">📝 {pageTitle}</h1>
 
-    <!-- DEBUG: Βλέπεις τι περνάει το parent στο ArticleForm -->
+    <!-- 
+    DEBUG προσωρινά απενεργοποιημένο:
     <div style="background:#ffe8e8; color:#c00; margin-bottom:1rem; padding:8px; font-size:13px;">
       <b>DEBUG user prop (parent):</b>
       <pre>{JSON.stringify(user, null, 2)}</pre>
       <b>DEBUG lang param:</b> {lang}
     </div>
+    -->
 
     <ArticleForm 
       user={user} 
       mode="new" 
       onSuccessUrl={`/${lang}/blog`} 
-      lang={lang}   {/* ΠΕΡΝΑ το lang ως prop εδώ */}
+      lang={lang}
     />
   </main>
 </Layout>
