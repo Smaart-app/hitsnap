@@ -29,13 +29,21 @@ try {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
-
     <meta name="description" content="Not just real estate. A better way to choose." />
+
+    <!-- Canonical tag: Δείχνει πάντα στο πραγματικό path, ΟΧΙ μόνο στη ρίζα -->
+    <link rel="canonical" href={`https://hitlift.app${Astro.url.pathname}`} />
+
+    <!-- hreflang tags για πολυγλωσσικότητα -->
+    <link rel="alternate" hreflang="el" href="https://hitlift.app/" />
+    <link rel="alternate" hreflang="en" href="https://hitlift.app/en" />
+    <link rel="alternate" hreflang="x-default" href="https://hitlift.app/" />
+
     <!-- Open Graph (Facebook, LinkedIn, Slack, Viber κλπ) -->
     <meta property="og:title" content="Hitlift — The smart rise in real estate" />
     <meta property="og:description" content="Not just real estate. A better way to choose." />
     <meta property="og:image" content="https://hitlift.app/preview-og-final.png" />
-    <meta property="og:url" content="https://hitlift.app/" />
+    <meta property="og:url" content={`https://hitlift.app${Astro.url.pathname}`} />
     <meta property="og:type" content="website" />
 
     <!-- Twitter Card -->
