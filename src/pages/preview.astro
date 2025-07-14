@@ -17,6 +17,16 @@ const image = "https://hitlift.app/preview-og-final.png";
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://hitlift.app/preview" />
 
+    <!-- Canonical tag -->
+    <link rel="canonical" href="https://hitlift.app/preview" />
+
+    <!-- hreflang tags για να μην το μπερδεύει με άλλες γλώσσες -->
+    <link rel="alternate" hreflang="en" href="https://hitlift.app/preview" />
+    <link rel="alternate" hreflang="x-default" href="https://hitlift.app/preview" />
+
+    <!-- NOINDEX για Google -->
+    <meta name="robots" content="noindex, follow" />
+
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
