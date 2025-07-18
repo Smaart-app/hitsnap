@@ -29,7 +29,6 @@ Designed for multilingual publishing, editorial freedom, and experimental featur
 ## 🧪 Local Development Setup
 
 1. **Clone the repo**
-
-```bash
-git clone https://github.com/your-username/hitlift.git
-cd hitlift
+   ```bash
+   git clone https://github.com/your-username/hitlift.git
+   cd hitlift
