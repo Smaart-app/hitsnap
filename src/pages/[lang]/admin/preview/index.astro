@@ -24,11 +24,26 @@ function getStatus(article) {
   if (new Date(article.publish_date) > new Date()) return 'scheduled';
   return 'published';
 }
+
+// Βοηθητική για να επιστρέφει σημαιάκι βάσει lang
+function getLangFlag(lang) {
+  return lang === 'el'
+    ? '🇬🇷'
+    : lang === 'en'
+    ? '🇬🇧'
+    : lang === 'nl'
+    ? '🇳🇱'
+    : lang === 'fr'
+    ? '🇫🇷'
+    : lang === 'de'
+    ? '🇩🇪'
+    : '';
+}
 ---
 
 <Layout title="Προεπισκοπήσεις Άρθρων" user={user} lang={lang}>
   <main class="max-w-6xl mx-auto px-4 py-16">
-    {/*
+    {/* 
     // ΠΑΛΙΟ NAVIGATION – αφαιρέθηκε γιατί πλέον το admin navigation μπαίνει στο header!
     <div class="flex justify-end gap-3 mb-6">
       <a
@@ -63,7 +78,7 @@ function getStatus(article) {
                 <h2 class="text-lg font-semibold">{article.title}</h2>
                 <p class="text-sm text-zinc-500">
                   🗓️ {new Date(article.publish_date).toLocaleString('el-GR')} | 🏷️{' '}
-                  {lang.toUpperCase()} | 📌{' '}
+                  {getLangFlag(lang)} | 📌{' '}
                   {getStatus(article) === 'draft' && '📝 Πρόχειρο'}
                   {getStatus(article) === 'scheduled' && '⏳ Προγραμματισμένο'}
                   {getStatus(article) === 'published' && '✅ Δημοσιευμένο'}

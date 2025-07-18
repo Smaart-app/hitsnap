@@ -69,7 +69,7 @@ const initial = {
 
   <div>
     <label class="block font-semibold mb-1">Γλώσσα</label>
-    <select name="lang" required class="w-full border rounded px-3 py-2" value={initial.lang}>
+    <select name="lang" required class="w-full border rounded px-3 py-2">
       <option value="" disabled selected={initial.lang === ""}>-- Διάλεξε γλώσσα --</option>
       {languages.map(l =>
         <option value={l.value} selected={initial.lang === l.value}>{l.label}</option>
@@ -118,7 +118,7 @@ const initial = {
     </div>
     <div>
       <label class="block font-semibold mb-1">Κατάσταση</label>
-      <select name="published" class="w-full border rounded" value={initial.published}>
+      <select name="published" class="w-full border rounded">
         <option value="false" selected={initial.published === "false"}>📝 Πρόχειρο</option>
         <option value="true" selected={initial.published === "true"}>✅ Δημοσιευμένο</option>
       </select>

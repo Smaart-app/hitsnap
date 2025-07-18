@@ -1,4 +1,4 @@
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from 'react-markdown';  
 
 export default function ArticleCard({
   title,
@@ -7,15 +7,14 @@ export default function ArticleCard({
   href,
   altHref,
   lang = 'el',
-  icon = null,
 }) {
   const langIcon =
     lang === 'en' ? '🇬🇧'
-    : lang === 'el' ? '🏠'
+    : lang === 'el' ? '🇬🇷'
     : lang === 'nl' ? '🇳🇱'
     : lang === 'fr' ? '🇫🇷'
     : lang === 'de' ? '🇩🇪'
-    : '🧩';
+    : '';
 
   const readMoreText = lang === 'en' ? 'Read more →' : 'Διαβάστε περισσότερα →';
   const altLangText = lang === 'en' ? 'View in Greek →' : 'Δες και στα Αγγλικά →';
@@ -47,7 +46,9 @@ export default function ArticleCard({
 
       <div className="flex flex-col justify-between gap-4 p-6 sm:p-8">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-xl">{icon ?? langIcon}</span>
+          {langIcon && (
+            <span className="text-xl font-normal">{langIcon}</span>
+          )}
           <h2 className="text-lg sm:text-xl font-extrabold mb-0 text-zinc-800 tracking-tight">
             {title}
           </h2>

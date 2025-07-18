@@ -103,7 +103,7 @@ const markdown = article?.content ?? '';
 
       {article.publish_date && (
         <p class="text-sm text-zinc-500">
-          {new Date(article.publish_date).toLocaleDateString(lang === "en" ? "en-GB" : "el-GR")}
+          {new Date(article.publish_date).toLocaleDateString(lang === "en" ? "en" : "el")}
         </p>
       )}
 

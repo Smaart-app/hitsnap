@@ -36,6 +36,21 @@ const processedArticles = articles?.map(article => {
 
 // Τώρα, ΟΛΑ τα άρθρα είναι ορατά (χωρίς φίλτρο)
 const visible = processedArticles;
+
+// Helper για σημαίες γλωσσών
+function getLangFlag(lang) {
+  return lang === 'el'
+    ? '🇬🇷'
+    : lang === 'en'
+    ? '🇬🇧'
+    : lang === 'nl'
+    ? '🇳🇱'
+    : lang === 'fr'
+    ? '🇫🇷'
+    : lang === 'de'
+    ? '🇩🇪'
+    : '';
+}
 ---
 
 <Layout title="📋 Πίνακας Άρθρων" user={user}>
@@ -44,8 +59,6 @@ const visible = processedArticles;
       <h1 class="text-3xl font-bold">📋 Διαχείριση Άρθρων</h1>
       <a href={`/${lang}/logout`} class="text-sm text-red-500 hover:underline">Logout</a>
     </div>
-
-    <!-- Εδώ μπορείς να βγάλεις εντελώς τα φίλτρα tabs αν δεν τα θες -->
 
     {error ? (
       <p class="text-red-600 font-semibold">⚠️ Σφάλμα: {error.message}</p>
@@ -77,7 +90,7 @@ const visible = processedArticles;
               <tr class="border-b border-gray-100 hover:bg-gray-50">
                 <td class="py-2 px-2 font-mono">{article.slug}</td>
                 <td class="py-2 px-2">{article.title}</td>
-                <td class="py-2 px-2 uppercase">{article.lang}</td>
+                <td class="py-2 px-2">{getLangFlag(article.lang)}</td>
                 <td class="py-2 px-2">
                   {article.isScheduled ? (
                     <span class="text-blue-600 font-medium">📅 Προγραμματισμένο</span>
