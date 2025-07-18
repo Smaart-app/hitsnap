@@ -31,8 +31,8 @@ try {
     <title>{title}</title>
     <meta name="description" content="Not just real estate. A better way to choose." />
 
-    <!-- Canonical tag: Δείχνει πάντα στο πραγματικό path, ΟΧΙ μόνο στη ρίζα -->
-    <link rel="canonical" href={`https://hitlift.app${Astro.url.pathname}`} />
+    <!-- Canonical tag: Αποτρέπει διπλό indexing -->
+    <link rel="canonical" href={`https://hitlift.app${Astro.url.pathname.replace(/\/$/, "")}`} />
 
     <!-- hreflang tags για πολυγλωσσικότητα -->
     <link rel="alternate" hreflang="el" href="https://hitlift.app/" />
@@ -43,6 +43,9 @@ try {
     <meta property="og:title" content="Hitlift — The smart rise in real estate" />
     <meta property="og:description" content="Not just real estate. A better way to choose." />
     <meta property="og:image" content="https://hitlift.app/preview-og-final.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="1200" />
     <meta property="og:url" content={`https://hitlift.app${Astro.url.pathname}`} />
     <meta property="og:type" content="website" />
 
@@ -52,12 +55,14 @@ try {
     <meta name="twitter:description" content="Not just real estate. A better way to choose." />
     <meta name="twitter:image" content="https://hitlift.app/preview-og-final.png" />
 
+    <!-- Favicons & Manifest -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
+    <!-- Google Fonts -->
     <link
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap"
       rel="stylesheet"
