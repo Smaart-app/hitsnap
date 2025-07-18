@@ -118,7 +118,9 @@ const statusDisplay = status ? getStatusDisplay(status) : null;
           <h1 class="text-3xl font-bold mb-4">{article.title}</h1>
           <div class="flex flex-wrap items-center gap-4 text-sm text-zinc-600 mb-4">
             <span>🗓️ {new Date(article.publish_date || article.created_at).toLocaleString('el-GR')}</span>
-            <span>🏷️ {article.lang?.toUpperCase()}</span>
+            <span>
+              {article.lang === 'el' ? '🇬🇷' : article.lang === 'en' ? '🇬🇧' : article.lang === 'nl' ? '🇳🇱' : article.lang === 'fr' ? '🇫🇷' : article.lang === 'de' ? '🇩🇪' : ''}
+            </span>
             {article.excerpt && <span>📄 {article.excerpt.length} χαρακτήρες περίληψη</span>}
           </div>
           <div class="flex items-center justify-between mb-6">
