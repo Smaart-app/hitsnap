@@ -34,21 +34,21 @@ const processedArticles = articles?.map(article => {
   };
 }) ?? [];
 
-// Τώρα, ΟΛΑ τα άρθρα είναι ορατά (χωρίς φίλτρο)
+// ΟΛΑ τα άρθρα είναι ορατά (χωρίς φίλτρο)
 const visible = processedArticles;
 
-// Helper για σημαίες γλωσσών
-function getLangFlag(lang) {
+// Helper για καθαρό text γλώσσας
+function getLangName(lang) {
   return lang === 'el'
-    ? '🇬🇷'
+    ? 'Ελληνικά'
     : lang === 'en'
-    ? '🇬🇧'
+    ? 'English'
     : lang === 'nl'
-    ? '🇳🇱'
+    ? 'Nederlands'
     : lang === 'fr'
-    ? '🇫🇷'
+    ? 'Français'
     : lang === 'de'
-    ? '🇩🇪'
+    ? 'Deutsch'
     : '';
 }
 ---
@@ -90,7 +90,7 @@ function getLangFlag(lang) {
               <tr class="border-b border-gray-100 hover:bg-gray-50">
                 <td class="py-2 px-2 font-mono">{article.slug}</td>
                 <td class="py-2 px-2">{article.title}</td>
-                <td class="py-2 px-2">{getLangFlag(article.lang)}</td>
+                <td class="py-2 px-2">{getLangName(article.lang)}</td>
                 <td class="py-2 px-2">
                   {article.isScheduled ? (
                     <span class="text-blue-600 font-medium">📅 Προγραμματισμένο</span>
