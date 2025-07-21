@@ -1,5 +1,15 @@
 {
-  "name": "hitlift",
+  "name": "realstarter-template-basic",
+  "description": "A clean, ready-to-use Astro + Supabase + Netlify blog/CMS template for commercial use.",
+  "author": "",
+  "keywords": [
+    "astro",
+    "supabase",
+    "netlify",
+    "template",
+    "blog",
+    "cms"
+  ],
   "type": "module",
   "scripts": {
     "dev": "astro dev",

@@ -1,34 +1,34 @@
-# Hitlift – A Creative Content Playground ✨
+# Realstarter Template Basic
 
-A modern, markdown-first CMS and blog platform built with Astro, Supabase, and Tailwind.  
-Designed for multilingual publishing, editorial freedom, and experimental features.
+A modern, markdown-first CMS & blog template built with Astro, Supabase, and Tailwind CSS.  
+Ready for multilingual publishing, editorial workflow, and fast deployment to Netlify.
 
 ---
 
 ## 🛠 Tech Stack
 
-- Astro (static site generator)
-- Supabase (backend, auth, and DB)
-- Tailwind CSS (utility-first styling)
+- [Astro](https://astro.build/) (static site generator)
+- [Supabase](https://supabase.com/) (backend, auth, and DB)
+- [Tailwind CSS](https://tailwindcss.com/) (utility-first styling)
 - TypeScript
 
 ---
 
 ## ✨ Features
 
-- 🌍 Language routing with `/[lang]/` (Greek 🇬🇷 + English 🇬🇧)
+- 🌍 Multi-language ready (add any languages you need)
 - 📝 Markdown + Supabase-powered articles
-- 🗂 Admin dashboard with editor and preview
-- 📆 Scheduled publishing system (WIP)
-- 🔐 Authentication-ready via Supabase
-- 🧠 Future AI tools architecture (smart editor, recommendations)
-- 💅 Modular layout system (Astro components)
+- 🗂 Admin dashboard with editor and live preview
+- 📆 Scheduled publishing system
+- 🔐 Authentication-ready (Supabase Auth)
+- 💅 Modular, clean layout (Astro components)
+- ☁️ Deploy to Netlify in minutes
 
 ---
 
-## 🧪 Local Development Setup
+## 🚀 Quick Start
 
 1. **Clone the repo**
    ```bash
-   git clone https://github.com/your-username/hitlift.git
-   cd hitlift
+   git clone https://github.com/your-username/realstarter-template-basic.git
+   cd realstarter-template-basic
