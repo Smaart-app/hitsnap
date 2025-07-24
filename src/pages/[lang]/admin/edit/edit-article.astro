@@ -37,7 +37,7 @@ const article = data;
 const isGreek = article?.lang === 'el';
 ---
 
-<Layout title={`${isGreek ? 'Επεξεργασία Άρθρου' : 'Edit Article'} | realstarter.example`} lang={article?.lang || 'el'} user={user}>
+<Layout title={`${isGreek ? 'Επεξεργασία Άρθρου' : 'Edit Article'} | hitsnap`} lang={article?.lang || 'el'} user={user}>
   <main class="max-w-3xl mx-auto p-6">
     <h1 class="text-2xl font-bold mb-6">{isGreek ? '✏️ Επεξεργασία Άρθρου' : '✏️ Edit Article'}</h1>
 

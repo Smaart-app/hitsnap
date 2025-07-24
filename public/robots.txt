@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://realstarter.example.app/sitemap.xml
+Sitemap: https://hitsnap.app/sitemap.xml

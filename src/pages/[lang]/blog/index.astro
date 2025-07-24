@@ -21,11 +21,11 @@ const { data: articles, error } = await supabase
   .lte('publish_date', now)
   .order('publish_date', { ascending: false });
 
-const pageTitle = lang === 'en' ? 'Articles | realstarter.example' : 'Άρθρα | realstarter.example';
+const pageTitle = lang === 'en' ? 'Articles | hitsnap' : 'Άρθρα | hitsnap';
 const pageDesc =
   lang === 'en'
-    ? 'Explore the latest articles from realstarter.example about real estate, strategy and clarity.'
-    : 'Δες τα τελευταία άρθρα της realstarter.example για ακίνητα, στρατηγική και καθαρή σκέψη.';
+    ? 'Explore the latest articles from hitsnap about real estate, strategy and clarity.'
+    : 'Δες τα τελευταία άρθρα της hitsnap για ακίνητα, στρατηγική και καθαρή σκέψη.';
 ---
 
 <Layout title={pageTitle} lang={lang}>

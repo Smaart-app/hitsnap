@@ -8,7 +8,7 @@ import path from "path";
 
 // 🟢 Πρόσθεσε το site εδώ!
 export default defineConfig({
-  site: 'https://realstarter.example.app', // <-- ΒΑΣΙΚΟ για sitemap & SEO!
+  site: 'https://hitsnap.app', // <-- ΒΑΣΙΚΟ για sitemap & SEO!
   output: "server",
   adapter: netlify(),
   integrations: [

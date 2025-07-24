@@ -9,19 +9,19 @@
   SECRETS_SCAN_ENABLED = "false"
 
 [[redirects]]
-  from = "http://realstarter.example.app/*"
-  to = "https://realstarter.example.app/:splat"
+  from = "http://hitsnap.app/*"
+  to = "https://hitsnap.app/:splat"
   status = 301
   force = true
 
 [[redirects]]
-  from = "http://www.realstarter.example.app/*"
-  to = "https://realstarter.example.app/:splat"
+  from = "http://www.hitsnap.app/*"
+  to = "https://hitsnap.app/:splat"
   status = 301
   force = true
 
 [[redirects]]
-  from = "https://www.realstarter.example.app/*"
-  to = "https://realstarter.example.app/:splat"
+  from = "https://www.hitsnap.app/*"
+  to = "https://hitsnap.app/:splat"
   status = 301
   force = true
