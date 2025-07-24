@@ -33,12 +33,12 @@ const { data: articles } = await supabase
 const featured = articles?.[0] || null;
 const rest = featured ? articles.slice(1) : [];
 
-const title = "Hitlift — The smart rise in real estate";
+const title = "realstarter.example — The smart rise in real estate";
 const description = lang === 'el'
-  ? "Τι λείπει από τον τρόπο που αγοράζουμε και επενδύουμε σε ακίνητα; Η Hitlift εξερευνά τις απαντήσεις — άρθρο το άρθρο."
-  : "What’s missing from the way we buy and invest in real estate? Hitlift explores the gaps — one article at a time.";
+  ? "Τι λείπει από τον τρόπο που αγοράζουμε και επενδύουμε σε ακίνητα; Η realstarter.example εξερευνά τις απαντήσεις — άρθρο το άρθρο."
+  : "What’s missing from the way we buy and invest in real estate? realstarter.example explores the gaps — one article at a time.";
 
-const image = "https://hitlift.app/preview-og-final.png?v=2";
+const image = "https://realstarter.example.app/preview-og-final.png?v=2";
 ---
 
 <Layout title={title} lang={lang} user={null}>
@@ -47,7 +47,7 @@ const image = "https://hitlift.app/preview-og-final.png?v=2";
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={`https://hitlift.app/${lang}`} />
+    <meta property="og:url" content={`https://realstarter.example.app/${lang}`} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />

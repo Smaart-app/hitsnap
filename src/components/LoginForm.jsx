@@ -18,7 +18,7 @@ export default function LoginForm({ lang }) {
           id="emailInput"
           name="email"
           className="w-full p-2 border rounded"
-          placeholder="anna@hitlift.com"
+          placeholder="anna@realstarter.example.com"
           autoComplete="username"
           required
         />

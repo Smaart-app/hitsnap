@@ -21,11 +21,11 @@ const { data: articles, error } = await supabase
   .lte('publish_date', now)
   .order('publish_date', { ascending: false });
 
-const pageTitle = lang === 'en' ? 'Articles | Hitlift' : 'Άρθρα | Hitlift';
+const pageTitle = lang === 'en' ? 'Articles | realstarter.example' : 'Άρθρα | realstarter.example';
 const pageDesc =
   lang === 'en'
-    ? 'Explore the latest articles from Hitlift about real estate, strategy and clarity.'
-    : 'Δες τα τελευταία άρθρα της Hitlift για ακίνητα, στρατηγική και καθαρή σκέψη.';
+    ? 'Explore the latest articles from realstarter.example about real estate, strategy and clarity.'
+    : 'Δες τα τελευταία άρθρα της realstarter.example για ακίνητα, στρατηγική και καθαρή σκέψη.';
 ---
 
 <Layout title={pageTitle} lang={lang}>

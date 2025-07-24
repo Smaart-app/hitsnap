@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 
-const title = Astro.props?.title || 'Hitlift';
+const title = Astro.props?.title || 'realstarter.example';
 let lang = Astro.props?.lang;
 
 import Header from '../components/Header.astro';
@@ -32,28 +32,28 @@ try {
     <meta name="description" content="Not just real estate. A better way to choose." />
 
     <!-- Canonical tag: Αποτρέπει διπλό indexing -->
-    <link rel="canonical" href={`https://hitlift.app${Astro.url.pathname.replace(/\/$/, "")}`} />
+    <link rel="canonical" href={`https://realstarter.example.app${Astro.url.pathname.replace(/\/$/, "")}`} />
 
     <!-- hreflang tags για πολυγλωσσικότητα -->
-    <link rel="alternate" hreflang="el" href="https://hitlift.app/" />
-    <link rel="alternate" hreflang="en" href="https://hitlift.app/en" />
-    <link rel="alternate" hreflang="x-default" href="https://hitlift.app/" />
+    <link rel="alternate" hreflang="el" href="https://realstarter.example.app/" />
+    <link rel="alternate" hreflang="en" href="https://realstarter.example.app/en" />
+    <link rel="alternate" hreflang="x-default" href="https://realstarter.example.app/" />
 
     <!-- Open Graph (Facebook, LinkedIn, Slack, Viber κλπ) -->
-    <meta property="og:title" content="Hitlift — The smart rise in real estate" />
+    <meta property="og:title" content="realstarter.example — The smart rise in real estate" />
     <meta property="og:description" content="Not just real estate. A better way to choose." />
-    <meta property="og:image" content="https://hitlift.app/preview-og-final.png" />
+    <meta property="og:image" content="https://realstarter.example.app/preview-og-final.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="1200" />
-    <meta property="og:url" content={`https://hitlift.app${Astro.url.pathname}`} />
+    <meta property="og:url" content={`https://realstarter.example.app${Astro.url.pathname}`} />
     <meta property="og:type" content="website" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Hitlift — The smart rise in real estate" />
+    <meta name="twitter:title" content="realstarter.example — The smart rise in real estate" />
     <meta name="twitter:description" content="Not just real estate. A better way to choose." />
-    <meta name="twitter:image" content="https://hitlift.app/preview-og-final.png" />
+    <meta name="twitter:image" content="https://realstarter.example.app/preview-og-final.png" />
 
     <!-- Favicons & Manifest -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hitlift.app/sitemap.xml
+Sitemap: https://realstarter.example.app/sitemap.xml

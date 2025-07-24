@@ -28,14 +28,14 @@ export function createServerClientAstro(cookies: AstroCookies) {
             secure: import.meta.env.PROD,
             sameSite: 'lax',
             path: '/',
-            ...(import.meta.env.PROD ? { domain: 'hitlift.com' } : {}),
+            ...(import.meta.env.PROD ? { domain: 'realstarter.example.com' } : {}),
           });
         },
         remove(name, options) {
           cookies.delete(name, {
             ...options,
             path: '/',
-            ...(import.meta.env.PROD ? { domain: 'hitlift.com' } : {}),
+            ...(import.meta.env.PROD ? { domain: 'realstarter.example.com' } : {}),
           });
         },
       },

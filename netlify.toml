@@ -9,19 +9,19 @@
   SECRETS_SCAN_ENABLED = "false"
 
 [[redirects]]
-  from = "http://hitlift.app/*"
-  to = "https://hitlift.app/:splat"
+  from = "http://realstarter.example.app/*"
+  to = "https://realstarter.example.app/:splat"
   status = 301
   force = true
 
 [[redirects]]
-  from = "http://www.hitlift.app/*"
-  to = "https://hitlift.app/:splat"
+  from = "http://www.realstarter.example.app/*"
+  to = "https://realstarter.example.app/:splat"
   status = 301
   force = true
 
 [[redirects]]
-  from = "https://www.hitlift.app/*"
-  to = "https://hitlift.app/:splat"
+  from = "https://www.realstarter.example.app/*"
+  to = "https://realstarter.example.app/:splat"
   status = 301
   force = true
