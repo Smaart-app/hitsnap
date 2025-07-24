@@ -1,17 +1,17 @@
 ---
-const lang = Astro?.props?.lang ?? 'el';
-
-const tagline = lang === 'en'
-  ? "The smart rise in real estate, beyond the obvious."
-  : "Η έξυπνη άνοδος στο real estate, πέρα από το προφανές.";
+const tagline = "Η μικρή τέχνη στο website.";
+const year = new Date().getFullYear();
 ---
 
 <footer class="w-full border-t border-zinc-200 dark:border-zinc-800 text-center py-6 text-sm text-zinc-600 dark:text-zinc-400">
+  <img src="/logo.png" alt="SMAart logo" class="mx-auto h-8 mb-3 opacity-80" />
+
   <p class="italic text-sm text-center text-gray-600 mb-2">
     {tagline}
   </p>
+
   <p class="text-sm text-center text-gray-500">
-    © 2025 realstarter.example — All rights reserved.
+    © {year} SMAart — All rights reserved.
     <br />
     <span class="text-xs opacity-70">Designed & created by Anna Fokidou</span>
   </p>
