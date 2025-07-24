@@ -1,4 +1,4 @@
---- 
+---
 import Layout from '../../layouts/Layout.astro';
 import ArticleCard from '../../components/ArticleCard.jsx';
 import { createServerClientAstro } from '../../lib/createServerClient';
@@ -33,10 +33,10 @@ const { data: articles } = await supabase
 const featured = articles?.[0] || null;
 const rest = featured ? articles.slice(1) : [];
 
-const title = "realstarter.example — The smart rise in real estate";
+const title = "HitSnap — Just focus";
 const description = lang === 'el'
-  ? "Τι λείπει από τον τρόπο που αγοράζουμε και επενδύουμε σε ακίνητα; Η realstarter.example εξερευνά τις απαντήσεις — άρθρο το άρθρο."
-  : "What’s missing from the way we buy and invest in real estate? realstarter.example explores the gaps — one article at a time.";
+  ? "Ένα καθαρό template για φωτογράφους, δημιουργούς και μινιμαλιστικά website."
+  : "A clean template for photographers, creators, and minimal websites.";
 
 const image = "https://realstarter.example.app/preview-og-final.png?v=2";
 ---

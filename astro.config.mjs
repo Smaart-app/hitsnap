@@ -18,18 +18,15 @@ export default defineConfig({
     sitemap() // <-- Απλά κάλεσέ το χωρίς baseUrl, το παίρνει από το site πάνω!
   ],
   vite: {
-    resolve: {
-      alias: {
-        "@lib": path.resolve("./src/lib"),
-        "@components": path.resolve("./src/components"),
-        "@utils": path.resolve("./src/utils"),
-        "@layouts": path.resolve("./src/layouts"),
-      },
-    },
-    build: {
-      rollupOptions: {
-        external: ["formidable"],
-      },
-    },
-  },
+  resolve: {
+    alias: {
+      "@": path.resolve("./src"),
+      "@/config": path.resolve("./src/content/config.ts"),
+      "@lib": path.resolve("./src/lib"),
+      "@components": path.resolve("./src/components"),
+      "@utils": path.resolve("./src/utils"),
+      "@layouts": path.resolve("./src/layouts")
+    }
+  }
+}
 });

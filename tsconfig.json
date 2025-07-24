@@ -2,6 +2,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@/*": ["src/*"],
+      "@/config": ["src/content/config.ts"],
       "@lib/*": ["src/lib/*"],
       "@components/*": ["src/components/*"],
       "@utils/*": ["src/utils/*"],
