@@ -1,14 +1,17 @@
 {
-  "name": "realstarter-template-basic",
-  "description": "A clean, ready-to-use Astro + Supabase + Netlify blog/CMS template for commercial use.",
-  "author": "",
+  "name": "hitsnap",
+  "description": "HitSnap — A multilingual blog & portfolio template with Supabase, built for photographers and creatives. Built with Astro, styled with Tailwind, deployed on Netlify.",
+  "author": "SMAart · Signed as Hitlift",
   "keywords": [
     "astro",
     "supabase",
     "netlify",
     "template",
     "blog",
-    "cms"
+    "cms",
+    "multilingual",
+    "portfolio",
+    "photography"
   ],
   "type": "module",
   "scripts": {
