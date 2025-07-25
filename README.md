@@ -1,9 +1,16 @@
-# RealStarter Template Basic
+# HitSnap · Portfolio & Blog Template
 
-A modern, production-ready blog & CMS template built with Astro, Supabase, and Tailwind CSS.  
-Ideal for multilingual content, markdown-based publishing, and fast Netlify deployment.
+A clean, production-ready portfolio & CMS template for photographers and creatives.  
+Built with Astro, Supabase, and Tailwind CSS — ready for Netlify.
 
-This template is designed for developers, makers, and teams who want full editorial control without the complexity of traditional CMS platforms.
+Designed to combine clarity with creative flexibility.  
+Created by SMAart · Signed as Hitlift.
+
+---
+
+## 🔖 Live Demo
+
+🌐 [hitsnap.netlify.app](https://hitsnap.netlify.app)
 
 ---
 
@@ -18,13 +25,14 @@ This template is designed for developers, makers, and teams who want full editor
 
 ## ✨ Core Features
 
-- 🌍 Multi-language support (add any languages you need)
-- 📝 Markdown-powered article editing with Supabase backend
-- 🧑‍💻 Admin dashboard with live preview and scheduling
-- 📅 Programmatic publishing via date & time
-- 🔐 Supabase Auth-based authentication
-- ⚙️ Modular layout using Astro components
-- ⚡ Instant deployment with Netlify
+- 🌍 Multilingual support (English, Greek — extendable)
+- 📝 Markdown-powered article creation
+- 📆 Scheduled publishing (date & time)
+- 🖼 Image upload per article
+- 🔐 Authentication via Supabase
+- 🎨 Light/Dark mode
+- 🧩 Modular layout using Astro components
+- 📦 Ready to deploy on Netlify
 
 ---
 
@@ -32,5 +40,5 @@ This template is designed for developers, makers, and teams who want full editor
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/realstarter-template-basic.git
-   cd realstarter-template-basic
+   git clone https://github.com/your-username/hitsnap.git
+   cd hitsnap
