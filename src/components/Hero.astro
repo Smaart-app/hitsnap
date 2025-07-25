@@ -1,0 +1,39 @@
+---
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HitSnap</title>
+  </head>
+  <body class="bg-black text-white">
+    <Header />
+    <main class="min-h-screen">
+      <section class="w-full px-6 py-20 grid grid-cols-1 md:grid-cols-2 gap-10 items-center max-w-screen-xl mx-auto">
+        <div class="space-y-6 text-center md:text-left">
+          <h1 class="text-4xl md:text-6xl font-bold tracking-tight text-white">
+            Moments. <span class="text-[#50c7c2]">Framed.</span>
+          </h1>
+          <p class="text-lg md:text-xl text-zinc-400">
+            A creative portfolio and publishing space — all in one clean template.
+          </p>
+          <a
+            href="#gallery"
+            class="inline-block bg-[#50c7c2] text-white px-6 py-3 rounded-full text-sm font-medium hover:opacity-90 transition"
+          >
+            Explore Gallery
+          </a>
+        </div>
+        <div class="flex justify-center">
+          <video autoplay muted loop playsinline class="rounded-lg shadow-lg max-h-[500px] border-2 border-[#50c7c2]/40">
+            <source src="/article-images/hero-video.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

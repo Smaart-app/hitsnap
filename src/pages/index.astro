@@ -1,5 +1,16 @@
 ---
-export const prerender = false;
-return Astro.redirect('/en');
+import Hero from "../components/Hero.astro";
 ---
-<html></html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HitSnap</title>
+  </head>
+  <body class="bg-black text-white">
+    <main class="min-h-screen">
+      <Hero />
+    </main>
+  </body>
+</html>

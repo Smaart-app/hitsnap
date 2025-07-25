@@ -69,59 +69,55 @@ const initial = {
 
   <div>
     <label class="block font-semibold mb-1">Γλώσσα</label>
-    <select name="lang" required class="w-full border rounded px-3 py-2">
+    <select name="lang" required class="w-full border rounded px-3 py-2 bg-zinc-900 text-white">
       <option value="" disabled selected={initial.lang === ""}>-- Διάλεξε γλώσσα --</option>
       {languages.map(l =>
         <option value={l.value} selected={initial.lang === l.value}>{l.label}</option>
       )}
     </select>
-    <p class="text-xs text-gray-600 mt-1">
-      Διάλεξε τη γλώσσα του άρθρου πριν το αποθηκεύσεις.
-    </p>
+    <p class="text-xs text-gray-400 mt-1">Διάλεξε τη γλώσσα του άρθρου πριν το αποθηκεύσεις.</p>
   </div>
 
   <div>
     <label class="block font-semibold mb-1">Τίτλος</label>
-    <input type="text" name="title" class="w-full border rounded px-3 py-2" value={initial.title} required />
+    <input type="text" name="title" class="w-full border rounded px-3 py-2 bg-zinc-900 text-white placeholder-white/60" value={initial.title} required />
   </div>
   <div>
     <label class="block font-semibold mb-1">Slug (URL)</label>
-    <input type="text" name="slug" class="w-full border rounded px-3 py-2" value={initial.slug} required />
+    <input type="text" name="slug" class="w-full border rounded px-3 py-2 bg-zinc-900 text-white" value={initial.slug} required />
   </div>
   <div>
     <label class="block font-semibold mb-1">Απόσπασμα</label>
-    <textarea name="excerpt" id="excerptInput" class="w-full border rounded px-3 py-2" rows="3">{initial.excerpt}</textarea>
+    <textarea name="excerpt" id="excerptInput" class="w-full border rounded px-3 py-2 bg-zinc-900 text-white" rows="3">{initial.excerpt}</textarea>
   </div>
   <div>
     <label class="block font-semibold mb-1">Περιεχόμενο (Markdown)</label>
-    <textarea name="content" id="markdownInput" class="w-full border rounded font-mono text-sm px-3 py-2" rows="12">{initial.content}</textarea>
+    <textarea name="content" id="markdownInput" class="w-full border rounded font-mono text-sm px-3 py-2 bg-zinc-900 text-white" rows="12">{initial.content}</textarea>
   </div>
   <div>
     <label class="block font-semibold mb-1">Εικόνα Εξωφύλλου (URL)</label>
-    <input type="text" name="cover_image" id="coverImageInput" class="w-full border rounded px-3 py-2" value={initial.cover_image} />
+    <input type="text" name="cover_image" id="coverImageInput" class="w-full border rounded px-3 py-2 bg-zinc-900 text-white" value={initial.cover_image} />
   </div>
   <div>
     <label class="block font-semibold mb-1">UUID Πρωτότυπου Άρθρου (αν είναι μετάφραση)</label>
-    <input type="text" name="translation_of" class="w-full border rounded px-3 py-2"
+    <input type="text" name="translation_of" class="w-full border rounded px-3 py-2 bg-zinc-900 text-white"
       value={initial.translation_of}
       placeholder="Άσε το κενό αν είναι πρωτότυπο"
     />
-    <p class="text-xs text-gray-500 mt-1">
-      Συμπλήρωσε μόνο αν το άρθρο είναι μετάφραση (uuid ελληνικού/άλλου άρθρου)
-    </p>
+    <p class="text-xs text-gray-400 mt-1">Συμπλήρωσε μόνο αν το άρθρο είναι μετάφραση (uuid ελληνικού/άλλου άρθρου)</p>
   </div>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div>
       <label class="block font-semibold mb-1">Ημερομηνία Δημοσίευσης</label>
-      <input type="datetime-local" name="publish_date" class="w-full border rounded"
+      <input type="datetime-local" name="publish_date" class="w-full border rounded bg-zinc-900 text-white"
         value={initial.publish_date} />
-      <p class="text-xs text-gray-500 mt-1">
+      <p class="text-xs text-gray-400 mt-1">
         Η ώρα που βάζεις είναι τοπική ({Intl.DateTimeFormat().resolvedOptions().timeZone}) — το άρθρο θα δημοσιευτεί ακριβώς τότε.
       </p>
     </div>
     <div>
       <label class="block font-semibold mb-1">Κατάσταση</label>
-      <select name="published" class="w-full border rounded">
+      <select name="published" class="w-full border rounded bg-zinc-900 text-white">
         <option value="false" selected={initial.published === "false"}>📝 Πρόχειρο</option>
         <option value="true" selected={initial.published === "true"}>✅ Δημοσιευμένο</option>
       </select>
@@ -138,15 +134,15 @@ const initial = {
   <div id="formError" class="text-red-600 font-semibold mt-2" style="display:none"></div>
 </form>
 
-<section class="prose prose-zinc dark:prose-invert p-4 border rounded shadow-sm mt-8 max-h-[600px] overflow-auto">
+<section class="prose prose-zinc dark:prose-invert p-4 border rounded shadow-sm mt-8 max-h-[600px] overflow-auto bg-neutral-900 text-white">
   <h2 class="text-xl font-bold mb-2">Προεπισκόπηση</h2>
   <div id="previewImageContainer">
     {initial.cover_image && (
       <img src={initial.cover_image} alt="cover" class="mb-4 rounded shadow max-h-64 w-full object-cover" id="previewCoverImage"/>
     )}
   </div>
-  <div id="excerptPreview" class="text-zinc-600 mb-4"></div>
-  <div id="markdownPreview" class="text-sm text-zinc-800 dark:text-zinc-200"></div>
+  <div id="excerptPreview" class="text-zinc-300 mb-4"></div>
+  <div id="markdownPreview" class="text-sm text-zinc-200"></div>
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
