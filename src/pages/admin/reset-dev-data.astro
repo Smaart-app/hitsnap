@@ -1,0 +1,70 @@
+---
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+let message = "";
+
+if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  const action = form.get("action");
+
+  if (action === "reset") {
+    await supabase.from("articles").delete().neq("id", "");
+    message = "Διέγραψαν όλα τα άρθρα.";
+  }
+
+  if (action === "demo") {
+    const now = new Date();
+    await supabase.from("articles").insert([
+      {
+        title: "Moments in Motion",
+        slug: "moments-in-motion",
+        content: "# Sample Markdown\nA test post with **bold** text.",
+        lang: "en",
+        image: "/article-images/demo-1.jpg",
+        published_at: now.toISOString(),
+      },
+      {
+        title: "Το σπίτι που δεν με χωράει",
+        slug: "to-spiti-pou-den-me-xoraei",
+        content: "## Ελληνικό δοκιμαστικό άρθρο",
+        lang: "el",
+        image: "/article-images/demo-2.jpg",
+        published_at: now.toISOString(),
+      },
+      {
+        title: "Contrast and Silence",
+        slug: "contrast-and-silence",
+        content: "_Minimal markdown with a message._",
+        lang: "en",
+        image: "/article-images/demo-3.jpg",
+        published_at: null,
+      },
+    ]);
+    message = "Δημιουργήθηκαν 3 demo άρθρα.";
+  }
+}
+---
+
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Reset Dev Data</title>
+  </head>
+  <body style="font-family: sans-serif; padding: 2rem;">
+    <h1>Ρύθμιση Supabase Dev Data</h1>
+    <form method="POST">
+      <button name="action" value="reset" style="margin-right: 1rem;">
+        Διέγραψε όλα τα άρθρα
+      </button>
+      <button name="action" value="demo">
+        Δημιουργία demo άρθρων
+      </button>
+    </form>
+    {message && <p style="margin-top: 1rem; color: green;">{message}</p>}
+  </body>
+</html>

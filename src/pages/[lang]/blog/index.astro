@@ -1,25 +1,24 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import ArticleCard from '../../../components/ArticleCard.jsx';
-// ΕΔΩ η διόρθωση:
 import { createServerClientAstro } from '../../../lib/createServerClient.ts';
 
-// 🚨 Μετατρέπουμε τη σελίδα σε Server-rendered
 export const prerender = false;
 
 const { lang } = Astro.params;
-// ΕΔΩ η διόρθωση:
 const supabase = createServerClientAstro(Astro.cookies);
 
 const now = new Date().toISOString();
 
-const { data: articles, error } = await supabase
+const { data: articlesRaw, error } = await supabase
   .from('articles')
   .select('*')
   .eq('lang', lang)
   .eq('published', true)
   .lte('publish_date', now)
   .order('publish_date', { ascending: false });
+
+const articles = Array.isArray(articlesRaw) ? articlesRaw : [];
 
 const pageTitle = lang === 'en' ? 'Articles | hitsnap' : 'Άρθρα | hitsnap';
 const pageDesc =
@@ -44,9 +43,11 @@ const pageDesc =
       {lang === 'en' ? 'Articles' : 'Άρθρα'}
     </h1>
 
-    {articles?.length === 0 ? (
-      <p class="text-center text-zinc-500">
-        {lang === 'en' ? 'No articles found.' : 'Δεν υπάρχουν άρθρα προς εμφάνιση.'}
+    {articles.length === 0 ? (
+      <p class="text-center text-zinc-500 text-lg">
+        {lang === 'en'
+          ? 'No articles found.'
+          : 'Δεν υπάρχουν άρθρα προς εμφάνιση.'}
       </p>
     ) : (
       <section class="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
