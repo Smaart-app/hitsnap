@@ -22,6 +22,6 @@ export const siteConfig = {
   siteTitle: 'HitSnap',
   siteTagline: 'The subtle art of website design.',
   brandName: 'SMAart',
-  signature: 'Hitlift',
+  signature: 'HitSnap',
   year: 2025
 }

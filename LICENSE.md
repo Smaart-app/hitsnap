@@ -13,8 +13,8 @@ This template, "HitSnap", is licensed for personal and commercial use under the 
 
 - Resell or redistribute this template, modified or unmodified.
 - Create a new template based on this one and distribute it as your own.
-- Claim authorship or remove original attribution (SMAart / Hitlift) without permission.
-- Use the name "HitSnap", "SMAart", or "Hitlift" as part of a new product or marketplace listing.
+- Claim authorship or remove original attribution (SMAart / HitSnap) without permission.
+- Use the name "HitSnap", "SMAart", or "HitSnap" as part of a new product or marketplace listing.
 
 ## ℹ️ Support
 
@@ -24,4 +24,4 @@ Customizations or help can be provided upon agreement, but are optional.
 ---
 
 © 2025 SMAart — All rights reserved.  
-Template: HitSnap · Signed as Hitlift
+Template: HitSnap · Signed as HitSnap

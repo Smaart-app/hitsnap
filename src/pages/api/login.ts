@@ -1,5 +1,5 @@
-import type { APIRoute } from 'astro';
-import { createServerClient } from '@supabase/ssr';
+import type { APIRoute } from 'astro'
+import { createServerClient } from '@supabase/ssr'
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const supabase = createServerClient(
@@ -12,7 +12,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
           cookies.set(name, value, {
             path: '/',
             httpOnly: true,
-            secure: false, // false για local, true για prod με https
+            secure: false, // true σε production
             sameSite: 'Lax',
             ...options,
           }),
@@ -20,35 +20,55 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
           cookies.delete(name, { path: '/', ...options }),
       },
     }
-  );
+  )
 
-  // Παίρνει από POST form
-  const form = await request.formData();
-  const email = form.get('email') as string | null;
-  const password = form.get('password') as string | null;
-  const lang = form.get('lang') as string | null;
+  const form = await request.formData()
+  const email = form.get('email') as string | null
+  const password = form.get('password') as string | null
+  const lang = form.get('lang') as string | null
 
-  // Προσοχή: αν λείπουν πεδία, error!
   if (!email || !password || !lang) {
-    return new Response(
-      JSON.stringify({ error: 'Λείπουν στοιχεία login.' }),
-      { status: 400 }
-    );
+    return new Response(JSON.stringify({ error: 'Λείπουν στοιχεία login.' }), {
+      status: 400,
+    })
   }
 
-  const { data, error } = await supabase.auth.signInWithPassword({
+  // Προσπάθεια login
+  let { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
-  });
+  })
 
+  // Αν αποτύχει, δοκίμασε sign up (μόνο για development/initial use)
   if (error || !data.session) {
-    return new Response(
-      JSON.stringify({ error: error?.message || 'Login failed' }),
-      { status: 401 }
-    );
+    const signUpResult = await supabase.auth.signUp({
+      email,
+      password,
+    })
+
+    if (signUpResult.error) {
+      return new Response(
+        JSON.stringify({ error: signUpResult.error.message }),
+        { status: 401 }
+      )
+    }
+
+    // Δοκίμασε login ξανά
+    const retry = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (retry.error || !retry.data.session) {
+      return new Response(
+        JSON.stringify({ error: retry.error?.message || 'Login failed' }),
+        { status: 401 }
+      )
+    }
+
+    return redirect(`/${lang}/admin/preview`)
   }
 
-  // Τα cookies μπαίνουν αυτόματα από τον Supabase client!
-  // Κάνε redirect μετά το login
-  return redirect(`/${lang}/admin/preview`);
-};
+  // Επιτυχία από το πρώτο login
+  return redirect(`/${lang}/admin/preview`)
+}

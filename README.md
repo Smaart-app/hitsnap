@@ -8,7 +8,7 @@ A clean, production-ready portfolio & CMS template for photographers and creativ
 Built with Astro, Supabase, and Tailwind CSS — ready for Netlify.
 
 Designed to combine clarity with creative flexibility.  
-Created by SMAart · Signed as Hitlift.
+Created by SMAart · Signed as HitSnap.
 
 ---
 
