@@ -1,7 +1,21 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import LoginForm from '../../components/LoginForm.jsx';
+import { createServerClient } from '@supabase/ssr';
+
 const lang = Astro.params?.lang || 'el';
+
+const supabase = createServerClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
+  { cookies: Astro.cookies }
+);
+
+const { data: { session } } = await supabase.auth.getSession();
+
+if (session) {
+  return Astro.redirect(`/${lang}/admin/preview`);
+}
 ---
 
 <Layout title="🔐 Login" lang={lang}>

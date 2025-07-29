@@ -1,10 +1,10 @@
-import type { APIRoute } from 'astro'
-import { createServerClient } from '@supabase/ssr'
+import type { APIRoute } from 'astro';
+import { createServerClient } from '@supabase/ssr';
 
-export const POST: APIRoute = async ({ request, cookies, redirect }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
   const supabase = createServerClient(
     import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+    import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
     {
       cookies: {
         get: (name) => cookies.get(name)?.value,
@@ -12,7 +12,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
           cookies.set(name, value, {
             path: '/',
             httpOnly: true,
-            secure: false, // true σε production
+            secure: false,
             sameSite: 'Lax',
             ...options,
           }),
@@ -20,55 +20,48 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
           cookies.delete(name, { path: '/', ...options }),
       },
     }
-  )
+  );
 
-  const form = await request.formData()
-  const email = form.get('email') as string | null
-  const password = form.get('password') as string | null
-  const lang = form.get('lang') as string | null
+  const form = await request.formData();
+  const email = form.get('email') as string | null;
+  const password = form.get('password') as string | null;
+  const lang = form.get('lang') as string || 'el';
 
-  if (!email || !password || !lang) {
-    return new Response(JSON.stringify({ error: 'Λείπουν στοιχεία login.' }), {
+  if (!email || !password) {
+    return new Response(JSON.stringify({ error: 'Λείπουν στοιχεία.' }), {
       status: 400,
-    })
+    });
   }
 
-  // Προσπάθεια login
-  let { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-  // Αν αποτύχει, δοκίμασε sign up (μόνο για development/initial use)
   if (error || !data.session) {
-    const signUpResult = await supabase.auth.signUp({
-      email,
-      password,
-    })
+    const signUpResult = await supabase.auth.signUp({ email, password });
 
     if (signUpResult.error) {
       return new Response(
         JSON.stringify({ error: signUpResult.error.message }),
         { status: 401 }
-      )
+      );
     }
 
-    // Δοκίμασε login ξανά
-    const retry = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const retry = await supabase.auth.signInWithPassword({ email, password });
 
     if (retry.error || !retry.data.session) {
       return new Response(
         JSON.stringify({ error: retry.error?.message || 'Login failed' }),
         { status: 401 }
-      )
+      );
     }
 
-    return redirect(`/${lang}/admin/preview`)
+    return new Response(
+      JSON.stringify({ success: true, redirectTo: `/${lang}/admin/preview` }),
+      { status: 200 }
+    );
   }
 
-  // Επιτυχία από το πρώτο login
-  return redirect(`/${lang}/admin/preview`)
-}
+  return new Response(
+    JSON.stringify({ success: true, redirectTo: `/${lang}/admin/preview` }),
+    { status: 200 }
+  );
+};
