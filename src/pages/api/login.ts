@@ -4,7 +4,7 @@ import { createServerClient } from '@supabase/ssr';
 export const POST: APIRoute = async ({ request, cookies }) => {
   const supabase = createServerClient(
     process.env.PUBLIC_SUPABASE_URL!,
-    process.env.PUBLIC_SUPABASE_ANON_KEY!, // Άλλαξε από SUPABASE_SERVICE_ROLE_KEY
+    process.env.PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         get: (name) => cookies.get(name)?.value,
@@ -36,27 +36,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error || !data.session) {
-    const signUpResult = await supabase.auth.signUp({ email, password });
-
-    if (signUpResult.error) {
-      return new Response(
-        JSON.stringify({ error: signUpResult.error.message }),
-        { status: 401 }
-      );
-    }
-
-    const retry = await supabase.auth.signInWithPassword({ email, password });
-
-    if (retry.error || !retry.data.session) {
-      return new Response(
-        JSON.stringify({ error: retry.error?.message || 'Login failed' }),
-        { status: 401 }
-      );
-    }
-
     return new Response(
-      JSON.stringify({ success: true, redirectTo: `/${lang}/admin/preview` }),
-      { status: 200 }
+      JSON.stringify({ error: error?.message || 'Αποτυχία σύνδεσης.' }),
+      { status: 401 }
     );
   }
 
