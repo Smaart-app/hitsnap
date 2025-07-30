@@ -4,7 +4,7 @@ import { createServerClient } from '@supabase/ssr';
 export const POST: APIRoute = async ({ request, cookies }) => {
   const supabase = createServerClient(
     process.env.PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.PUBLIC_SUPABASE_ANON_KEY!, // Άλλαξε από SUPABASE_SERVICE_ROLE_KEY
     {
       cookies: {
         get: (name) => cookies.get(name)?.value,
