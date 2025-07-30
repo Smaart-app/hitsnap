@@ -2,14 +2,9 @@ import type { APIRoute } from 'astro';
 import { createServerClient } from '@supabase/ssr';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
-  // 🔍 Διάγνωση: Τι βλέπει το Netlify για το service_role_key;
-  console.log("🧪 service role key (start):", import.meta.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 10));
-  console.log("🧪 key type:", typeof import.meta.env.SUPABASE_SERVICE_ROLE_KEY);
-  console.log("🧪 key length:", import.meta.env.SUPABASE_SERVICE_ROLE_KEY?.length);
-
   const supabase = createServerClient(
-    import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
+    process.env.PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
       cookies: {
         get: (name) => cookies.get(name)?.value,
