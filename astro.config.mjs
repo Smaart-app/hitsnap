@@ -6,20 +6,18 @@ import netlify from "@astrojs/netlify";
 import sitemap from "@astrojs/sitemap";
 import path from "path";
 
-// 🟢 Πρόσθεσε το site εδώ!
 export default defineConfig({
-  site: 'https://hitsnap.app', // <-- ΒΑΣΙΚΟ για sitemap & SEO!
+  site: 'https://hitsnap.app',
   output: "server",
   adapter: netlify(),
 
-  // ✅ Λύση για το Invalid API key: Ενεργοποιεί την πρόσβαση στις env μεταβλητές
   envPrefix: ['PUBLIC_', 'SUPABASE_'],
 
   integrations: [
     tailwind(),
     mdx(),
     react(),
-    sitemap() // <-- Απλά κάλεσέ το χωρίς baseUrl, το παίρνει από το site πάνω!
+    sitemap()
   ],
 
   vite: {
@@ -32,6 +30,11 @@ export default defineConfig({
         "@utils": path.resolve("./src/utils"),
         "@layouts": path.resolve("./src/layouts")
       }
+    },
+    define: {
+      'process.env.PUBLIC_SUPABASE_URL': JSON.stringify(process.env.PUBLIC_SUPABASE_URL),
+      'process.env.PUBLIC_SUPABASE_ANON_KEY': JSON.stringify(process.env.PUBLIC_SUPABASE_ANON_KEY),
+      'process.env.PUBLIC_SITE_URL': JSON.stringify(process.env.PUBLIC_SITE_URL),
     }
   }
 });

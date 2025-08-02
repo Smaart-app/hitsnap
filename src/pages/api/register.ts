@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { createServerClient } from '@supabase/ssr';
+import { createSupabaseClient } from '@/lib/createSupabaseClient';
 
 export const POST: APIRoute = async ({ request }) => {
   const formData = await request.formData();
@@ -14,19 +14,9 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  const supabase = createServerClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      cookies: {
-        get() { return '' },
-        set() {},
-        remove() {},
-      },
-    }
-  );
+  const supabase = createSupabaseClient();
 
-  const siteURL = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
+  const siteURL = process.env.PUBLIC_SITE_URL || 'http://localhost:4321';
   const redirectTo = `${siteURL}/${lang}/login`;
 
   const { error } = await supabase.auth.signUp({
