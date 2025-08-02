@@ -1,12 +1,21 @@
 import { useEffect, useState } from 'react';
-import { getBrowserClient } from '../lib/createBrowserClient.js';
+import { createBrowserClient } from '@supabase/ssr';
 
 export default function UserStatus({ lang = 'el' }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const supabase = getBrowserClient();
+    // ✅ Δημιουργεί τον Supabase client μόνο στον browser
+    const supabase = typeof window !== 'undefined'
+      ? createBrowserClient(
+          import.meta.env.PUBLIC_SUPABASE_URL,
+          import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+        )
+      : null;
+
+    if (!supabase) return;
+
     let ignore = false;
 
     supabase.auth.getUser().then(({ data }) => {
@@ -33,7 +42,16 @@ export default function UserStatus({ lang = 'el' }) {
 
   const handleLogout = async (e) => {
     e.preventDefault();
-    const supabase = getBrowserClient();
+
+    const supabase = typeof window !== 'undefined'
+      ? createBrowserClient(
+          import.meta.env.PUBLIC_SUPABASE_URL,
+          import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+        )
+      : null;
+
+    if (!supabase) return;
+
     await supabase.auth.signOut();
     window.location.href = `${base}/login`;
   };

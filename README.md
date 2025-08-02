@@ -1,7 +1,7 @@
 # HitSnap · Portfolio & Blog Template
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/33e46a8f-2f3f-4a18-a6e3-d53ea08a9d32/deploy-status)](https://hitsnap.netlify.app)
-![License](https://img.shields.io/badge/license-Commercial-blue.svg)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/33e46a8f-2f3f-4a18-a6e3-d53ea08a9d32/deploy-status)](https://hitsnap.netlify.app)  
+![License](https://img.shields.io/badge/license-Commercial-blue.svg)  
 ![Built with Astro](https://img.shields.io/badge/Built%20with-Astro-302d41?logo=astro&logoColor=white)
 
 A clean, production-ready portfolio & CMS template for photographers and creatives.  

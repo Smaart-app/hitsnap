@@ -22,7 +22,7 @@ if (!lang || !supportedLangs.includes(lang)) {
 const supabase = createServerClientAstro(Astro.cookies);
 const todayISO = new Date().toISOString();
 
-const { data: articles } = await supabase
+const { data: articlesRaw } = await supabase
   .from('articles')
   .select('*')
   .eq('lang', lang)
@@ -30,7 +30,9 @@ const { data: articles } = await supabase
   .lte('publish_date', todayISO)
   .order('publish_date', { ascending: false });
 
-const featured = articles?.[0] || null;
+const articles = Array.isArray(articlesRaw) ? articlesRaw : [];
+
+const featured = articles[0] || null;
 const rest = featured ? articles.slice(1) : [];
 
 const title = "HitSnap — Just focus";
@@ -113,7 +115,7 @@ const image = "https://hitsnap.app/preview-og-final.png?v=2";
       </div>
     )}
 
-    {articles.length === 0 && (
+    {Array.isArray(articles) && articles.length === 0 && (
       <section class="text-center py-16 text-gray-500 bg-[#f4f3f0]">
         {lang === 'el'
           ? 'Δεν υπάρχουν ακόμη άρθρα σε αυτή τη γλώσσα.'
