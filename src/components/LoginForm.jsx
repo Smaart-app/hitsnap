@@ -22,9 +22,10 @@ export default function LoginForm({ lang }) {
     try {
       const result = await response.json();
       if (response.ok && result.success) {
-        // ✅ Ανακατεύθυνση μετά το login
-        const base = lang === 'el' ? '/el' : '/en';
-        window.location.href = result.redirectTo || `${base}/admin/preview`;
+        // ✅ Σταθερό redirect μετά το login
+        window.location.href = lang === 'el'
+          ? '/el/admin/preview'
+          : '/en/admin/preview';
       } else {
         setError(result?.error || '❌ Αποτυχία σύνδεσης.');
       }
