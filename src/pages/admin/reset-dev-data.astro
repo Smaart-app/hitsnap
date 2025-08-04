@@ -1,24 +1,21 @@
 ---
-import { createClient } from "@supabase/supabase-js";
+import { createServerClientAstro } from "@/lib/createServerClientAstro"
 
-const supabase = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabase = createServerClientAstro(Astro.cookies)
 
-let message = "";
+let message = ""
 
 if (Astro.request.method === "POST") {
-  const form = await Astro.request.formData();
-  const action = form.get("action");
+  const form = await Astro.request.formData()
+  const action = form.get("action")
 
   if (action === "reset") {
-    await supabase.from("articles").delete().neq("id", "");
-    message = "Διέγραψαν όλα τα άρθρα.";
+    await supabase.from("articles").delete().neq("id", "")
+    message = "Διέγραψαν όλα τα άρθρα."
   }
 
   if (action === "demo") {
-    const now = new Date();
+    const now = new Date()
     await supabase.from("articles").insert([
       {
         title: "Moments in Motion",
@@ -44,8 +41,8 @@ if (Astro.request.method === "POST") {
         image: "/article-images/demo-3.jpg",
         published_at: null,
       },
-    ]);
-    message = "Δημιουργήθηκαν 3 demo άρθρα.";
+    ])
+    message = "Δημιουργήθηκαν 3 demo άρθρα."
   }
 }
 ---

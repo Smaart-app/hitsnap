@@ -1,5 +1,6 @@
-import { createServerClient } from '@supabase/ssr';
-import type { APIRoute } from 'astro';
+// src/lib/createApiSupabase.ts
+import { createServerClient } from '@/lib/createServerClient'
+import type { APIRoute } from 'astro'
 
 export function createApiSupabase({ cookies }: APIRoute['context']) {
   return createServerClient(
@@ -8,8 +9,8 @@ export function createApiSupabase({ cookies }: APIRoute['context']) {
     {
       cookies: {
         getAll: () => {
-          const cookieList = cookies.getAll();
-          return Object.fromEntries(cookieList.map(c => [c.name, c.value]));
+          const cookieList = cookies.getAll()
+          return Object.fromEntries(cookieList.map(c => [c.name, c.value]))
         },
         setAll: (newCookies) => {
           newCookies.forEach(({ name, value, options }) => {
@@ -20,10 +21,10 @@ export function createApiSupabase({ cookies }: APIRoute['context']) {
               secure: import.meta.env.PROD,
               ...(import.meta.env.PROD ? { domain: 'hitsnap.com' } : {}),
               ...options,
-            });
-          });
+            })
+          })
         },
       },
     }
-  );
+  )
 }

@@ -22,6 +22,10 @@ try {
 } catch (err) {
   user = null;
 }
+
+// 🧪 Debug τοπικών μεταβλητών περιβάλλοντος
+console.log('🧪 DEBUG env URL:', import.meta.env.PUBLIC_SUPABASE_URL);
+console.log('🧪 DEBUG env KEY:', import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
 ---
 
 <html lang={lang}>

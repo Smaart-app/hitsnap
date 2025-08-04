@@ -15,6 +15,8 @@ const { prefix, suffix } = splitTitle(siteConfig.siteTitle);
 const lang = Astro.props?.lang || 'en';
 const altArticle = Astro.props?.altArticle || null;
 const disableLangSwitch = Astro.props?.disableHeaderLangSwitch || false;
+const user = Astro.props?.user || null;
+const isLoggedIn = !!user;
 
 const isGreek = lang === 'el';
 const base = isGreek ? '/el' : '/en';
@@ -58,7 +60,7 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
         </a>
       )}
 
-      {isAdmin && (
+      {isLoggedIn && isAdmin && (
         <>
           <a href={`/${lang}/admin/preview`} class={`px-2 py-1 rounded transition ${isArticleList ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Λίστα άρθρων</a>
           <a href={`/${lang}/admin/new`} class={`px-2 py-1 rounded transition ${isNewArticle ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Νέο άρθρο</a>
@@ -91,7 +93,7 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
       {isGreek ? 'English' : 'Ελληνικά'}
     </a>
   )}
-  {isAdmin && (
+  {isLoggedIn && isAdmin && (
     <>
       <a href={`/${lang}/admin/preview`} class={`w-full px-2 py-2 rounded transition ${isArticleList ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Λίστα άρθρων</a>
       <a href={`/${lang}/admin/new`} class={`w-full px-2 py-2 rounded transition ${isNewArticle ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Νέο άρθρο</a>

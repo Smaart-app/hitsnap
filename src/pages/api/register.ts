@@ -1,4 +1,3 @@
-// src/pages/api/register.ts
 import type { APIRoute } from 'astro'
 import { createServerClient } from '@/lib/createServerClient'
 
@@ -17,7 +16,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   const supabase = createServerClient()
 
-  const siteURL = process.env.PUBLIC_SITE_URL || 'http://localhost:4321'
+  const siteURL = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321'
   const redirectTo = `${siteURL}/${lang}/login`
 
   const { error } = await supabase.auth.signUp({

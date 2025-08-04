@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/createServerClient'
 
 export function createSupabaseClient() {
   const url = import.meta.env.PUBLIC_SUPABASE_URL

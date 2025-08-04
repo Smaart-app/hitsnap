@@ -1,43 +1,40 @@
 ---
-import { createClient } from '@supabase/supabase-js';
-import { serialize } from 'cookie';
+import { createServerClientAstro } from '@/lib/createServerClientAstro'
+import { serialize } from 'cookie'
 
-export const prerender = false;
+export const prerender = false
 
-const supabase = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-);
+const supabase = createServerClientAstro(Astro.cookies)
 
 // Κάνε logout από Supabase (client-side tokens)
-await supabase.auth.signOut();
+await supabase.auth.signOut()
 
 // Ανάκτηση γλώσσας από τη διαδρομή π.χ. /el/logout → "el"
-const url = new URL(Astro.request.url);
-const rawSegment = url.pathname.split('/')[1];
-const lang = ['el', 'en'].includes(rawSegment) ? rawSegment : 'el';
+const url = new URL(Astro.request.url)
+const rawSegment = url.pathname.split('/')[1]
+const lang = ['el', 'en'].includes(rawSegment) ? rawSegment : 'el'
 
 // Δημιουργία headers για redirect και καθαρισμό cookies
-const headers = new Headers();
+const headers = new Headers()
 // Κάνε redirect στο login μετά το logout (όχι στην αρχική)
-headers.set('Location', `/${lang}/login`);
+headers.set('Location', `/${lang}/login`)
 headers.append('Set-Cookie', serialize('sb-access-token', '', {
   path: '/',
   maxAge: 0,
   httpOnly: true,
   sameSite: 'Lax'
-}));
+}))
 headers.append('Set-Cookie', serialize('sb-refresh-token', '', {
   path: '/',
   maxAge: 0,
   httpOnly: true,
   sameSite: 'Lax'
-}));
-// Optionally: σβήσε και άλλα σχετικά cookies αν έχεις (π.χ. CSRF)
-// headers.append('Set-Cookie', serialize('sb-csrf-token', '', { path: '/', maxAge: 0, httpOnly: true, sameSite: 'Lax' }));
+}))
+// Optional:
+// headers.append('Set-Cookie', serialize('sb-csrf-token', '', { path: '/', maxAge: 0, httpOnly: true, sameSite: 'Lax' }))
 
 return new Response(null, {
   status: 302,
   headers
-});
+})
 ---
