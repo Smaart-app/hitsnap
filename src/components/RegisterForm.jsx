@@ -1,18 +1,20 @@
 import { useState } from 'react';
 
-export default function LoginForm({ lang }) {
+export default function RegisterForm({ lang }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     const form = new FormData(e.target);
 
-    const response = await fetch('/api/login', {
+    const response = await fetch('/api/register', {
       method: 'POST',
       body: form,
     });
@@ -21,13 +23,13 @@ export default function LoginForm({ lang }) {
 
     try {
       const result = await response.json();
-      if (response.ok && result.success) {
-        window.location.href = result.redirectTo || `/${lang}/admin/preview`;
+      if (result.success) {
+        setSuccess('✅ Ελέγξτε το email σας για επιβεβαίωση.');
       } else {
-        setError(result?.error || '❌ Αποτυχία σύνδεσης.');
+        setError(result.error || '❌ Αποτυχία εγγραφής.');
       }
     } catch {
-      setError('❌ Άγνωστο σφάλμα κατά την απόκριση.');
+      setError('❌ Άγνωστο σφάλμα κατά την εγγραφή.');
     }
   }
 
@@ -57,7 +59,7 @@ export default function LoginForm({ lang }) {
             name="password"
             className="w-full p-2 border rounded pr-10"
             placeholder="••••••••••"
-            autoComplete="current-password"
+            autoComplete="new-password"
             required
           />
           <button
@@ -76,12 +78,16 @@ export default function LoginForm({ lang }) {
         <div className="text-red-600 text-sm font-semibold">{error}</div>
       )}
 
+      {success && (
+        <div className="text-green-600 text-sm font-semibold">{success}</div>
+      )}
+
       <button
         type="submit"
         disabled={loading}
         className="bg-[#50c7c2] text-white px-6 py-2 rounded hover:bg-[#3db2b0] transition font-semibold w-full"
       >
-        {loading ? 'Σύνδεση...' : 'Σύνδεση'}
+        {loading ? 'Αποστολή...' : 'Εγγραφή'}
       </button>
     </form>
   );
