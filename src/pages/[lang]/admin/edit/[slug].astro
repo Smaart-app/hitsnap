@@ -3,7 +3,7 @@ import Layout from '../../../../layouts/Layout.astro';
 import EditorPage from '../../../../components/editor/EditorPage.astro';
 
 const { slug, lang } = Astro.params;
-import { createServerClientAstro } from '../../../../lib/createServerClient.ts';
+import { createServerClientAstro } from '../../../../lib/createServerClientAstro';
 
 const supabase = createServerClientAstro(Astro.cookies);
 

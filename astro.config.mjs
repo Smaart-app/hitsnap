@@ -11,7 +11,8 @@ export default defineConfig({
   output: "server",
   adapter: netlify(),
 
-  envPrefix: ['PUBLIC_', 'SUPABASE_'],
+  // ✅ Προστέθηκε SMTP_ για να λειτουργούν οι email μεταβλητές
+  envPrefix: ['PUBLIC_', 'SUPABASE_', 'SMTP_'],
 
   integrations: [
     tailwind(),

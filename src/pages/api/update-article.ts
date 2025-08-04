@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { createServerClientAstro } from "../../lib/createServerClient.ts";
+import { createServerClientAstro } from "../../lib/createServerClientAstro.js";
 
 export const prerender = false;
 

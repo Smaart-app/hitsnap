@@ -1,4 +1,4 @@
-import { createServerClientAstro } from './createServerClient';
+import { createServerClientAstro } from './createServerClientAstro';
 
 export async function requireUser(Astro: any) {
   const supabase = createServerClientAstro(Astro.cookies);
