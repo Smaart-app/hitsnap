@@ -1,9 +1,8 @@
 ---
 import ThemeButton from './ThemeButton.tsx';
-import UserStatus from '../components/UserStatus.jsx';
+import UserStatusWrapper from '../components/UserStatusWrapper.jsx';
 import { siteConfig } from '@/content/config';
 
-// ✨ Helper για διαχωρισμό τίτλου
 function splitTitle(title) {
   return {
     prefix: title.startsWith('Hit') ? 'Hit' : title.slice(0, 3),
@@ -13,7 +12,7 @@ function splitTitle(title) {
 
 const { prefix, suffix } = splitTitle(siteConfig.siteTitle);
 
-const lang = Astro.props?.lang || 'el';
+const lang = Astro.props?.lang || 'en';
 const altArticle = Astro.props?.altArticle || null;
 const disableLangSwitch = Astro.props?.disableHeaderLangSwitch || false;
 
@@ -29,15 +28,12 @@ const isEditor = currentPath.includes('/admin/edit') && currentPath.split('/').l
 const isPreview = currentPath.includes('/admin/preview') && currentPath.split('/').length === 5;
 const isArticleList = currentPath.endsWith('/admin/preview');
 const isNewArticle = currentPath.endsWith('/admin/new');
-let slug = null;
 
+let slug = null;
 const slugMatch = currentPath.match(/\/admin\/(?:edit|preview)\/([^/]+)/);
-if (slugMatch) {
-  slug = slugMatch[1];
-}
+if (slugMatch) slug = slugMatch[1];
 
 let langSwitchHref = isGreek ? '/en' : '/el';
-
 if (isArticles && altArticle?.slug && altArticle?.lang) {
   langSwitchHref = `/${altArticle.lang}/blog/${altArticle.slug}`;
 } else {
@@ -76,7 +72,7 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
       )}
 
       <ThemeButton client:only="react" />
-      <UserStatus lang={lang} client:load />
+      <UserStatusWrapper lang={lang} client:only="react" />
     </nav>
   </div>
 </header>
@@ -111,7 +107,7 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
     <ThemeButton client:only="react" />
   </div>
   <div class="w-full px-2 py-2">
-    <UserStatus lang={lang} client:load />
+    <UserStatusWrapper lang={lang} client:only="react" />
   </div>
 </nav>
 
