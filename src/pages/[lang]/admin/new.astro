@@ -1,14 +1,14 @@
 ---
 // File: /src/pages/[lang]/admin/new.astro
 import Layout from '@layouts/Layout.astro';
-import { createServerClientAstro } from '@/lib/createServerClientAstro';
+import { createServerClient } from '@/lib/createServerClientAstro';
 import ArticleForm from '../../../components/editor/ArticleForm.astro';
 
 export const prerender = false;
 
 const lang = Astro.params.lang || 'el';
 
-const supabase = createServerClientAstro(Astro.cookies);
+const supabase = createServerClient(Astro.cookies);
 const { data: { user } } = await supabase.auth.getUser();
 
 if (!user || !user.id) {
@@ -39,5 +39,4 @@ const pageTitle = lang === 'el' ? 'Νέο Άρθρο' : 'New Article';
       lang={lang}
     />
   </main>
-  
 </Layout>

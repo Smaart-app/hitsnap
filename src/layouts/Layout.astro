@@ -6,7 +6,7 @@ let lang = Astro.props?.lang;
 
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { createServerClientAstro } from '../lib/createServerClientAstro';
+import { createServerClient } from '../lib/createServerClientAstro';
 
 let user = null;
 
@@ -16,14 +16,13 @@ if (!lang && Astro.url) {
 }
 
 try {
-  const supabase = createServerClientAstro(Astro.cookies);
+  const supabase = createServerClient(Astro.cookies);
   const result = await supabase.auth.getSession();
   user = result.session?.user || null;
 } catch (err) {
   user = null;
 }
 
-// 🧪 Debug τοπικών μεταβλητών περιβάλλοντος
 console.log('🧪 DEBUG env URL:', import.meta.env.PUBLIC_SUPABASE_URL);
 console.log('🧪 DEBUG env KEY:', import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
 ---

@@ -1,9 +1,9 @@
 // src/pages/api/login.ts
 import type { APIRoute } from 'astro'
-import { createServerClientAstro } from '@/lib/createServerClientAstro'
+import { createServerClient } from '@/lib/createServerClientAstro'
 
 export const POST: APIRoute = async ({ request, cookies }) => {
-  const supabase = createServerClientAstro(cookies)
+  const supabase = createServerClient(cookies)
 
   const form = await request.formData()
   const email = form.get('email')?.toString() ?? ''

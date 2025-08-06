@@ -1,16 +1,16 @@
 ---
 import Layout from '@layouts/Layout.astro';
-import { createServerClientAstro } from '@/lib/createServerClientAstro';
+import { createServerClient } from '@/lib/createServerClientAstro';
 
 export const prerender = false;
 
-const supabase = createServerClientAstro(Astro.cookies);
+const supabase = createServerClient(Astro.cookies);
 
 const {
   data: { user },
 } = await supabase.auth.getUser();
 
-const lang = Astro.params.lang || 'el';
+const lang = Astro.params.lang || 'en';
 
 if (!user) {
   return Astro.redirect(`/${lang}/login`);
@@ -34,17 +34,16 @@ const processedArticles = articles?.map(article => {
   };
 }) ?? [];
 
-// ΟΛΑ τα άρθρα είναι ορατά (χωρίς φίλτρο)
 const visible = processedArticles;
 
-// Helper για καθαρό text γλώσσας
+// Helper για ονομασία γλώσσας με νέα προτεραιότητα
 function getLangName(lang) {
-  return lang === 'el'
-    ? 'Ελληνικά'
-    : lang === 'en'
+  return lang === 'en'
     ? 'English'
     : lang === 'nl'
     ? 'Nederlands'
+    : lang === 'el'
+    ? 'Ελληνικά'
     : lang === 'fr'
     ? 'Français'
     : lang === 'de'
@@ -53,7 +52,7 @@ function getLangName(lang) {
 }
 ---
 
-<Layout title="📋 Πίνακας Άρθρων" user={user}>
+<Layout title="📋 Πίνακας Άρθρων" user={user} lang={lang}>
   <main class="max-w-6xl mx-auto px-6 py-12">
     <div class="flex justify-between items-center mb-8">
       <h1 class="text-3xl font-bold">📋 Διαχείριση Άρθρων</h1>
@@ -76,13 +75,13 @@ function getLangName(lang) {
         </thead>
         <tbody>
           {visible.map((article) => {
-            const locale = article.lang === 'en' ? 'en-GB' : 'el-GR';
+            const locale = article.lang === 'en' ? 'en-GB' : article.lang === 'nl' ? 'nl-NL' : 'el-GR';
             const formattedDate = article.publish_date
               ? new Date(article.publish_date).toLocaleDateString(locale)
               : '—';
 
             const editUrl = `/${article.lang}/admin/edit/${article.slug}`;
-            const altLang = article.lang === 'el' ? 'en' : 'el';
+            const altLang = article.lang === 'el' ? 'en' : article.lang === 'en' ? 'nl' : 'el';
             const baseLang = article.lang;
             const translateUrl = `/${altLang}/admin/edit/${article.slug}?base_lang=${baseLang}&lang=${altLang}`;
 

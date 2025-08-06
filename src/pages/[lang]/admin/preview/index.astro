@@ -1,14 +1,14 @@
 ---
 import Layout from '../../../../layouts/Layout.astro';
-import { createServerClientAstro } from '../../../../lib/createServerClientAstro';
+import { createServerClient } from '@/lib/createServerClientAstro';
 
 export const prerender = false;
 
-const supabase = createServerClientAstro(Astro.cookies);
+const supabase = createServerClient(Astro.cookies);
 
 const { data: { user }, error } = await supabase.auth.getUser();
 
-const lang = Astro.params?.lang || 'el';
+const lang = Astro.params?.lang || 'en';
 
 if (!user) {
   return Astro.redirect(`/${lang}/login`);
@@ -25,14 +25,13 @@ function getStatus(article) {
   return 'published';
 }
 
-// Βοηθητική για να επιστρέφει σημαιάκι βάσει lang
 function getLangFlag(lang) {
-  return lang === 'el'
-    ? '🇬🇷'
-    : lang === 'en'
+  return lang === 'en'
     ? '🇬🇧'
     : lang === 'nl'
     ? '🇳🇱'
+    : lang === 'el'
+    ? '🇬🇷'
     : lang === 'fr'
     ? '🇫🇷'
     : lang === 'de'
@@ -43,24 +42,6 @@ function getLangFlag(lang) {
 
 <Layout title="Προεπισκοπήσεις Άρθρων" user={user} lang={lang}>
   <main class="max-w-6xl mx-auto px-4 py-16">
-    {/* 
-    // ΠΑΛΙΟ NAVIGATION – αφαιρέθηκε γιατί πλέον το admin navigation μπαίνει στο header!
-    <div class="flex justify-end gap-3 mb-6">
-      <a
-        href={`/${lang}/admin/new`}
-        class="bg-[#50c7c2] text-white px-4 py-2 rounded hover:bg-[#3db2b0] transition font-semibold"
-      >
-        ➕ Νέο άρθρο
-      </a>
-      <a
-        href={`/${lang}/admin/preview`}
-        class="bg-zinc-200 text-zinc-800 px-4 py-2 rounded hover:bg-zinc-300 transition font-semibold"
-      >
-        👁️ Προεπισκόπηση
-      </a>
-    </div>
-    */}
-
     <h1 class="text-2xl font-bold mb-8">📋 Όλα τα άρθρα</h1>
 
     {articles?.length === 0 ? (

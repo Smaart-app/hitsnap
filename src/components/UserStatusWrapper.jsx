@@ -1,6 +1,5 @@
-// src/components/UserStatusWrapper.jsx
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabaseBrowserClient'
 
 export default function UserStatusWrapper({ lang = 'en' }) {
   const [user, setUser] = useState(null)
@@ -8,11 +7,6 @@ export default function UserStatusWrapper({ lang = 'en' }) {
   const base = lang === 'el' ? '/el' : '/en'
 
   useEffect(() => {
-    const supabase = createClient(
-      import.meta.env.PUBLIC_SUPABASE_URL,
-      import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-    )
-
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user)
       setLoading(false)
@@ -28,12 +22,6 @@ export default function UserStatusWrapper({ lang = 'en' }) {
 
   const handleLogout = async (e) => {
     e.preventDefault()
-
-    const supabase = createClient(
-      import.meta.env.PUBLIC_SUPABASE_URL,
-      import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-    )
-
     await supabase.auth.signOut()
     window.location.href = `${base}/login`
   }

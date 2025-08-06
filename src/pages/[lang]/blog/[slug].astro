@@ -1,14 +1,13 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import Markdown from '../../../components/Markdown.astro';
-import { createServerClientAstro } from '../../../lib/createServerClientAstro';
+import { createServerClient } from '@/lib/createServerClientAstro';
 
 export const prerender = false;
 export const client = 'load';
 
 const { slug, lang } = Astro.params;
 
-// Validation: Ensure required params exist
 if (!slug || !lang) {
   return new Response(null, {
     status: 404,
@@ -16,7 +15,7 @@ if (!slug || !lang) {
   });
 }
 
-const supabase = createServerClientAstro(Astro.cookies);
+const supabase = createServerClient(Astro.cookies);
 
 const {
   data: { user },

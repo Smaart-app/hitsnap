@@ -1,126 +1,47 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import ArticleCard from '../../components/ArticleCard.jsx';
-import { createServerClientAstro } from '../../lib/createServerClientAstro';
 
 export const prerender = false;
 
 export async function getStaticPaths() {
   return [
-    { params: { lang: 'el' } },
     { params: { lang: 'en' } },
+    { params: { lang: 'nl' } },
+    { params: { lang: 'el' } },
   ];
 }
 
 const { lang } = Astro.params;
-const supportedLangs = ['el', 'en'];
+const supportedLangs = ['en', 'nl', 'el'];
 
 if (!lang || !supportedLangs.includes(lang)) {
-  return Astro.redirect('/el', 302);
+  return Astro.redirect('/en', 302);
 }
 
-const supabase = createServerClientAstro(Astro.cookies);
-const todayISO = new Date().toISOString();
-
-const { data: articlesRaw } = await supabase
-  .from('articles')
-  .select('*')
-  .eq('lang', lang)
-  .eq('published', true)
-  .lte('publish_date', todayISO)
-  .order('publish_date', { ascending: false });
-
-const articles = Array.isArray(articlesRaw) ? articlesRaw : [];
-
-const featured = articles[0] || null;
-const rest = featured ? articles.slice(1) : [];
-
-const title = "HitSnap — Just focus";
-const description = lang === 'el'
-  ? "Ένα καθαρό template για φωτογράφους, δημιουργούς και μινιμαλιστικά website."
-  : "A clean template for photographers, creators, and minimal websites.";
-
-const image = "https://hitsnap.app/preview-og-final.png?v=2";
+const title = "Moments. Framed.";
+const subtitle = "Where stillness tells a story.";
 ---
 
 <Layout title={title} lang={lang} user={null}>
-  <head slot="head">
-    <meta name="description" content={description} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={`https://hitsnap.app/${lang}`} />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-  </head>
-
-  <section class="bg-[#f4f3f0] pt-12 pb-20 px-4 sm:px-8 relative z-10">
-    <div class="w-full flex justify-center mb-4 fade-in-up">
-      <img 
-        src="/assets/images/houses-sketch.png"
-        alt="Χειροποίητο σκίτσο σπιτιών"
-        class="w-full max-w-[720px] h-auto object-contain"
-        style="aspect-ratio: 2.5 / 1;"
-      />
-    </div>
-
-    <div class="w-full text-center mx-auto max-w-[520px] mb-10 px-4 fade-in-up" style="animation-delay: 0.2s;">
-      <h1 class="text-[28px] sm:text-[32px] font-bold text-black leading-snug mb-1"
-           style="font-family: 'Playfair Display', serif;">
-        {lang === 'el'
-          ? 'Φαίνεται καλό.'
-          : 'Looks good.'}
+  <section class="bg-black text-white py-20 px-6 min-h-screen flex flex-col items-center justify-center">
+    <div class="text-center">
+      <h1 class="text-4xl sm:text-5xl font-bold mb-4 leading-tight">
+        <span class="text-white">Moments.</span> <span class="text-[#50c7c2]">Framed.</span>
       </h1>
-      <p class="text-base text-gray-700 font-medium mb-5"
-         style="font-family: 'Source Sans 3', sans-serif;">
-        {lang === 'el'
-          ? 'Αλλά... αξίζει στ’ αλήθεια;'
-          : 'But… does it really pay off?'}
+      <p class="text-lg text-zinc-400 mb-8">
+        Where stillness tells a story.
       </p>
-      <img 
-        src="/assets/images/puzzle-piece-dark.png"
-        alt="Το κομμάτι που λείπει"
-        class="mx-auto w-8 sm:w-10 opacity-80 hover:opacity-100 transition animate-float"
-      />
+      <a href={`/${lang}/blog`} class="bg-[#50c7c2] text-white px-6 py-3 rounded-full font-semibold shadow hover:bg-[#3db2b0] transition">
+        Explore Gallery
+      </a>
     </div>
 
-    {featured && (
-      <div class="flex justify-center mb-12 fade-in-left" style="animation-delay: 0.4s;">
-        <div class="w-full max-w-[420px] sm:max-w-[480px]">
-          <ArticleCard
-            title={featured.title}
-            excerpt={featured.excerpt}
-            image={featured.cover_image}
-            href={`/${lang}/blog/${featured.slug}`}
-            lang={lang}
-          />
-        </div>
-      </div>
-    )}
-
-    {rest.length > 0 && (
-      <div class="flex flex-col items-center gap-10 max-w-5xl mx-auto fade-in-up" style="animation-delay: 0.6s;">
-        {rest.map((article) => (
-          <div key={article.id} class="w-full max-w-[420px] sm:max-w-[480px]">
-            <ArticleCard
-              title={article.title}
-              excerpt={article.excerpt}
-              image={article.cover_image}
-              href={`/${lang}/blog/${article.slug}`}
-              lang={lang}
-            />
-          </div>
-        ))}
-      </div>
-    )}
-
-    {Array.isArray(articles) && articles.length === 0 && (
-      <section class="text-center py-16 text-gray-500 bg-[#f4f3f0]">
-        {lang === 'el'
-          ? 'Δεν υπάρχουν ακόμη άρθρα σε αυτή τη γλώσσα.'
-          : 'No articles available in this language yet.'}
-      </section>
-    )}
+    <div class="mt-12 max-w-md w-full">
+      <img
+        src="/assets/images/clown-preview.png"
+        alt="HitSnap preview image"
+        class="rounded-lg w-full h-auto object-contain"
+      />
+    </div>
   </section>
 </Layout>

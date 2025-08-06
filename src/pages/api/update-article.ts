@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { createServerClientAstro } from "../../lib/createServerClientAstro.js";
+import { createServerClient } from "../../lib/createServerClientAstro";
 
 export const prerender = false;
 
@@ -10,7 +10,6 @@ function isValidUUID(uuid: string) {
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
-    // LOG headers and method!
     console.log("[UPDATE-ARTICLE] HEADERS:", request.headers);
     console.log("[UPDATE-ARTICLE] METHOD:", request.method);
 
@@ -46,7 +45,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       publish_date,
     } = body;
 
-    // --- ΕΠΑΓΓΕΛΜΑΤΙΚΟΙ ΕΛΕΓΧΟΙ INPUTS ---
     if (!id || typeof id !== "string" || !isValidUUID(id.trim())) {
       console.error("[UPDATE-ARTICLE] No valid article ID sent!");
       return new Response(
@@ -62,17 +60,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
 
-    // Ελέγχουμε το published ώστε να είναι ΠΑΝΤΑ boolean!
     if (typeof published === "string") {
       published = published === "true";
     }
-    published = !!published; // fallback
+    published = !!published;
 
-    // Έλεγχος χρήστη (πρέπει να είναι authenticated)
-    const supabase = createServerClientAstro(cookies);
+    const supabase = createServerClient(cookies);
     const {
       data: { user },
-      error: userError
+      error: userError,
     } = await supabase.auth.getUser();
 
     if (userError || !user || !user.id || !isValidUUID(user.id)) {
@@ -83,12 +79,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
 
-    // Log τι θα ενημερώσεις!
     console.log("[UPDATE-ARTICLE] GOING TO UPDATE WITH:", {
       id: id.trim(), user_id: user.id.trim(), title, excerpt, content, cover_image, lang, published, publish_date
     });
 
-    // Ενημέρωση άρθρου στη βάση
     const { error, data } = await supabase
       .from("articles")
       .update({
@@ -102,7 +96,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         updated_at: new Date().toISOString(),
       })
       .eq("id", id.trim())
-      .eq("user_id", user.id.trim()) // <-- update μόνο αν ανήκει στον χρήστη
+      .eq("user_id", user.id.trim())
       .select();
 
     console.log("[UPDATE-ARTICLE] SUPABASE UPDATE RESULT:", { error, data });
@@ -120,7 +114,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
 
-    // Επιστροφή του ενημερωμένου άρθρου (μόνο βασικά)
     const updated = data[0];
     return new Response(
       JSON.stringify({

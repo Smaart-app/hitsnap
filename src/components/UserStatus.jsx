@@ -1,20 +1,12 @@
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabaseBrowserClient'
 
 export default function UserStatus({ lang = 'el' }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const base = lang === 'el' ? '/el' : '/en'
 
   useEffect(() => {
-    const supabase = typeof window !== 'undefined'
-      ? createClient(
-          import.meta.env.PUBLIC_SUPABASE_URL,
-          import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-        )
-      : null
-
-    if (!supabase) return
-
     let ignore = false
 
     supabase.auth.getUser().then(({ data }) => {
@@ -37,20 +29,8 @@ export default function UserStatus({ lang = 'el' }) {
     }
   }, [])
 
-  const base = lang === 'el' ? '/el' : '/en'
-
   const handleLogout = async (e) => {
     e.preventDefault()
-
-    const supabase = typeof window !== 'undefined'
-      ? createClient(
-          import.meta.env.PUBLIC_SUPABASE_URL,
-          import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-        )
-      : null
-
-    if (!supabase) return
-
     await supabase.auth.signOut()
     window.location.href = `${base}/login`
   }

@@ -1,11 +1,11 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import LoginForm from '../../components/LoginForm.jsx';
-import { createServerClientAstro } from '@/lib/createServerClientAstro';
+import { createServerClient } from '@/lib/createServerClientAstro';
 
-const lang = Astro.params?.lang || 'el';
+const lang = Astro.params?.lang || 'en';
 
-const supabase = createServerClientAstro(Astro.cookies);
+const supabase = createServerClient(Astro.cookies);
 
 const { data: { session } } = await supabase.auth.getSession();
 

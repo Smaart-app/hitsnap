@@ -1,7 +1,7 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import ArticleCard from '@components/ArticleCard.jsx';
-import { createServerClientAstro } from '@/lib/createServerClientAstro';
+import { createServerClient } from '@/lib/createServerClientAstro';
 
 export const prerender = false;
 
@@ -13,7 +13,7 @@ export async function getStaticPaths() {
 }
 
 const { lang } = Astro.params;
-const supabase = createServerClientAstro(Astro.cookies);
+const supabase = createServerClient(Astro.cookies);
 
 // Έλεγχος αυθεντικοποίησης
 const {

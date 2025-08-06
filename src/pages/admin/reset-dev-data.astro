@@ -1,10 +1,24 @@
 ---
-import { createServerClientAstro } from "@/lib/createServerClientAstro"
+import { createServerClient } from "@/lib/createServerClientAstro"
 
-const supabase = createServerClientAstro(Astro.cookies)
-
+const supabase = createServerClient(Astro.cookies)
 let message = ""
 
+// Έλεγχος σύνδεσης
+const {
+  data: { user },
+} = await supabase.auth.getUser()
+
+if (!user) {
+  return new Response(null, {
+    status: 302,
+    headers: {
+      location: "/en/login",
+    },
+  })
+}
+
+// Ενέργειες POST
 if (Astro.request.method === "POST") {
   const form = await Astro.request.formData()
   const action = form.get("action")
@@ -51,17 +65,46 @@ if (Astro.request.method === "POST") {
   <head>
     <meta charset="UTF-8" />
     <title>Reset Dev Data</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 2rem;
+        background: #f4f4f4;
+        color: #333;
+      }
+
+      button {
+        margin-right: 1rem;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      button:first-of-type {
+        background: #e53935;
+        color: white;
+      }
+
+      button:last-of-type {
+        background: #43a047;
+        color: white;
+      }
+
+      p {
+        margin-top: 1rem;
+        font-weight: bold;
+        color: green;
+      }
+    </style>
   </head>
-  <body style="font-family: sans-serif; padding: 2rem;">
+  <body>
     <h1>Ρύθμιση Supabase Dev Data</h1>
     <form method="POST">
-      <button name="action" value="reset" style="margin-right: 1rem;">
-        Διέγραψε όλα τα άρθρα
-      </button>
-      <button name="action" value="demo">
-        Δημιουργία demo άρθρων
-      </button>
+      <button name="action" value="reset">Διέγραψε όλα τα άρθρα</button>
+      <button name="action" value="demo">Δημιουργία demo άρθρων</button>
     </form>
-    {message && <p style="margin-top: 1rem; color: green;">{message}</p>}
+    {message && <p>{message}</p>}
   </body>
 </html>
