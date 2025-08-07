@@ -1,4 +1,4 @@
-// src/pages/api/login.ts
+// src/pages/api/login.ts 
 import type { APIRoute } from 'astro'
 import { createServerClient } from '@/lib/createServerClientAstro'
 
@@ -29,8 +29,22 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     )
   }
 
-  return new Response(
-    JSON.stringify({ success: true, redirectTo: `/${lang}/admin/preview` }),
-    { status: 200 }
-  )
+  // ✅ Set auth cookies manually
+  const { access_token, refresh_token } = data.session
+
+  const responseBody = JSON.stringify({
+    success: true,
+    redirectTo: `/${lang}/admin/preview`,
+  })
+
+  return new Response(responseBody, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'Set-Cookie': [
+        `sb-access-token=${access_token}; Path=/; HttpOnly; SameSite=Lax`,
+        `sb-refresh-token=${refresh_token}; Path=/; HttpOnly; SameSite=Lax`,
+      ],
+    },
+  })
 }

@@ -17,14 +17,11 @@ if (!lang && Astro.url) {
 
 try {
   const supabase = createServerClient(Astro.cookies);
-  const result = await supabase.auth.getSession();
-  user = result.session?.user || null;
+  const { data } = await supabase.auth.getUser();
+  user = data?.user || null;
 } catch (err) {
   user = null;
 }
-
-console.log('🧪 DEBUG env URL:', import.meta.env.PUBLIC_SUPABASE_URL);
-console.log('🧪 DEBUG env KEY:', import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
 ---
 
 <html lang={lang}>
