@@ -1,4 +1,5 @@
 ---
+// src/pages/[lang]/blog/index.astro
 import Layout from '../../../layouts/Layout.astro';
 import ArticleCard from '../../../components/ArticleCard.jsx';
 import { createServerClient } from '@/lib/createServerClientAstro';
@@ -20,11 +21,11 @@ const { data: articlesRaw, error } = await supabase
 
 const articles = Array.isArray(articlesRaw) ? articlesRaw : [];
 
-const pageTitle = lang === 'en' ? 'Articles | hitsnap' : 'Άρθρα | hitsnap';
+const pageTitle = lang === 'en' ? 'Articles | HitSnap' : 'Άρθρα | HitSnap';
 const pageDesc =
   lang === 'en'
-    ? 'Explore the latest articles from hitsnap about real estate, strategy and clarity.'
-    : 'Δες τα τελευταία άρθρα της hitsnap για ακίνητα, στρατηγική και καθαρή σκέψη.';
+    ? 'Fresh posts from HitSnap on photography, the creative process, and product updates.'
+    : 'Πρόσφατα άρθρα του HitSnap για φωτογραφία, δημιουργική διαδικασία και νέα του project.';
 ---
 
 <Layout title={pageTitle} lang={lang}>
@@ -34,7 +35,7 @@ const pageDesc =
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDesc} />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/preview-image.png" />
+    <meta property="og:image" content="/preview-og-final.png" />
     <title>{pageTitle}</title>
   </head>
 

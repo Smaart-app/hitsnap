@@ -1,63 +1,51 @@
 ---
-import Header from "../components/Header.astro";
+/**
+ * Hero.astro — καθαρό component (χωρίς <html>/<body>).
+ * Χρήση:
+ *   import Hero from '../../components/Hero.astro'
+ *   <Hero lang={safeLang} />
+ */
+const lang = Astro.props?.lang ?? 'en';
+
+const title = lang === 'el' ? 'Στιγμές. Καδραρισμένες.' : 'Moments. Framed.';
+const subtitle = lang === 'el' ? 'Όπου η ακινησία λέει μια ιστορία.' : 'Where stillness tells a story.';
+
+// → Στέλνουμε στο /{lang}/gallery (όχι στο blog)
+const ctaHref = `/${lang}/gallery`;
+const ctaText = lang === 'el' ? 'Δες το Gallery' : 'Explore Gallery';
+
+// Προσαρμόζεις την εικόνα σου εδώ:
+const imageSrc = '/article-images/pierrot-moment-snap.png';
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HitSnap</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-    <style>
-      h1, h2 {
-        font-family: 'Playfair Display', serif;
-      }
-    </style>
-  </head>
-  <body class="bg-black text-white flex flex-col min-h-screen">
-    <Header />
-    <main class="flex-1 relative">
-      <section class="w-full h-[92vh] max-h-[900px] grid grid-cols-1 md:grid-cols-2 items-stretch relative overflow-hidden">
-        {/* Αριστερή στήλη */}
-        <div class="flex flex-col h-full px-4 md:px-10">
-          <div class="pt-12 md:pt-28 flex flex-col">
-            <div class="space-y-5">
-              <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
-                Moments. <span class="text-[#50c7c2]">Framed.</span>
-              </h1>
-              <p class="text-lg text-zinc-400 italic">
-                Where stillness tells a story.
-              </p>
-              <a
-                href="#gallery"
-                class="inline-block bg-[#50c7c2] text-white px-6 py-3 rounded-full text-sm font-medium hover:opacity-90 transition"
-              >
-                Explore Gallery
-              </a>
-            </div>
-          </div>
-          {/* Σε desktop/tablet, copyright στο κάτω μέρος της στήλης */}
-          <div class="hidden md:block mt-auto pb-4 md:pb-7 pt-6 text-sm text-white opacity-90">
-            <p>© 2025 SMAart — All rights reserved.</p>
-            <p>Template: HitSnap · Signed as HitSnap</p>
-          </div>
-        </div>
-        {/* Δεξιά στήλη: Εικόνα πάντα δεξιά */}
-        <div class="w-full h-full flex items-center justify-end bg-black relative overflow-hidden pr-4 md:pr-10">
-          <img 
-            src="/article-images/pierrot-moment-snap.png" 
-            alt="Pierrot with turquoise tear and costume"
-            class="object-contain h-[90%] w-auto max-h-[650px] block ml-auto"
-          />
-        </div>
-      </section>
-      {/* Σε mobile, copyright ΠΑΝΤΑ sticky bottom */}
-      <div class="block md:hidden fixed bottom-0 left-0 w-full bg-black bg-opacity-95 text-sm text-white opacity-90 z-50 px-4 py-2">
-        <div>
-          <p>© 2025 SMAart — All rights reserved.</p>
-          <p>Template: HitSnap · Signed as HitSnap</p>
-        </div>
+<section class="w-full max-h-[900px] grid grid-cols-1 md:grid-cols-2 items-stretch relative overflow-hidden">
+  <!-- Αριστερή στήλη -->
+  <div class="flex flex-col h-full px-4 md:px-10">
+    <div class="pt-12 md:pt-28 flex flex-col">
+      <div class="space-y-5">
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
+          {title.split(' ')[0]} <span class="text-[#50c7c2]">{title.split(' ')[1]}</span>
+        </h1>
+        <p class="text-lg text-zinc-400 italic">
+          {subtitle}
+        </p>
+        <a
+          href={ctaHref}
+          class="inline-block bg-[#50c7c2] text-white px-6 py-3 rounded-full text-sm font-medium hover:opacity-90 transition"
+        >
+          {ctaText}
+        </a>
       </div>
-    </main>
-  </body>
-</html>
+    </div>
+  </div>
+
+  <!-- Δεξιά στήλη: Εικόνα -->
+  <div class="w-full h-full flex items-center justify-end bg-black relative overflow-hidden pr-4 md:pr-10">
+    <img
+      src={imageSrc}
+      alt="HitSnap preview"
+      class="object-contain h-[90%] w-auto max-h-[650px] block ml-auto"
+      loading="eager"
+    />
+  </div>
+</section>

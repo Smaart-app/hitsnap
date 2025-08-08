@@ -22,14 +22,17 @@ const isGreek = lang === 'el';
 const base = isGreek ? '/el' : '/en';
 
 const currentPath = Astro.url.pathname;
-const isHome = currentPath === '/';
+const isHome = currentPath === '/' || currentPath === '/el' || currentPath === '/en';
 const isArticles = currentPath.includes('/blog') && !currentPath.includes('/edit');
 const isContact = currentPath.includes('/contact');
+const isGallery = currentPath.includes('/gallery') && !currentPath.includes('/admin');
+const isAbout = currentPath.includes('/about');
 const isAdmin = currentPath.includes('/admin');
 const isEditor = currentPath.includes('/admin/edit') && currentPath.split('/').length === 5;
 const isPreview = currentPath.includes('/admin/preview') && currentPath.split('/').length === 5;
 const isArticleList = currentPath.endsWith('/admin/preview');
 const isNewArticle = currentPath.endsWith('/admin/new');
+const isAdminGallery = currentPath.endsWith('/admin/gallery');
 
 let slug = null;
 const slugMatch = currentPath.match(/\/admin\/(?:edit|preview)\/([^/]+)/);
@@ -40,7 +43,7 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
   langSwitchHref = `/${altArticle.lang}/blog/${altArticle.slug}`;
 } else {
   const pathWithoutLang = currentPath.replace(/^\/(el|en)/, '');
-  langSwitchHref = `/${isGreek ? 'en' : 'el'}${pathWithoutLang}`;
+  langSwitchHref = `/${isGreek ? 'en' : 'el'}${pathWithoutLang || ''}`;
 }
 ---
 
@@ -49,11 +52,15 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
     <a href="/" class="text-3xl tracking-tight leading-none" style="font-family: 'Lora', serif;">
       <span class="text-black dark:text-white">{prefix}</span><span class="text-[#50c7c2]">{suffix}</span>
     </a>
-    <button id="burgerBtn" class="sm:hidden text-2xl focus:outline-none z-50 relative w-10 h-10 rounded-full border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-[#1a1a1a] flex items-center justify-center transition hover:scale-105" aria-label="Toggle menu" aria-expanded="false" aria-controls="mainNav">☰</button>
+
+    <!-- Desktop nav -->
     <nav class="hidden sm:flex gap-6 items-center text-sm sm:text-base">
       <a href="/" class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isHome ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Αρχική' : 'Home'}</a>
+      <a href={`${base}/gallery`} class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isGallery ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Gallery' : 'Gallery'}</a>
+      <a href={`${base}/about`} class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isAbout ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Σχετικά' : 'About'}</a>
       <a href={`${base}/blog`} class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Άρθρα' : 'Articles'}</a>
       <a href={`${base}/contact`} class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-bold' : 'hover:text-[#50c7c2]'}`}>{isGreek ? 'Επικοινωνία' : 'Contact'}</a>
+
       {!disableLangSwitch && (
         <a href={langSwitchHref} class="px-2 py-1 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition hover:text-[#50c7c2]">
           {isGreek ? 'English' : 'Ελληνικά'}
@@ -62,96 +69,115 @@ if (isArticles && altArticle?.slug && altArticle?.lang) {
 
       {isLoggedIn && isAdmin && (
         <>
-          <a href={`/${lang}/admin/preview`} class={`px-2 py-1 rounded transition ${isArticleList ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Λίστα άρθρων</a>
-          <a href={`/${lang}/admin/new`} class={`px-2 py-1 rounded transition ${isNewArticle ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Νέο άρθρο</a>
+          <a href={`/${lang}/admin/preview`} class={`px-2 py-1 rounded transition ${isArticleList ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>{isGreek ? 'Λίστα άρθρων' : 'Articles'}</a>
+          <a href={`/${lang}/admin/new`} class={`px-2 py-1 rounded transition ${isNewArticle ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>{isGreek ? 'Νέο άρθρο' : 'New Article'}</a>
+          <a href={`/${lang}/admin/gallery`} class={`px-2 py-1 rounded transition ${isAdminGallery ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Gallery Upload</a>
           {slug && (
             <>
-              <a href={`/${lang}/admin/preview/${slug}`} class={`px-2 py-1 rounded transition ${isPreview ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Προεπισκόπηση</a>
-              <a href={`/${lang}/admin/edit/${slug}`} class={`px-2 py-1 rounded transition ${isEditor ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Επεξεργασία</a>
+              <a href={`/${lang}/admin/preview/${slug}`} class={`px-2 py-1 rounded transition ${isPreview ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>{isGreek ? 'Προεπισκόπηση' : 'Preview'}</a>
+              <a href={`/${lang}/admin/edit/${slug}`} class={`px-2 py-1 rounded transition ${isEditor ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>{isGreek ? 'Επεξεργασία' : 'Edit'}</a>
             </>
           )}
+          <a href={`/${lang}/logout`} class="px-2 py-1 rounded transition hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600">
+            {isGreek ? 'Αποσύνδεση' : 'Logout'}
+          </a>
         </>
       )}
 
       <ThemeButton client:only="react" />
       <UserStatusWrapper lang={lang} client:only="react" />
     </nav>
+
+    <!-- Burger button -->
+    <button id="burgerBtn" class="sm:hidden text-2xl focus:outline-none w-10 h-10 rounded-full border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-[#1a1a1a] flex items-center justify-center transition hover:scale-105" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileDrawer">☰</button>
   </div>
 </header>
 
-<div id="overlay" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-30"></div>
+<!-- Overlay -->
+<div id="overlay" class="fixed inset-0 bg-black/30 backdrop-blur-sm z-[60] hidden"></div>
 
+<!-- Mobile drawer -->
 <nav
-  id="mainNav"
-  class="hidden sm:hidden flex-col gap-2 items-start text-sm bg-white dark:bg-[#1a1a1a] w-full absolute top-[60px] left-0 px-6 py-4 border-b border-zinc-200 shadow-md z-40 animate-fadeIn"
+  id="mobileDrawer"
+  class="fixed top-0 right-0 h-screen w-[85%] max-w-[380px] bg-white dark:bg-[#1a1a1a] text-black dark:text-white z-[70] translate-x-full transition-transform duration-300 shadow-xl flex flex-col"
+  aria-hidden="true"
 >
-  <a href="/" class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isHome ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Αρχική' : 'Home'}</a>
-  <a href={`${base}/blog`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Άρθρα' : 'Articles'}</a>
-  <a href={`${base}/contact`} class={`w-full px-2 py-2 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Επικοινωνία' : 'Contact'}</a>
-  {!disableLangSwitch && (
-    <a href={langSwitchHref} class="w-full px-2 py-2 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition hover:text-[#50c7c2]">
-      {isGreek ? 'English' : 'Ελληνικά'}
-    </a>
-  )}
-  {isLoggedIn && isAdmin && (
-    <>
-      <a href={`/${lang}/admin/preview`} class={`w-full px-2 py-2 rounded transition ${isArticleList ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Λίστα άρθρων</a>
-      <a href={`/${lang}/admin/new`} class={`w-full px-2 py-2 rounded transition ${isNewArticle ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Νέο άρθρο</a>
-      {slug && (
-        <>
-          <a href={`/${lang}/admin/preview/${slug}`} class={`w-full px-2 py-2 rounded transition ${isPreview ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Προεπισκόπηση</a>
-          <a href={`/${lang}/admin/edit/${slug}`} class={`w-full px-2 py-2 rounded transition ${isEditor ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Επεξεργασία</a>
-        </>
-      )}
-    </>
-  )}
-  <div class="w-full px-2 py-2">
-    <ThemeButton client:only="react" />
+  <div class="flex items-center justify-between px-5 py-4 border-b border-zinc-200 dark:border-zinc-700">
+    <span class="text-xl font-semibold">{isGreek ? 'Μενού' : 'Menu'}</span>
+    <button id="closeDrawer" aria-label="Close menu" class="text-2xl">✕</button>
   </div>
-  <div class="w-full px-2 py-2">
-    <UserStatusWrapper lang={lang} client:only="react" />
+
+  <div class="px-5 py-4 flex-1 overflow-y-auto space-y-1">
+    <a href="/" class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isHome ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Αρχική' : 'Home'}</a>
+    <a href={`${base}/gallery`} class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isGallery ? 'text-[#50c7c2] font-bold' : ''}`}>Gallery</a>
+    <a href={`${base}/about`} class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isAbout ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Σχετικά' : 'About'}</a>
+    <a href={`${base}/blog`} class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Άρθρα' : 'Articles'}</a>
+    <a href={`${base}/contact`} class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-bold' : ''}`}>{isGreek ? 'Επικοινωνία' : 'Contact'}</a>
+
+    {!disableLangSwitch && (
+      <a href={langSwitchHref} class="block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800">
+        {isGreek ? 'English' : 'Ελληνικά'}
+      </a>
+    )}
+
+    {isLoggedIn && isAdmin && (
+      <>
+        <div class="h-px bg-zinc-200 dark:bg-zinc-700 my-2"></div>
+        <a href={`/${lang}/admin/preview`} class={`block w-full px-2 py-2 rounded transition ${isArticleList ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>{isGreek ? 'Λίστα άρθρων' : 'Articles'}</a>
+        <a href={`/${lang}/admin/new`} class={`block w-full px-2 py-2 rounded transition ${isNewArticle ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>{isGreek ? 'Νέο άρθρο' : 'New Article'}</a>
+        <a href={`/${lang}/admin/gallery`} class={`block w-full px-2 py-2 rounded transition ${isAdminGallery ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>Gallery Upload</a>
+        {slug && (
+          <>
+            <a href={`/${lang}/admin/preview/${slug}`} class={`block w-full px-2 py-2 rounded transition ${isPreview ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>{isGreek ? 'Προεπισκόπηση' : 'Preview'}</a>
+            <a href={`/${lang}/admin/edit/${slug}`} class={`block w-full px-2 py-2 rounded transition ${isEditor ? 'bg-[#50c7c2]/10 font-bold text-[#50c7c2]' : 'hover:bg-[#50c7c2]/10'}`}>{isGreek ? 'Επεξεργασία' : 'Edit'}</a>
+          </>
+        )}
+        <a href={`/${lang}/logout`} class="block w-full px-2 py-2 rounded transition hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600">
+          {isGreek ? 'Αποσύνδεση' : 'Logout'}
+        </a>
+      </>
+    )}
+
+    <div class="h-px bg-zinc-200 dark:bg-zinc-700 my-2"></div>
+
+    <div class="px-1"><ThemeButton client:only="react" /></div>
+    <div class="px-1"><UserStatusWrapper lang={lang} client:only="react" /></div>
   </div>
 </nav>
 
 <style>
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .animate-fadeIn {
-    animation: fadeIn 0.3s ease-out;
-  }
+  @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+  .animate-fadeIn { animation: fadeIn .25s ease-out }
 </style>
 
 <script is:client>
   const burger = document.getElementById('burgerBtn');
-  const nav = document.getElementById('mainNav');
+  const drawer = document.getElementById('mobileDrawer');
   const overlay = document.getElementById('overlay');
-  const body = document.body;
-  let open = false;
+  const closeBtn = document.getElementById('closeDrawer');
 
-  function closeMenu() {
-    nav.classList.add('hidden');
-    nav.classList.remove('flex');
+  const openDrawer = () => {
+    drawer.classList.remove('translate-x-full');
+    overlay.classList.remove('hidden');
+    drawer.setAttribute('aria-hidden', 'false');
+    burger?.setAttribute('aria-expanded', 'true');
+    closeBtn?.focus();
+    document.body.classList.add('overflow-hidden');
+  };
+
+  const closeDrawer = () => {
+    document.activeElement?.blur(); // avoid ARIA warning
+    drawer.classList.add('translate-x-full');
     overlay.classList.add('hidden');
-    body.classList.remove('overflow-hidden');
-    burger.textContent = '☰';
-    burger.setAttribute('aria-expanded', 'false');
-    open = false;
-  }
+    drawer.setAttribute('aria-hidden', 'true');
+    burger?.setAttribute('aria-expanded', 'false');
+    burger?.focus();
+    document.body.classList.remove('overflow-hidden');
+  };
 
-  burger?.addEventListener('click', () => {
-    open = !open;
-    nav.classList.toggle('hidden');
-    nav.classList.toggle('flex');
-    overlay.classList.toggle('hidden');
-    body.classList.toggle('overflow-hidden');
-    burger.textContent = open ? '✕' : '☰';
-    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-
-  overlay?.addEventListener('click', closeMenu);
-  document.querySelectorAll('#mainNav a').forEach(link => {
-    link.addEventListener('click', closeMenu);
-  });
+  burger?.addEventListener('click', openDrawer);
+  closeBtn?.addEventListener('click', closeDrawer);
+  overlay?.addEventListener('click', closeDrawer);
+  drawer?.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDrawer));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
 </script>

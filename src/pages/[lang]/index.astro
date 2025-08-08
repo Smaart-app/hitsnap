@@ -1,5 +1,7 @@
 ---
+// Διόρθωση διαδρομών για να φορτώνει το Layout και το Hero σωστά
 import Layout from '../../layouts/Layout.astro';
+import Hero from '../../components/Hero.astro';
 
 export const prerender = false;
 
@@ -18,34 +20,9 @@ if (!lang || !supportedLangs.includes(lang)) {
   return Astro.redirect('/en', 302);
 }
 
-const title = "Moments. Framed.";
-const subtitle = "Where stillness tells a story.";
+const title = lang === 'el' ? 'Στιγμές. Καδραρισμένες.' : 'Moments. Framed.';
 ---
 
 <Layout title={title} lang={lang} user={null}>
-  <section class="bg-black text-white py-24 px-6 min-h-screen flex flex-col items-center justify-center fade-in">
-    <div class="text-center">
-      <img
-        src="/article-images/pierrot-moment-snap.png"
-        alt="HitSnap preview image"
-        class="rounded-lg w-64 h-auto object-contain mx-auto mb-6"
-      />
-      <p class="text-xl text-white tracking-wide">This space is yours.</p>
-    </div>
-  </section>
-
-  <style>
-    .fade-in {
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeInUp 1.2s ease-out forwards;
-    }
-
-    @keyframes fadeInUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  </style>
+  <Hero lang={lang} />
 </Layout>

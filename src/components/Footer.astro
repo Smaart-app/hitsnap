@@ -1,12 +1,7 @@
 ---
-// Footer.astro
+const year = new Date().getFullYear();
 ---
 
-<footer class="text-center text-sm mt-20 mb-6 pt-12 pb-12 text-zinc-400 bg-black">
-  <div class="mb-1">
-    © 2025 <span class="font-semibold text-white">SMAart</span> — All rights reserved.
-  </div>
-  <div class="text-xs">
-    Template: <span class="font-medium text-white">HitSnap</span> · Signed as <span class="italic text-white">HitSnap</span>
-  </div>
+<footer class="mt-20 py-8 text-center text-sm text-zinc-500 bg-white dark:bg-black dark:text-zinc-400 border-t border-zinc-200 dark:border-zinc-800">
+  © {year} <span class="font-semibold text-black dark:text-white">SMAart</span> — All rights reserved.
 </footer>

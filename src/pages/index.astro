@@ -1,16 +1,7 @@
 ---
-import Hero from "../components/Hero.astro";
----
+/** Root redirect so we always use the [lang]/index.astro that wraps Layout */
+export const prerender = false;
 
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HitSnap</title>
-  </head>
-  <body class="bg-black text-white">
-    <main class="min-h-screen">
-      <Hero />
-    </main>
-  </body>
-</html>
+// Default: send users to English home
+return Astro.redirect('/en', 302);
+---

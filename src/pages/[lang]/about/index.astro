@@ -1,0 +1,46 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+
+export const prerender = false;
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'nl' } },
+    { params: { lang: 'el' } },
+  ];
+}
+
+const { lang } = Astro.params;
+const t = (en, el) => (lang === 'el' ? el : en);
+
+const title = t('About', 'Σχετικά');
+---
+
+<Layout title={title} lang={lang}>
+  <section class="max-w-screen-xl mx-auto px-4 sm:px-6 py-10 grid gap-10 md:grid-cols-[1fr_1.2fr] items-start">
+    <div class="order-2 md:order-1">
+      <h1 class="text-3xl sm:text-4xl font-bold mb-4">{title}</h1>
+      <p class="text-zinc-300 leading-relaxed mb-4">
+        {t(
+          "I’m a photographer exploring stillness, light and narrative. I create series that invite the viewer to slow down.",
+          "Είμαι φωτογράφος που εξερευνά την ακινησία, το φως και την αφήγηση. Δημιουργώ σειρές που προσκαλούν τον θεατή να επιβραδύνει."
+        )}
+      </p>
+      <p class="text-zinc-300 leading-relaxed mb-6">
+        {t(
+          "Available for editorial and personal commissions. Let’s talk about your project.",
+          "Διαθέσιμη/ος για editorial και προσωπικές αναθέσεις. Ας μιλήσουμε για το project σου."
+        )}
+      </p>
+
+      <a href={`/${lang}/contact`} class="inline-block bg-[#50c7c2] text-white px-6 py-3 rounded-full text-sm font-medium hover:opacity-90 transition">
+        {t('Get in touch', 'Επικοινώνησε')}
+      </a>
+    </div>
+
+    <div class="order-1 md:order-2">
+      <img src="/article-images/about-portrait.jpg" alt="Portrait" class="w-full rounded-xl object-cover border border-zinc-800" />
+    </div>
+  </section>
+</Layout>

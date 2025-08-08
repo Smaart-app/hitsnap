@@ -1,0 +1,58 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { createServerClient } from '../../../lib/createServerClientAstro';
+
+export const prerender = false;
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'nl' } },
+    { params: { lang: 'el' } },
+  ];
+}
+
+const { lang } = Astro.params;
+const t = (en, el) => (lang === 'el' ? el : en);
+
+const title = t('Gallery', 'Gallery');
+const lead = t('Selected work — each frame tells a story.', 'Επιλεγμένη δουλειά — κάθε καρέ και μια ιστορία.');
+
+const supabase = createServerClient(Astro.cookies);
+const { data: photos } = await supabase
+  .from('gallery_photos')
+  .select('*')
+  .eq('lang', lang)
+  .eq('published', true)
+  .order('sort_order', { ascending: true })
+  .order('created_at', { ascending: false });
+
+function pubUrl(p) {
+  const base = import.meta.env.PUBLIC_SUPABASE_URL;
+  return `${base}/storage/v1/object/public/gallery/${p.image_path}`;
+}
+---
+
+<Layout title={title} lang={lang}>
+  <section class="max-w-screen-xl mx-auto px-4 sm:px-6 py-10">
+    <h1 class="text-3xl sm:text-4xl font-bold mb-2">{title}</h1>
+    <p class="text-zinc-400 mb-8">{lead}</p>
+
+    {(!photos || photos.length === 0) ? (
+      <p class="text-zinc-500">{t('No photos yet.','Δεν υπάρχουν φωτογραφίες ακόμα.')}</p>
+    ) : (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {photos!.map((p) => (
+          <figure class="bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800">
+            <img src={pubUrl(p)} alt={p.title || 'photo'} class="w-full h-64 object-cover" loading="lazy" />
+            <figcaption class="p-4 text-sm text-zinc-300">
+              <div class="font-medium">{p.title}</div>
+              {p.caption && <div class="text-zinc-400">{p.caption}</div>}
+              {p.album && <div class="text-zinc-500 text-xs mt-1">Album: {p.album}</div>}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    )}
+  </section>
+</Layout>

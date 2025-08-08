@@ -1,0 +1,87 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+
+export const prerender = false;
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'nl' } },
+    { params: { lang: 'el' } },
+  ];
+}
+const { lang } = Astro.params;
+const t = (en, el) => (lang === 'el' ? el : en);
+const title = t('Upload to Gallery', 'Ανέβασμα στο Gallery');
+---
+
+<Layout title={title} lang={lang}>
+  <section class="max-w-screen-lg mx-auto px-4 sm:px-6 py-10">
+    <h1 class="text-3xl sm:text-4xl font-bold mb-6">{title}</h1>
+
+    <form id="uploadForm" class="space-y-4">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm mb-1">{t('Title','Τίτλος')}</label>
+          <input name="title" class="w-full px-3 py-2 rounded bg-zinc-900 border border-zinc-800" />
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Album</label>
+          <input name="album" class="w-full px-3 py-2 rounded bg-zinc-900 border border-zinc-800" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1">{t('Caption','Λεζάντα')}</label>
+        <textarea name="caption" class="w-full px-3 py-2 rounded bg-zinc-900 border border-zinc-800" rows="3"></textarea>
+      </div>
+
+      <div class="grid sm:grid-cols-[1fr_auto] gap-4 items-end">
+        <div>
+          <label class="block text-sm mb-1">{t('Image file','Αρχείο εικόνας')}</label>
+          <input type="file" name="file" accept="image/*" class="w-full" required />
+        </div>
+        <button class="bg-[#50c7c2] text-white px-6 py-3 rounded-full text-sm font-medium hover:opacity-90 transition">
+          {t('Upload','Ανέβασμα')}
+        </button>
+      </div>
+
+      <input type="hidden" name="lang" value={lang} />
+      <p id="status" class="text-sm text-zinc-400"></p>
+    </form>
+
+    <div id="lastUpload" class="mt-8 hidden">
+      <h2 class="text-xl font-semibold mb-3">{t('Last uploaded','Τελευταίο ανέβασμα')}</h2>
+      <img id="lastImg" class="w-full rounded border border-zinc-800" alt="uploaded" />
+      <p id="lastMeta" class="text-sm text-zinc-400 mt-2"></p>
+    </div>
+  </section>
+
+  <script is:client>
+    const form = document.getElementById('uploadForm');
+    const status = document.getElementById('status');
+    const last = document.getElementById('lastUpload');
+    const lastImg = document.getElementById('lastImg');
+    const lastMeta = document.getElementById('lastMeta');
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.textContent = 'Uploading...';
+      const fd = new FormData(form);
+      const res = await fetch('/api/gallery-upload', { method: 'POST', body: fd });
+      const json = await res.json();
+      if (!res.ok) {
+        status.textContent = json?.error || 'Upload failed';
+        return;
+      }
+      status.textContent = 'Done ✅';
+      last.classList.remove('hidden');
+
+      // Δημιουργούμε public URL για preview
+      const url = `${import.meta.env.PUBLIC_SUPABASE_URL}/storage/v1/object/public/gallery/${json.photo.image_path}`;
+      lastImg.src = url;
+      lastMeta.textContent = `${json.photo.title || ''} • ${json.photo.caption || ''}`;
+      form.reset();
+    });
+  </script>
+</Layout>
