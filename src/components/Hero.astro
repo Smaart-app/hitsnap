@@ -1,51 +1,93 @@
 ---
 /**
- * Hero.astro — καθαρό component (χωρίς <html>/<body>).
- * Χρήση:
- *   import Hero from '../../components/Hero.astro'
+ * Hero.astro — Clean, responsive hero with EN default + NL + EL.
+ * Props (all optional): { lang, title, subtitle, imageSrc, ctaText, ctaHref }
+ * Usage:
+ *   import Hero from '@/components/Hero.astro'
  *   <Hero lang={safeLang} />
  */
-const lang = Astro.props?.lang ?? 'en';
 
-const title = lang === 'el' ? 'Στιγμές. Καδραρισμένες.' : 'Moments. Framed.';
-const subtitle = lang === 'el' ? 'Όπου η ακινησία λέει μια ιστορία.' : 'Where stillness tells a story.';
+const lang = (Astro.props?.lang ?? 'en').toLowerCase();
 
-// → Στέλνουμε στο /{lang}/gallery (όχι στο blog)
-const ctaHref = `/${lang}/gallery`;
-const ctaText = lang === 'el' ? 'Δες το Gallery' : 'Explore Gallery';
+// i18n defaults
+const dict = {
+  en: {
+    title: 'Moments. Framed.',
+    subtitle: 'Where stillness tells a story.',
+    ctaText: 'Explore Gallery',
+  },
+  nl: {
+    title: 'Momenten. Gekaderd.',
+    subtitle: 'Waar stilstand een verhaal vertelt.',
+    ctaText: 'Bekijk galerij',
+  },
+  el: {
+    title: 'Στιγμές. Καδραρισμένες.',
+    subtitle: 'Όπου η ακινησία λέει μια ιστορία.',
+    ctaText: 'Δες το Gallery',
+  },
+};
 
-// Προσαρμόζεις την εικόνα σου εδώ:
-const imageSrc = '/article-images/pierrot-moment-snap.png';
+const active = dict[lang] ?? dict.en;
+
+// Final content (allow overrides via props)
+const title    = Astro.props?.title    ?? active.title;
+const subtitle = Astro.props?.subtitle ?? active.subtitle;
+const imageSrc = Astro.props?.imageSrc ?? '/article-images/pierrot-moment-snap.png';
+const ctaText  = Astro.props?.ctaText  ?? active.ctaText;
+
+// Base href by lang
+const base = lang === 'el' ? '/el' : (lang === 'nl' ? '/nl' : '/en');
+const ctaHref = Astro.props?.ctaHref ?? `${base}/gallery`;
+
+// For styling the second word of the title robustly (handles punctuation)
+function splitTitle(t) {
+  const parts = t.split(/\s+/);
+  if (parts.length < 2) return { first: t, second: '' };
+  return { first: parts[0], second: t.slice(parts[0].length + 1) };
+}
+const { first, second } = splitTitle(title);
 ---
 
-<section class="w-full max-h-[900px] grid grid-cols-1 md:grid-cols-2 items-stretch relative overflow-hidden">
-  <!-- Αριστερή στήλη -->
-  <div class="flex flex-col h-full px-4 md:px-10">
-    <div class="pt-12 md:pt-28 flex flex-col">
-      <div class="space-y-5">
-        <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
-          {title.split(' ')[0]} <span class="text-[#50c7c2]">{title.split(' ')[1]}</span>
+<section class="relative w-full overflow-hidden bg-black">
+  <div class="max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-2 items-stretch min-h-[480px] md:min-h-[560px] lg:min-h-[620px]">
+    <!-- Left: Copy -->
+    <div class="relative flex items-center">
+      <!-- subtle gradient for readability -->
+      <div class="absolute inset-0 md:inset-y-0 md:-left-10 md:w-[120%] bg-gradient-to-r from-black via-black/80 to-transparent pointer-events-none"></div>
+
+      <div class="relative z-10 px-5 sm:px-8 md:px-10 py-12 md:py-20">
+        <h1 class="text-white leading-tight font-bold tracking-tight text-4xl md:text-5xl lg:text-6xl">
+          {first}{second && ' '}<span class="text-[#50c7c2]">{second}</span>
         </h1>
-        <p class="text-lg text-zinc-400 italic">
-          {subtitle}
-        </p>
-        <a
-          href={ctaHref}
-          class="inline-block bg-[#50c7c2] text-white px-6 py-3 rounded-full text-sm font-medium hover:opacity-90 transition"
-        >
-          {ctaText}
-        </a>
+
+        {subtitle && (
+          <p class="mt-4 md:mt-5 text-zinc-300 text-base md:text-lg max-w-[48ch] italic">
+            {subtitle}
+          </p>
+        )}
+
+        <div class="mt-7">
+          <a href={ctaHref} class="inline-block bg-[#50c7c2] text-white px-6 py-3 rounded-full text-sm font-medium hover:opacity-90 active:opacity-80 transition">
+            {ctaText}
+          </a>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Δεξιά στήλη: Εικόνα -->
-  <div class="w-full h-full flex items-center justify-end bg-black relative overflow-hidden pr-4 md:pr-10">
-    <img
-      src={imageSrc}
-      alt="HitSnap preview"
-      class="object-contain h-[90%] w-auto max-h-[650px] block ml-auto"
-      loading="eager"
-    />
+    <!-- Right: Image -->
+    <div class="relative">
+      <div class="absolute inset-0">
+        <img
+          src={imageSrc}
+          alt="HitSnap preview hero"
+          class="w-full h-full object-contain md:object-contain"
+          loading="eager"
+          decoding="async"
+        />
+      </div>
+      <!-- gentle vignette on the right edge to avoid hard cutoff -->
+      <div class="absolute inset-y-0 right-0 w-12 md:w-24 bg-gradient-to-l from-black/20 to-transparent pointer-events-none"></div>
+    </div>
   </div>
 </section>

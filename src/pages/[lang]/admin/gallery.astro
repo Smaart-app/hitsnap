@@ -10,78 +10,151 @@ export async function getStaticPaths() {
     { params: { lang: 'el' } },
   ];
 }
+
 const { lang } = Astro.params;
-const t = (en, el) => (lang === 'el' ? el : en);
-const title = t('Upload to Gallery', 'Ανέβασμα στο Gallery');
+
+// i18n (EN default)
+const dict = {
+  en: {
+    pageTitle: 'Upload to Gallery',
+    title: 'Title',
+    album: 'Album',
+    caption: 'Caption',
+    image: 'Image file',
+    upload: 'Upload',
+    last: 'Last uploaded',
+    uploading: 'Uploading…',
+    done: 'Done ✅',
+    failed: 'Upload failed',
+  },
+  nl: {
+    pageTitle: 'Upload naar Galerij',
+    title: 'Titel',
+    album: 'Album',
+    caption: 'Bijschrift',
+    image: 'Afbeelding',
+    upload: 'Uploaden',
+    last: 'Laatst geüpload',
+    uploading: 'Bezig met uploaden…',
+    done: 'Klaar ✅',
+    failed: 'Upload mislukt',
+  },
+  el: {
+    pageTitle: 'Ανέβασμα στο Gallery',
+    title: 'Τίτλος',
+    album: 'Άλμπουμ',
+    caption: 'Λεζάντα',
+    image: 'Αρχείο εικόνας',
+    upload: 'Ανέβασμα',
+    last: 'Τελευταίο ανέβασμα',
+    uploading: 'Γίνεται ανέβασμα…',
+    done: 'Έτοιμο ✅',
+    failed: 'Το ανέβασμα απέτυχε',
+  },
+};
+const t = (key) => (dict[lang] ?? dict.en)[key];
 ---
 
-<Layout title={title} lang={lang}>
+<Layout title={t('pageTitle')} lang={lang}>
   <section class="max-w-screen-lg mx-auto px-4 sm:px-6 py-10">
-    <h1 class="text-3xl sm:text-4xl font-bold mb-6">{title}</h1>
+    <h1 class="text-3xl sm:text-4xl font-bold mb-6">{t('pageTitle')}</h1>
 
-    <form id="uploadForm" class="space-y-4">
+    <!-- Το action μένει για fallback χωρίς JS, αλλά ο client-script εμποδίζει την πλοήγηση -->
+    <form id="uploadForm" action="/api/upload-gallery" method="post" enctype="multipart/form-data" class="space-y-5">
       <div class="grid sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm mb-1">{t('Title','Τίτλος')}</label>
-          <input name="title" class="w-full px-3 py-2 rounded bg-zinc-900 border border-zinc-800" />
-        </div>
-        <div>
-          <label class="block text-sm mb-1">Album</label>
-          <input name="album" class="w-full px-3 py-2 rounded bg-zinc-900 border border-zinc-800" />
-        </div>
+        <label class="block">
+          <span class="block text-sm mb-1">{t('title')}</span>
+          <input name="title" class="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-black dark:text-white" />
+        </label>
+
+        <label class="block">
+          <span class="block text-sm mb-1">{t('album')}</span>
+          <input name="album" class="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-black dark:text-white" />
+        </label>
       </div>
 
-      <div>
-        <label class="block text-sm mb-1">{t('Caption','Λεζάντα')}</label>
-        <textarea name="caption" class="w-full px-3 py-2 rounded bg-zinc-900 border border-zinc-800" rows="3"></textarea>
-      </div>
+      <label class="block">
+        <span class="block text-sm mb-1">{t('caption')}</span>
+        <textarea name="caption" rows="4" class="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-black dark:text-white"></textarea>
+      </label>
 
       <div class="grid sm:grid-cols-[1fr_auto] gap-4 items-end">
-        <div>
-          <label class="block text-sm mb-1">{t('Image file','Αρχείο εικόνας')}</label>
+        <label class="block">
+          <span class="block text-sm mb-1">{t('image')}</span>
           <input type="file" name="file" accept="image/*" class="w-full" required />
-        </div>
-        <button class="bg-[#50c7c2] text-white px-6 py-3 rounded-full text-sm font-medium hover:opacity-90 transition">
-          {t('Upload','Ανέβασμα')}
+        </label>
+
+        <button id="uploadBtn" type="submit" class="bg-[#50c7c2] text-white px-6 py-3 rounded-full text-sm font-medium hover:opacity-90 transition">
+          {t('upload')}
         </button>
       </div>
 
       <input type="hidden" name="lang" value={lang} />
-      <p id="status" class="text-sm text-zinc-400"></p>
+      <p id="status" class="text-sm text-zinc-500"></p>
     </form>
 
     <div id="lastUpload" class="mt-8 hidden">
-      <h2 class="text-xl font-semibold mb-3">{t('Last uploaded','Τελευταίο ανέβασμα')}</h2>
-      <img id="lastImg" class="w-full rounded border border-zinc-800" alt="uploaded" />
-      <p id="lastMeta" class="text-sm text-zinc-400 mt-2"></p>
+      <h2 class="text-xl font-semibold mb-3">{t('last')}</h2>
+      <img id="lastImg" class="w-full rounded border border-zinc-200 dark:border-zinc-800" alt="uploaded preview" />
+      <p id="lastMeta" class="text-sm text-zinc-500 mt-2"></p>
     </div>
   </section>
 
   <script is:client>
+    // Απλά strings για τα μηνύματα
+    const STR = {
+      uploading: {en:'Uploading…',nl:'Bezig met uploaden…',el:'Γίνεται ανέβασμα…'}["{lang}"] || "Uploading…",
+      done: {en:'Done ✅',nl:'Klaar ✅',el:'Έτοιμο ✅'}["{lang}"] || "Done ✅",
+      failed: {en:'Upload failed',nl:'Upload mislukt',el:'Το ανέβασμα απέτυχε'}["{lang}"] || "Upload failed",
+    };
+
     const form = document.getElementById('uploadForm');
     const status = document.getElementById('status');
     const last = document.getElementById('lastUpload');
     const lastImg = document.getElementById('lastImg');
     const lastMeta = document.getElementById('lastMeta');
+    const btn = document.getElementById('uploadBtn');
 
     form?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      status.textContent = 'Uploading...';
-      const fd = new FormData(form);
-      const res = await fetch('/api/gallery-upload', { method: 'POST', body: fd });
-      const json = await res.json();
-      if (!res.ok) {
-        status.textContent = json?.error || 'Upload failed';
-        return;
-      }
-      status.textContent = 'Done ✅';
-      last.classList.remove('hidden');
+      e.preventDefault(); // Μην φύγει η σελίδα
 
-      // Δημιουργούμε public URL για preview
-      const url = `${import.meta.env.PUBLIC_SUPABASE_URL}/storage/v1/object/public/gallery/${json.photo.image_path}`;
-      lastImg.src = url;
-      lastMeta.textContent = `${json.photo.title || ''} • ${json.photo.caption || ''}`;
-      form.reset();
+      if (status) status.textContent = STR.uploading;
+      if (btn) btn.disabled = true;
+
+      try {
+        const fd = new FormData(form);
+
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: fd,
+          credentials: 'include', // στείλε και το auth cookie
+        });
+
+        const json = await res.json().catch(() => null);
+
+        if (!res.ok || !json?.ok) {
+          if (status) status.textContent = (json && (json.error || json.message)) || STR.failed;
+          return;
+        }
+
+        // Επιτυχία — Δείξε την εικόνα με το publicUrl που ήδη γυρίζει το API
+        if (status) status.textContent = STR.done;
+        if (last) last.classList.remove('hidden');
+
+        const publicUrl = json.publicUrl;
+        if (publicUrl && lastImg) lastImg.src = publicUrl;
+        if (lastMeta) {
+          const title = json.title || '';
+          const caption = json.caption || '';
+          lastMeta.textContent = [title, caption].filter(Boolean).join(' • ');
+        }
+
+        form.reset();
+      } catch (err) {
+        if (status) status.textContent = STR.failed;
+      } finally {
+        if (btn) btn.disabled = false;
+      }
     });
   </script>
 </Layout>
