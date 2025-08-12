@@ -3,13 +3,19 @@ const supa = import.meta.env.PUBLIC_SUPABASE_URL || import.meta.env.SUPABASE_URL
 const HERO_URL = `${supa}/storage/v1/object/public/site_assets/hero/hero.jpg`;
 ---
 
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Branding · Hero</title>
+</head>
+
 <section style="max-width:1000px;margin:2rem auto;padding:1rem">
   <h1>Branding · Hero</h1>
   <p>Διάλεξε μία από τις ανεβασμένες εικόνες για να γίνει το Hero (σταθερό URL).</p>
 
   <div style="margin:.75rem 0">
     <strong>Τρέχον Hero:</strong><br/>
-    <img id="heroPrev" src={`${HERO_URL}?v=${Date.now()}`} style="max-width:100%;border:1px solid #ddd"/>
+    <img id="heroPrev" src={`${HERO_URL}?v=${Date.now()}`} style="max-width:100%;border:1px solid #ddd" alt="Hero preview"/>
   </div>
 
   <h3 style="margin:1rem 0 .5rem">Gallery</h3>
@@ -52,7 +58,6 @@ const HERO_URL = `${supa}/storage/v1/object/public/site_assets/hero/hero.jpg`;
       prev.src = j2.url; // cache-bust
     });
   }
-
   await load();
 }());
 </script>

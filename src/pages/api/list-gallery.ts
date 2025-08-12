@@ -7,19 +7,27 @@ export const GET: APIRoute = async () => {
   if (!url || !key) return new Response(JSON.stringify({ error: 'Missing Supabase env' }), { status: 500 });
 
   const supabase = createClient(url, key, { auth: { persistSession: false } });
-
-  // Προσαρμόζεις bucket & prefix αν χρειάζεται
   const BUCKET = 'gallery';
-  const PREFIX = ''; // π.χ. 'albums/flowers'
-  const { data, error } = await supabase.storage.from(BUCKET).list(PREFIX, {
-    limit: 100, sortBy: { column: 'created_at', order: 'desc' }
-  });
-  if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
 
-  const items = (data || [])
-    .filter(x => x.id) // μόνο αρχεία
-    .map(x => {
-      const path = PREFIX ? `${PREFIX}/${x.name}` : x.name;
+  // 1) Δες τι υπάρχει στο root
+  const root = await supabase.storage.from(BUCKET).list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
+  if (root.error) return new Response(JSON.stringify({ error: root.error.message }), { status: 500 });
+
+  // Αν υπάρχουν φάκελοι, πάμε στον πιο πρόσφατο
+  const folders = (root.data || []).filter((x: any) => x.id === null); // supabase: folders => id === null
+  let prefix = '';
+  if (folders.length) {
+    prefix = folders[0].name; // πρώτος/νεότερος φάκελος
+  }
+
+  // 2) Πάρε τα αρχεία (είτε root είτε μέσα στον φάκελο)
+  const filesRes = await supabase.storage.from(BUCKET).list(prefix, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
+  if (filesRes.error) return new Response(JSON.stringify({ error: filesRes.error.message }), { status: 500 });
+
+  const items = (filesRes.data || [])
+    .filter((x: any) => x.id) // μόνο αρχεία
+    .map((x: any) => {
+      const path = prefix ? `${prefix}/${x.name}` : x.name;
       return {
         name: x.name,
         path,
@@ -28,5 +36,5 @@ export const GET: APIRoute = async () => {
       };
     });
 
-  return new Response(JSON.stringify({ items }), { headers: { 'content-type': 'application/json' } });
+  return new Response(JSON.stringify({ items }), { headers: { 'content-type': 'application/json; charset=utf-8' } });
 };
