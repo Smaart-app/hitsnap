@@ -1,0 +1,58 @@
+---
+const supa = import.meta.env.PUBLIC_SUPABASE_URL || import.meta.env.SUPABASE_URL || '';
+const HERO_URL = `${supa}/storage/v1/object/public/site_assets/hero/hero.jpg`;
+---
+
+<section style="max-width:1000px;margin:2rem auto;padding:1rem">
+  <h1>Branding · Hero</h1>
+  <p>Διάλεξε μία από τις ανεβασμένες εικόνες για να γίνει το Hero (σταθερό URL).</p>
+
+  <div style="margin:.75rem 0">
+    <strong>Τρέχον Hero:</strong><br/>
+    <img id="heroPrev" src={`${HERO_URL}?v=${Date.now()}`} style="max-width:100%;border:1px solid #ddd"/>
+  </div>
+
+  <h3 style="margin:1rem 0 .5rem">Gallery</h3>
+  <div id="grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px"></div>
+
+  <div id="msg" style="margin-top:10px;"></div>
+</section>
+
+<script>
+(async function(){
+  const grid = document.getElementById('grid');
+  const msg  = document.getElementById('msg');
+  const prev = document.getElementById('heroPrev');
+
+  async function load() {
+    const r = await fetch('/api/list-gallery');
+    const j = await r.json();
+    grid.innerHTML = '';
+    (j.items || []).forEach(it => {
+      const card = document.createElement('div');
+      card.style.border = '1px solid #ddd'; card.style.padding = '8px'; card.style.borderRadius = '10px';
+      card.innerHTML = `
+        <img src="${it.url}" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px"/>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <small style="overflow:hidden;text-overflow:ellipsis">${it.name}</small>
+          <button data-path="${it.path}">Make Hero</button>
+        </div>`;
+      grid.appendChild(card);
+    });
+
+    grid.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const path = btn.getAttribute('data-path');
+      msg.textContent = 'Applying…';
+      const r2 = await fetch('/api/set-hero', { method: 'POST', headers: {'content-type':'application/json'}, body: JSON.stringify({ path }) });
+      const j2 = await r2.json();
+      if (!r2.ok) { msg.textContent = 'Σφάλμα: ' + (j2.error || r2.status); return; }
+      msg.textContent = 'OK ✓ Hero updated';
+      prev.src = j2.url; // cache-bust
+    });
+  }
+
+  await load();
+}());
+</script>
