@@ -1,39 +1,41 @@
 ---
+import { t, type Lang } from '@/lib/i18n';
+
 /**
- * Hero.astro — EN/NL/EL hero με ασφαλές fallback.
- * Αν υπάρχει PUBLIC_SUPABASE_URL, δοκιμάζει το
- *   /storage/v1/object/public/site_assets/hero/hero.jpg
- * Αν αποτύχει (404/403 κ.λπ.), γυρνά αμέσως στον Πιερότο.
+ * Hero.astro — EN/NL/EL hero με ασφαλές fallback και i18n.
+ * Προσπαθεί να φορτώσει hero από Supabase (αν υπάρχει PUBLIC_SUPABASE_URL),
+ * αλλιώς δείχνει τον Πιερότο από /public/article-images/.
  */
 
-const lang = (Astro.props?.lang ?? 'en').toLowerCase();
+const lang = ((Astro.props?.lang ?? 'en') as Lang).toLowerCase() as Lang;
+const L = t(lang);
 
-const dict = {
-  en: { title: 'Moments. Framed.', subtitle: 'Where stillness tells a story.', ctaText: 'Explore Gallery' },
-  nl: { title: 'Momenten. Gekaderd.', subtitle: 'Waar stilstand een verhaal vertelt.', ctaText: 'Bekijk galerij' },
-  el: { title: 'Στιγμές. Καδραρισμένες.', subtitle: 'Όπου η ακινησία λέει μια ιστορία.', ctaText: 'Δες το Gallery' },
-};
-const active = dict[lang] ?? dict.en;
-
+// Fallback τοπικής εικόνας
 const FALLBACK = '/article-images/pierrot-moment-snap.png';
+
+// Αν υπάρχει Supabase URL, δοκίμασε public bucket
 const supa = import.meta.env.PUBLIC_SUPABASE_URL || import.meta.env.SUPABASE_URL || '';
 const HERO_URL = supa
   ? `${supa}/storage/v1/object/public/site_assets/hero/hero.jpg`
   : FALLBACK;
+
+// Cache-bust για να μην «κολλάει» παλιά έκδοση του hero
 const cacheBust = Date.now();
 
-// τελικές τιμές (τα props έχουν πάντα προτεραιότητα)
-const title    = Astro.props?.title    ?? active.title;
-const subtitle = Astro.props?.subtitle ?? active.subtitle;
-const imageSrc = Astro.props?.imageSrc ?? (supa ? `${HERO_URL}?v=${cacheBust}` : FALLBACK);
-const ctaText  = Astro.props?.ctaText  ?? active.ctaText;
+// Τελικές τιμές (props έχουν προτεραιότητα)
+const title    = Astro.props?.title    ?? L.hero.title;
+const subtitle = Astro.props?.subtitle ?? L.hero.subtitle;
+const ctaText  = Astro.props?.ctaText  ?? L.hero.cta;
+const fallback = Astro.props?.fallback ?? FALLBACK;
+const imageSrc = Astro.props?.imageSrc ?? (supa ? `${HERO_URL}?v=${cacheBust}` : fallback);
 
+// Base path ανά γλώσσα
 const base = lang === 'el' ? '/el' : (lang === 'nl' ? '/nl' : '/en');
 const ctaHref = Astro.props?.ctaHref ?? `${base}/gallery`;
 
-// helper για να βάψουμε τη 2η λέξη
-function splitTitle(t) {
-  const parts = t.split(/\s+/);
+// helper για να χρωματίζουμε τη 2η λέξη
+function splitTitle(t: string) {
+  const parts = t.trim().split(/\s+/);
   if (parts.length < 2) return { first: t, second: '' };
   return { first: parts[0], second: t.slice(parts[0].length + 1) };
 }
@@ -75,6 +77,7 @@ const { first, second } = splitTitle(title);
           class="w-full h-full object-contain md:object-contain"
           loading="eager"
           decoding="async"
+          data-fallback={fallback}
         />
       </div>
       <div class="absolute inset-y-0 right-0 w-12 md:w-24 bg-gradient-to-l from-black/20 to-transparent pointer-events-none"></div>
@@ -83,24 +86,24 @@ const { first, second } = splitTitle(title);
 </section>
 
 <script>
-  // Ρητό fallback αν αποτύχει το Supabase URL
+  // Ρητό runtime fallback: αν αποτύχει το Supabase URL → γύρνα στον Πιερότο
   (function () {
     const img = document.getElementById('hero-img');
     if (!img) return;
-    const fallback = { src: `${FALLBACK}`, applied: false };
+    const fallbackSrc = img.getAttribute('data-fallback');
+    let applied = false;
 
     function applyFallback() {
-      if (fallback.applied) return;
-      fallback.applied = true;
-      img.src = fallback.src + '?v=' + Date.now(); // σπάσε cache
+      if (applied || !fallbackSrc) return;
+      applied = true;
+      img.src = fallbackSrc + '?v=' + Date.now(); // σπάσε cache
     }
 
-    // αν αποτύχει το αρχικό src → γύρνα στον Πιερότο
+    // Fallback στο error
     img.addEventListener('error', applyFallback, { once: true });
 
-    // αν για οποιονδήποτε λόγο το src είναι κενό/invalid στον πρώτο paint, κάνε ένα safety check
+    // Safety check για κενό/μη έγκυρο src στον πρώτο paint
     if (!img.complete || img.naturalWidth === 0) {
-      // δώσε λίγο χρόνο να προσπαθήσει, μετά fallback
       setTimeout(() => {
         if (!img.complete || img.naturalWidth === 0) applyFallback();
       }, 800);

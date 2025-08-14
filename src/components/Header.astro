@@ -3,7 +3,7 @@ import ThemeButton from './ThemeButton.tsx';
 import { siteConfig } from '@/content/config';
 
 /** ---------- Helpers ---------- */
-function splitTitle(title) {
+function splitTitle(title: string) {
   return {
     prefix: title.startsWith('Hit') ? 'Hit' : title.slice(0, 3),
     suffix: title.startsWith('Hit') ? title.slice(3) : title.slice(3),
@@ -11,20 +11,39 @@ function splitTitle(title) {
 }
 const { prefix, suffix } = splitTitle(siteConfig.siteTitle);
 
-/** Props / State coming in */
-const lang = Astro.props?.lang || 'en';
-const user = Astro.props?.user || null;
-const isLoggedIn = !!user;
-const disableLangSwitch = Astro.props?.disableHeaderLangSwitch || false;
+/** ---------- Props / State ---------- */
+type Labels = {
+  home: string; gallery: string; about: string; articles: string; contact: string;
+  menu: string; signup: string; signin: string; logout: string;
+  adminArticles: string; adminNew: string; adminGallery: string; language: string;
+};
 
-/** Supported langs (EN default; NL optional; EL) */
-const supportedLangs = (Astro.props?.supportedLangs ?? ['en','el'])
-  .filter(l => ['en','nl','el'].includes(l));
-const langOrder = ['en','nl','el']; // desired order
+const lang: 'en'|'nl'|'el' = (Astro.props?.lang ?? 'en').toLowerCase();
+const user = Astro.props?.user ?? null;
+const isLoggedIn = !!user;
+const disableLangSwitch = Astro.props?.disableHeaderLangSwitch ?? false;
+
+/** UI labels (can be overridden by Layout/i18n) */
+const labels: Labels = {
+  home: 'Home', gallery: 'Gallery', about: 'About', articles: 'Articles', contact: 'Contact',
+  menu: 'Menu', signup: 'Sign Up', signin: 'Sign In', logout: 'Logout',
+  adminArticles: 'Articles', adminNew: 'New Article', adminGallery: 'Gallery Upload', language: 'Language',
+  ...(Astro.props?.labels ?? {})
+};
+
+/** Supported langs (default: all three) */
+const supportedLangs: Array<'en'|'nl'|'el'> =
+  (Astro.props?.supportedLangs ?? ['en','nl','el'])
+    .filter((l: string) => ['en','nl','el'].includes(l)) as Array<'en'|'nl'|'el'>;
+const langOrder: Array<'en'|'nl'|'el'> = ['en','nl','el'];
 const langs = langOrder.filter(l => supportedLangs.includes(l));
 
-/** Path flags */
+/** Current URL parts */
 const currentPath = Astro.url.pathname;
+const currentSearch = Astro.url.search ?? '';
+const currentHash = Astro.url.hash ?? '';
+
+/** Page flags */
 const isHome    = currentPath === '/' || ['/en','/nl','/el'].includes(currentPath);
 const isGallery = currentPath.includes('/gallery') && !currentPath.includes('/admin');
 const isAbout   = currentPath.includes('/about');
@@ -35,40 +54,61 @@ const isAdmin   = currentPath.includes('/admin');
 /** Base by current language (fallback en) */
 const base = lang === 'el' ? '/el' : (lang === 'nl' ? '/nl' : '/en');
 
-/** Build language href for “same page, other lang” */
-function langHref(targetLang) {
-  // Strip any leading /en|/nl|/el from current path
-  const pathWithoutLang = currentPath.replace(/^\/(en|nl|el)/, '');
-  const prefix = '/' + (['en','nl','el'].includes(targetLang) ? targetLang : 'en');
-  // Root pages should not double slash
-  return (pathWithoutLang || '/') === '/' ? prefix : (prefix + pathWithoutLang);
+/** Build language href for “same page, other lang” (preserves query/hash) */
+function langHref(targetLang: 'en'|'nl'|'el') {
+  // Remove existing language prefix
+  const pathWithoutLang = currentPath.replace(/^\/(en|nl|el)(?=\/|$)/, '');
+  const prefix = '/' + targetLang;
+  const clean = (pathWithoutLang || '/');
+  const hrefPath = clean === '/' ? prefix : (prefix + clean);
+  return hrefPath + currentSearch + currentHash;
+}
+
+/** Safe join base + segment without double slashes */
+function joinBase(seg: string) {
+  return (base + '/' + seg).replace(/\/{2,}/g, '/');
 }
 
 /** Admin link helpers */
 const admin = {
-  list: `/${lang}/admin/preview`,
-  new:  `/${lang}/admin/new`,
-  gallery: `/${lang}/admin/gallery`,
-  logout: `/${lang}/logout`,
-  login:  `/${lang}/login`,
-  signup: `/${lang}/register`,
+  list: joinBase('admin/preview'),
+  new:  joinBase('admin/new'),
+  gallery: joinBase('admin/gallery'),
+  logout: joinBase('logout'),
+  login:  joinBase('login'),
+  signup: joinBase('register'),
 };
 ---
 
 <header class="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white dark:bg-[#1a1a1a] text-black dark:text-white shadow-sm transition-colors duration-300">
   <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
     <!-- Logo -->
-    <a href="/" class="text-3xl tracking-tight leading-none select-none" style="font-family: 'Lora', serif;">
+    <a href={base} class="text-3xl tracking-tight leading-none select-none" style="font-family: 'Lora', serif;">
       <span class="text-black dark:text-white">{prefix}</span><span class="text-[#50c7c2]">{suffix}</span>
     </a>
 
     <!-- Center: Public nav -->
     <nav class="hidden lg:flex items-center gap-5 text-[15px]">
-      <a href="/"                class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isHome ? 'text-[#50c7c2] font-semibold' : 'hover:text-[#50c7c2]'}`}>Home</a>
-      <a href={`${base}/gallery`} class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isGallery ? 'text-[#50c7c2] font-semibold' : 'hover:text-[#50c7c2]'}`}>Gallery</a>
-      <a href={`${base}/about`}   class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isAbout ? 'text-[#50c7c2] font-semibold' : 'hover:text-[#50c7c2]'}`}>About</a>
-      <a href={`${base}/blog`}    class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-semibold' : 'hover:text-[#50c7c2]'}`}>Articles</a>
-      <a href={`${base}/contact`} class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-semibold' : 'hover:text-[#50c7c2]'}`}>Contact</a>
+      <a href={base}
+         class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isHome ? 'text-[#50c7c2] font-semibold' : 'hover:text-[#50c7c2]'}`}>
+        {labels.home}
+      </a>
+      <a href={joinBase('gallery')}
+         class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isGallery ? 'text-[#50c7c2] font-semibold' : 'hover:text-[#50c7c2]'}`}>
+        {labels.gallery}
+      </a>
+      <a href={joinBase('about')}
+         class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isAbout ? 'text-[#50c7c2] font-semibold' : 'hover:text-[#50c7c2]'}`}>
+        {labels.about}
+      </a>
+      <a href={joinBase('blog')}
+         class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-semibold' : 'hover:text-[#50c7c2]'}`}>
+        {labels.articles}
+      </a>
+      <a href={joinBase('contact')}
+         class={`px-2 py-1 rounded-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-semibold' : 'hover:text-[#50c7c2]'}`}>
+        {labels.contact}
+      </a>
     </nav>
 
     <!-- Right: Lang, Theme, Account -->
@@ -76,12 +116,14 @@ const admin = {
       <!-- Language dropdown -->
       {!disableLangSwitch && langs?.length > 1 && (
         <div class="relative" id="langWrap">
-          <button id="langBtn" class="px-3 py-1.5 rounded-md border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm flex items-center gap-2">
+          <button id="langBtn" class="px-3 py-1.5 rounded-md border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm flex items-center gap-2" aria-haspopup="menu" aria-expanded="false">
             <span class="inline-block">🌐</span><span class="uppercase tracking-wide">{lang}</span>
           </button>
           <div id="langMenu" class="hidden absolute right-0 mt-2 w-36 rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-[#1a1a1a] shadow-lg py-1">
-            {langs.map(l => (
-              <a href={langHref(l)} class={`block px-3 py-1.5 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 ${l===lang ? 'text-[#50c7c2] font-medium' : ''}`}>{l.toUpperCase()}</a>
+            {langs.map(code => (
+              <a href={langHref(code)} class={`block px-3 py-1.5 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 ${code===lang ? 'text-[#50c7c2] font-medium' : ''}`}>
+                {code.toUpperCase()}
+              </a>
             ))}
           </div>
         </div>
@@ -91,7 +133,7 @@ const admin = {
 
       <!-- Account / Admin dropdown -->
       <div class="relative" id="acctWrap">
-        <button id="acctBtn" class="w-9 h-9 rounded-full border border-zinc-300 dark:border-zinc-700 flex items-center justify-center hover:scale-[1.03] transition">
+        <button id="acctBtn" class="w-9 h-9 rounded-full border border-zinc-300 dark:border-zinc-700 flex items-center justify-center hover:scale-[1.03] transition" aria-haspopup="menu" aria-expanded="false">
           {isLoggedIn ? (user?.email ? user.email[0].toUpperCase() : 'U') : '⋯'}
         </button>
         <div id="acctMenu" class="hidden absolute right-0 mt-2 w-56 rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-[#1a1a1a] shadow-lg py-1 text-sm">
@@ -99,16 +141,16 @@ const admin = {
             <>
               <div class="px-3 py-1.5 text-xs text-zinc-500">{user?.email}</div>
               <div class="h-px bg-zinc-200 dark:bg-zinc-700 my-1"></div>
-              <a href={admin.list}    class={`block px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isAdmin && currentPath.endsWith('/admin/preview') ? 'text-[#50c7c2] font-medium' : ''}`}>Articles</a>
-              <a href={admin.new}     class="block px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">New Article</a>
-              <a href={admin.gallery} class="block px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">Gallery Upload</a>
+              <a href={admin.list}    class={`block px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isAdmin && currentPath.endsWith('/admin/preview') ? 'text-[#50c7c2] font-medium' : ''}`}>{labels.adminArticles}</a>
+              <a href={admin.new}     class="block px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">{labels.adminNew}</a>
+              <a href={admin.gallery} class="block px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">{labels.adminGallery}</a>
               <div class="h-px bg-zinc-200 dark:bg-zinc-700 my-1"></div>
-              <a href={admin.logout}  class="block px-3 py-2 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600">Logout</a>
+              <a href={admin.logout}  class="block px-3 py-2 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600">{labels.logout}</a>
             </>
           ) : (
             <>
-              <a href={admin.signup} class="block px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">Sign Up</a>
-              <a href={admin.login}  class="block px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">Sign In</a>
+              <a href={admin.signup} class="block px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">{labels.signup}</a>
+              <a href={admin.login}  class="block px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">{labels.signin}</a>
             </>
           )}
         </div>
@@ -130,24 +172,26 @@ const admin = {
   aria-hidden="true"
 >
   <div class="flex items-center justify-between px-5 py-4 border-b border-zinc-200 dark:border-zinc-700">
-    <span class="text-xl font-semibold">Menu</span>
+    <span class="text-xl font-semibold">{labels.menu}</span>
     <button id="closeDrawer" aria-label="Close menu" class="text-2xl">✕</button>
   </div>
 
   <div class="px-5 py-4 flex-1 overflow-y-auto space-y-1">
     <!-- Public links -->
-    <a href="/" class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isHome ? 'text-[#50c7c2] font-semibold' : ''}`}>Home</a>
-    <a href={`${base}/gallery`} class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isGallery ? 'text-[#50c7c2] font-semibold' : ''}`}>Gallery</a>
-    <a href={`${base}/about`}   class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isAbout ? 'text-[#50c7c2] font-semibold' : ''}`}>About</a>
-    <a href={`${base}/blog`}    class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-semibold' : ''}`}>Articles</a>
-    <a href={`${base}/contact`} class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-semibold' : ''}`}>Contact</a>
+    <a href={base}                 class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isHome ? 'text-[#50c7c2] font-semibold' : ''}`}>{labels.home}</a>
+    <a href={joinBase('gallery')}  class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isGallery ? 'text-[#50c7c2] font-semibold' : ''}`}>{labels.gallery}</a>
+    <a href={joinBase('about')}    class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isAbout ? 'text-[#50c7c2] font-semibold' : ''}`}>{labels.about}</a>
+    <a href={joinBase('blog')}     class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isArticles ? 'text-[#50c7c2] font-semibold' : ''}`}>{labels.articles}</a>
+    <a href={joinBase('contact')}  class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isContact ? 'text-[#50c7c2] font-semibold' : ''}`}>{labels.contact}</a>
 
     <!-- Language quick switch -->
     {!disableLangSwitch && langs?.length > 1 && (
       <>
         <div class="h-px bg-zinc-200 dark:bg-zinc-700 my-2"></div>
-        {langs.map(l => (
-          <a href={langHref(l)} class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${l===lang ? 'text-[#50c7c2] font-medium' : ''}`}>Language: {l.toUpperCase()}</a>
+        {langs.map(code => (
+          <a href={langHref(code)} class={`block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800 ${code===lang ? 'text-[#50c7c2] font-medium' : ''}`}>
+            {labels.language}: {code.toUpperCase()}
+          </a>
         ))}
       </>
     )}
@@ -157,10 +201,10 @@ const admin = {
       <>
         <div class="h-px bg-zinc-200 dark:bg-zinc-700 my-2"></div>
         <div class="text-xs text-zinc-500 px-2 py-1">Admin</div>
-        <a href={admin.list}    class="block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800">Articles</a>
-        <a href={admin.new}     class="block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800">New Article</a>
-        <a href={admin.gallery} class="block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800">Gallery Upload</a>
-        <a href={admin.logout}  class="block w-full px-2 py-2 rounded transition hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600">Logout</a>
+        <a href={admin.list}    class="block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800">{labels.adminArticles}</a>
+        <a href={admin.new}     class="block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800">{labels.adminNew}</a>
+        <a href={admin.gallery} class="block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800">{labels.adminGallery}</a>
+        <a href={admin.logout}  class="block w-full px-2 py-2 rounded transition hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600">{labels.logout}</a>
       </>
     )}
 
@@ -168,8 +212,8 @@ const admin = {
     {!isLoggedIn && (
       <>
         <div class="h-px bg-zinc-200 dark:bg-zinc-700 my-2"></div>
-        <a href={admin.signup} class="block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800">Sign Up</a>
-        <a href={admin.login}  class="block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800">Sign In</a>
+        <a href={admin.signup} class="block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800">{labels.signup}</a>
+        <a href={admin.login}  class="block w-full px-2 py-2 rounded transition hover:bg-zinc-100 dark:hover:bg-zinc-800">{labels.signin}</a>
       </>
     )}
 
@@ -219,7 +263,10 @@ const admin = {
     const btn = document.getElementById(btnId);
     const menu = document.getElementById(menuId);
     if (!btn || !menu) return;
-    const toggle = () => menu.classList.toggle('hidden');
+    const toggle = () => {
+      const open = menu.classList.toggle('hidden');
+      btn.setAttribute('aria-expanded', String(!open));
+    };
     const close = (e) => { if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.add('hidden'); };
     btn.addEventListener('click', toggle);
     document.addEventListener('click', close);

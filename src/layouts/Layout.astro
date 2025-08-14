@@ -1,53 +1,67 @@
 ---
 import '../styles/global.css';
 
-const title = Astro.props?.title || 'hitsnap';
-let lang = Astro.props?.lang;
-
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { createServerClient } from '../lib/createServerClientAstro';
+import { t, SUPPORTED, type Lang } from '../lib/i18n';
 
+/* ---------- Lang detection (default EN) ---------- */
+const propLang = (Astro.props?.lang ?? '').toLowerCase();
+const urlSeg = Astro.url?.pathname.match(/^\/(en|nl|el)(?=\/|$)/)?.[1];
+const lang: Lang = (SUPPORTED.includes(propLang as Lang) ? propLang : (urlSeg as Lang)) ?? 'en';
+const L = t(lang);
+
+/* ---------- Auth (server) ---------- */
 let user = null;
-
-if (!lang && Astro.url) {
-  const match = Astro.url.pathname.match(/^\/(\w+)\//);
-  lang = match ? match[1] : 'el';
-}
-
 try {
   const supabase = createServerClient(Astro.cookies);
   const { data } = await supabase.auth.getUser();
   user = data?.user || null;
-} catch (err) {
+} catch (_) {
   user = null;
 }
----
 
+/* ---------- Head meta ---------- */
+const title = Astro.props?.title || 'hitsnap';
+const description = 'A clean portfolio to showcase your creative lens.';
+
+function hrefFor(target: Lang) {
+  const path = Astro.url.pathname;
+  const search = Astro.url.search ?? '';
+  const hash = Astro.url.hash ?? '';
+  const pathWithoutLang = path.replace(/^\/(en|nl|el)(?=\/|$)/, '');
+  const prefix = '/' + target;
+  const clean = pathWithoutLang || '/';
+  const hrefPath = clean === '/' ? prefix : (prefix + clean);
+  return `https://hitsnap.app${hrefPath}${search}${hash}`;
+}
+---
 <html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
-    <meta name="description" content="A clean portfolio to showcase your creative lens." />
+    <meta name="description" content={description} />
 
-    <link rel="canonical" href={`https://hitsnap.app${Astro.url.pathname.replace(/\/$/, "")}`} />
-    <link rel="alternate" hreflang="el" href="https://hitsnap.app/" />
-    <link rel="alternate" hreflang="en" href="https://hitsnap.app/en" />
-    <link rel="alternate" hreflang="x-default" href="https://hitsnap.app/" />
+    <link rel="canonical" href={hrefFor(lang)} />
+    {SUPPORTED.map(code => (
+      <link rel="alternate" hreflang={code} href={hrefFor(code)} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={hrefFor('en')} />
 
     <meta property="og:title" content="hitsnap — Capture. Frame. Express." />
-    <meta property="og:description" content="A clean portfolio to showcase your creative lens." />
+    <meta property="og:description" content={description} />
     <meta property="og:image" content="https://hitsnap.app/preview-og-final.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="1200" />
-    <meta property="og:url" content={`https://hitsnap.app${Astro.url.pathname}`} />
+    <meta property="og:url" content={hrefFor(lang)} />
     <meta property="og:type" content="website" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="hitsnap — Capture. Frame. Express." />
-    <meta name="twitter:description" content="A clean portfolio to showcase your creative lens." />
+    <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content="https://hitsnap.app/preview-og-final.png" />
 
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -56,16 +70,23 @@ try {
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
 
     <slot name="head" />
   </head>
 
   <body class="bg-black text-white leading-relaxed relative overflow-x-visible min-h-screen dark:bg-black dark:text-white">
-    <Header lang={lang} user={user} />
+    <!-- Περνάμε labels στο Header από το i18n -->
+    <Header
+      lang={lang}
+      user={user}
+      supportedLangs={['en','nl','el']}
+      labels={{
+        home: L.nav.home, gallery: L.nav.gallery, about: L.nav.about, articles: L.nav.articles, contact: L.nav.contact,
+        menu: L.auth.menu, signup: L.auth.signup, signin: L.auth.signin, logout: L.auth.logout,
+        adminArticles: L.auth.adminArticles, adminNew: L.auth.adminNew, adminGallery: L.auth.adminGallery, language: L.auth.language
+      }}
+    />
 
     <main class="relative z-10 min-h-[calc(100vh-120px)] pb-32">
       <div class="container">
@@ -74,22 +95,5 @@ try {
     </main>
 
     <Footer lang={lang} />
-
-    <script is:client>
-      const html = document.documentElement;
-      if (
-        localStorage.getItem('theme') === 'dark' ||
-        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
-      ) {
-        html.classList.add('dark');
-      }
-
-      document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('toggle-theme')?.addEventListener('click', () => {
-          html.classList.toggle('dark');
-          localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-        });
-      });
-    </script>
   </body>
 </html>
