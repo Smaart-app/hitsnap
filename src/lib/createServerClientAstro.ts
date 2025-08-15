@@ -1,11 +1,10 @@
-// src/lib/createServerClientAstro.ts
 import supabasePkg from '@supabase/supabase-js';
 import type { AstroCookies } from 'astro';
 
 const { createClient } = supabasePkg;
 
 export function createServerClient(cookies: AstroCookies | any) {
-  // Προσπάθησε και από τα PUBLIC_ και από τα σκέτα, καθώς και από process.env (Netlify runtime)
+  // Διαβάζουμε env από PUBLIC_ και non-PUBLIC και από process.env (Netlify)
   const supabaseUrl =
     (import.meta as any)?.env?.SUPABASE_URL ??
     (import.meta as any)?.env?.PUBLIC_SUPABASE_URL ??
@@ -19,13 +18,10 @@ export function createServerClient(cookies: AstroCookies | any) {
     (typeof process !== 'undefined' ? process.env.PUBLIC_SUPABASE_ANON_KEY : undefined);
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    // Κάνε fail fast με καθαρό μήνυμα (χωρίς να εκθέτεις secrets)
-    throw new Error(
-      'Missing Supabase URL or ANON KEY. Check Netlify env names: SUPABASE_URL / SUPABASE_ANON_KEY (or PUBLIC_ variants).'
-    );
+    throw new Error('Missing Supabase URL or ANON KEY.');
   }
 
-  // Υποστήριξη AstroCookies ή iterable cookies
+  // Διαβάζουμε τυχόν tokens από cookies
   let accessToken: string | null = null;
   let refreshToken: string | null = null;
 
@@ -39,12 +35,12 @@ export function createServerClient(cookies: AstroCookies | any) {
     }
   }
 
+  // 🔑 ΜΗΝ ΣΤΕΛΝΕΙΣ Authorization όταν δεν έχεις access token
+  const headers: Record<string, string> = {};
+  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
   return createClient(supabaseUrl, supabaseAnonKey, {
-    global: {
-      headers: {
-        Authorization: accessToken ? `Bearer ${accessToken}` : '',
-      },
-    },
+    global: { headers }, // άδειο object όταν δεν έχει token => δεν override-ρουμε τίποτα
     auth: {
       persistSession: false,
       autoRefreshToken: false,
