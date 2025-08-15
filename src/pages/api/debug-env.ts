@@ -2,26 +2,35 @@
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = async () => {
-  const publicUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-  const anonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
-  const serviceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url =
+    (import.meta as any)?.env?.SUPABASE_URL ??
+    (import.meta as any)?.env?.PUBLIC_SUPABASE_URL ??
+    (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined) ??
+    (typeof process !== 'undefined' ? process.env.PUBLIC_SUPABASE_URL : undefined);
+
+  const anon =
+    (import.meta as any)?.env?.SUPABASE_ANON_KEY ??
+    (import.meta as any)?.env?.PUBLIC_SUPABASE_ANON_KEY ??
+    (typeof process !== 'undefined' ? process.env.SUPABASE_ANON_KEY : undefined) ??
+    (typeof process !== 'undefined' ? process.env.PUBLIC_SUPABASE_ANON_KEY : undefined);
+
+  const mask = (v?: string) => (v ? v.slice(0, 6) + '…' + v.slice(-6) : null);
+  const refFromUrl = (u?: string) =>
+    u ? u.replace(/^https?:\/\//, '').split('.')[0] /* project ref */ : null;
 
   return new Response(
-    JSON.stringify({
-      PUBLIC_SUPABASE_URL: publicUrl?.slice(0, 20) + '...'
-        || '❌ NOT FOUND',
-      PUBLIC_SUPABASE_ANON_KEY: anonKey?.slice(0, 20) + '...'
-        || '❌ NOT FOUND',
-      SUPABASE_SERVICE_ROLE_KEY: serviceKey?.slice(0, 20) + '...'
-        || '❌ NOT FOUND',
-      serviceKeyLength: serviceKey?.length || '❌ Missing',
-      loaded: typeof serviceKey,
-    }, null, 2),
-    {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
+    JSON.stringify(
+      {
+        url_present: !!url,
+        anon_present: !!anon,
+        project_ref: refFromUrl(url), // πρέπει να ταιριάζει με το ref του project στο Supabase
+        anon_length: anon?.length ?? 0,
+        anon_preview: mask(anon),
+        prod_flag: import.meta.env.PROD ?? null,
       },
-    }
+      null,
+      2
+    ),
+    { headers: { 'Content-Type': 'application/json' } }
   );
 };
