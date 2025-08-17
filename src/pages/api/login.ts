@@ -1,87 +1,68 @@
 // src/pages/api/login.ts
 import type { APIRoute } from 'astro';
+// Αν το helper σου έχει άλλο όνομα/μονοπάτι, άλλαξέ το εδώ:
 import { createServerAuthClient } from '@/lib/createServerAuthClient';
 
 export const prerender = false;
 
-// — helpers —
-function json(body: any, status = 200) {
+function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { 'Content-Type': 'application/json' },
   });
 }
 
-async function readCredentials(req: Request): Promise<{ email: string; password: string } | null> {
-  const ct = (req.headers.get('content-type') || '').toLowerCase();
-
-  // 1) application/json
-  if (ct.includes('application/json')) {
-    const data = await req.json().catch(() => null);
-    if (!data) return null;
-    return {
-      email: typeof data.email === 'string' ? data.email.trim() : '',
-      password: typeof data.password === 'string' ? data.password : '',
-    };
-  }
-
-  // 2) form submissions (form-data ή x-www-form-urlencoded)
-  if (ct.includes('multipart/form-data') || ct.includes('application/x-www-form-urlencoded')) {
-    const form = await req.formData();
-    return {
-      email: String(form.get('email') ?? '').trim(),
-      password: String(form.get('password') ?? ''),
-    };
-  }
-
-  // 3) τίποτα από τα παραπάνω → δεν υποστηρίζεται
-  return null;
-}
-
-// — routes —
-export const GET: APIRoute = async (ctx) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
   try {
-    const supabase = createServerAuthClient(ctx);
-    const { data: { session }, error } = await supabase.auth.getSession();
-    if (error) return json({ session: null, error: error.message }, 401);
-    return json({ session, error: null }, 200);
-  } catch (e: any) {
-    return json({ session: null, error: e?.message || 'Internal error' }, 500);
-  }
-};
+    // Δέξου JSON ή form-data
+    const ctype = request.headers.get('content-type') || '';
+    let email = '';
+    let password = '';
+    let lang = 'en';
 
-export const POST: APIRoute = async (ctx) => {
-  try {
-    const supabase = createServerAuthClient(ctx);
-
-    const creds = await readCredentials(ctx.request);
-    if (!creds) {
-      // Δείξε καθαρό μήνυμα για να ξέρουμε τι έστειλε ο client
-      return json({ user: null, error: 'Unsupported Media Type: send JSON or form-encoded body' }, 415);
+    if (ctype.includes('application/json')) {
+      const body = await request.json().catch(() => ({} as any));
+      email = (body.email ?? '').toString().trim();
+      password = (body.password ?? '').toString();
+      lang = (body.lang ?? 'en').toString();
+    } else {
+      const form = await request.formData();
+      email = (form.get('email') ?? '').toString().trim();
+      password = (form.get('password') ?? '').toString();
+      lang = (form.get('lang') ?? 'en').toString();
     }
 
-    const { email, password } = creds;
     if (!email || !password) {
-      return json({ user: null, error: 'Missing email or password' }, 400);
+      return json({ success: false, error: 'Missing email or password' }, 400);
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return json({ user: null, error: error.message }, 401);
+    // SSR Supabase client με cookies adapter
+    const supabase = createServerAuthClient({ cookies });
 
-    // Τα auth cookies γράφτηκαν ήδη από τον adapter
-    return json({ user: data.user, error: null }, 200);
-  } catch (e: any) {
-    return json({ user: null, error: e?.message || 'Internal error' }, 500);
-  }
-};
+    // Login με password (χρειάζεται anon key, ΟΧΙ service role)
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-export const DELETE: APIRoute = async (ctx) => {
-  try {
-    const supabase = createServerAuthClient(ctx);
-    const { error } = await supabase.auth.signOut();
-    if (error) return json({ ok: false, error: error.message }, 500);
-    return json({ ok: true, error: null }, 200);
+    if (error) {
+      // Πέρνα το κανονικό μήνυμα προς τα έξω
+      return json({ success: false, error: error.message }, 401);
+    }
+
+    // Τα auth cookies γράφτηκαν από τον adapter
+    return json(
+      {
+        success: true,
+        redirectTo: `/${lang}/admin/preview`,
+        user: data?.user?.id ?? null,
+      },
+      200
+    );
   } catch (e: any) {
-    return json({ ok: false, error: e?.message || 'Internal error' }, 500);
+    return json(
+      { success: false, error: e?.message || 'Internal error' },
+      500
+    );
   }
 };

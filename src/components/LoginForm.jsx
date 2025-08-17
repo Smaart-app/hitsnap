@@ -6,6 +6,24 @@ export default function LoginForm({ lang = 'en' }) {
   const [loading, setLoading] = useState(false);
   const formRef = useRef(null);
 
+  const t = (en, el, nl) => (lang === 'el' ? el : lang === 'nl' ? nl : en);
+
+  function normalizeError(err) {
+    if (!err) return t('Login failed.', 'Η σύνδεση απέτυχε.', 'Inloggen mislukt.');
+    const msg = String(err).toLowerCase();
+
+    if (msg.includes('invalid login credentials')) {
+      return t('Invalid email or password.', 'Λανθασμένο email ή κωδικός.', 'Ongeldig e-mail of wachtwoord.');
+    }
+    if (msg.includes('email not confirmed') || msg.includes('unconfirmed')) {
+      return t('Please confirm your email address.', 'Επιβεβαίωσε το email σου.', 'Bevestig je e-mail.');
+    }
+    if (msg.includes('rate limit') || msg.includes('too many')) {
+      return t('Too many attempts. Try again later.', 'Πάρα πολλές προσπάθειες. Ξαναπροσπάθησε αργότερα.', 'Te veel pogingen. Probeer later.');
+    }
+    return err;
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (loading) return;
@@ -15,10 +33,16 @@ export default function LoginForm({ lang = 'en' }) {
     try {
       const formEl = formRef.current || e.currentTarget;
       const form = new FormData(formEl);
-      form.set('lang', lang); // σιγουρεύσου ότι στέλνεται
+      const email = String(form.get('email') || '').trim();
+      const password = String(form.get('password') || '');
+      if (!email || !password) {
+        setError(t('Please fill in email and password.', 'Συμπλήρωσε email και κωδικό.', 'Vul e-mail en wachtwoord in.'));
+        setLoading(false);
+        return;
+      }
 
       const headers = {
-        // μόνο αν έχεις ορίσει PUBLIC_ADMIN_API_KEY στο client env
+        'Content-Type': 'application/json',
         ...(import.meta.env.PUBLIC_ADMIN_API_KEY
           ? { 'X-API-Key': import.meta.env.PUBLIC_ADMIN_API_KEY }
           : {}),
@@ -27,29 +51,38 @@ export default function LoginForm({ lang = 'en' }) {
       const res = await fetch('/api/login', {
         method: 'POST',
         headers,
-        body: form,
         credentials: 'include', // επιτρέπει στον server να γράψει cookies
+        body: JSON.stringify({ email, password, lang }),
       });
 
-      let payload = null;
+      // προσπάθησε να διαβάσεις JSON, αλλιώς κράτα text
+      let data = null;
       try {
-        payload = await res.json();
+        data = await res.json();
       } catch {
-        // αν δεν είναι JSON
-        throw new Error('Unexpected server response');
+        // ίσως ο server έστειλε κενό ή text
       }
 
-      if (!res.ok || !payload?.success) {
-        // δείξε καθαρό μήνυμα σφάλματος
-        setError(payload?.error || '❌ Login failed.');
+      if (!res.ok) {
+        const message = normalizeError(data?.error || data?.message || `HTTP ${res.status}`);
+        setError(message);
         setLoading(false);
         return;
       }
 
-      // σταθερό redirect από τον server
-      window.location.href = payload.redirectTo || `/${lang}/admin/preview`;
+      // Υποστήριξη πολλών σχημάτων απάντησης (success/session/user)
+      const success = data?.success ?? !!data?.session ?? !!data?.user;
+      if (!success) {
+        const message = normalizeError(data?.error || 'Login failed.');
+        setError(message);
+        setLoading(false);
+        return;
+      }
+
+      const redirect = data?.redirectTo || `/${lang}/admin/preview`;
+      window.location.href = redirect;
     } catch (err) {
-      setError(err?.message || '❌ Network error.');
+      setError(normalizeError(err?.message || 'Network error.'));
       setLoading(false);
     }
   }
@@ -73,7 +106,7 @@ export default function LoginForm({ lang = 'en' }) {
 
       <div>
         <label className="block font-semibold mb-1" htmlFor="passwordInput">
-          {lang === 'el' ? 'Κωδικός' : lang === 'nl' ? 'Wachtwoord' : 'Password'}
+          {t('Password', 'Κωδικός', 'Wachtwoord')}
         </label>
         <div className="relative">
           <input
@@ -90,7 +123,7 @@ export default function LoginForm({ lang = 'en' }) {
             className="absolute inset-y-0 right-0 px-3 text-sm text-gray-600"
             tabIndex={-1}
             onClick={() => setShowPassword(s => !s)}
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            aria-label={showPassword ? t('Hide password', 'Κρύψε κωδικό', 'Wachtwoord verbergen') : t('Show password', 'Δείξε κωδικό', 'Wachtwoord tonen')}
           >
             {showPassword ? '🙈' : '👁'}
           </button>
@@ -109,8 +142,8 @@ export default function LoginForm({ lang = 'en' }) {
         className="bg-[#50c7c2] text-white px-6 py-2 rounded hover:bg-[#3db2b0] transition font-semibold w-full disabled:opacity-60"
       >
         {loading
-          ? (lang === 'el' ? 'Σύνδεση…' : lang === 'nl' ? 'Inloggen…' : 'Signing in…')
-          : (lang === 'el' ? 'Σύνδεση' : lang === 'nl' ? 'Inloggen' : 'Sign in')}
+          ? t('Signing in…', 'Σύνδεση…', 'Inloggen…')
+          : t('Sign in', 'Σύνδεση', 'Inloggen')}
       </button>
     </form>
   );
