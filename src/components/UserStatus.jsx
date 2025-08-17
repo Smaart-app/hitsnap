@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabaseBrowserClient'
+import { supabase } from '@/lib/supabaseClient'
 
 export default function UserStatus({ lang = 'el' }) {
   const [user, setUser] = useState(null)

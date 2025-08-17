@@ -4,33 +4,27 @@ import type { APIRoute } from 'astro';
 
 export function createApiSupabase({ cookies }: APIRoute['context']) {
   const supabaseUrl =
-    (import.meta as any)?.env?.SUPABASE_URL ??
-    (import.meta as any)?.env?.PUBLIC_SUPABASE_URL ??
-    (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined) ??
-    (typeof process !== 'undefined' ? process.env.PUBLIC_SUPABASE_URL : undefined);
+    import.meta.env.SUPABASE_URL ??
+    import.meta.env.PUBLIC_SUPABASE_URL;
 
-  const serviceRoleKey =
-    (import.meta as any)?.env?.SUPABASE_SERVICE_ROLE_KEY ??
-    (typeof process !== 'undefined' ? process.env.SUPABASE_SERVICE_ROLE_KEY : undefined);
+  const serviceRoleKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.');
-  }
+  if (!supabaseUrl) throw new Error('Missing SUPABASE_URL (or PUBLIC_SUPABASE_URL).');
+  if (!serviceRoleKey) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY.');
 
   return createServerClient(supabaseUrl, serviceRoleKey, {
     cookies: {
       getAll: () => Object.fromEntries(cookies.getAll().map(c => [c.name, c.value])),
       setAll: (newCookies) => {
-        newCookies.forEach(({ name, value, options }) => {
+        for (const { name, value, options } of newCookies) {
           cookies.set(name, value, {
             path: '/',
             sameSite: 'lax',
             httpOnly: import.meta.env.PROD,
             secure: import.meta.env.PROD,
-            // ΧΩΡΙΣ domain → ισχύει για το τρέχον host (π.χ. hitsnap.app)
             ...options,
           });
-        });
+        }
       },
     },
   });

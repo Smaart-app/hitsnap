@@ -1,46 +1,87 @@
 // src/pages/api/login.ts
 import type { APIRoute } from 'astro';
-import { createServerClient } from '@/lib/createServerClientAstro';
+import { createServerAuthClient } from '@/lib/createServerAuthClient';
 
-export const POST: APIRoute = async ({ request, cookies }) => {
-  const supabase = createServerClient(cookies);
+export const prerender = false;
 
-  const form = await request.formData();
-  const email = form.get('email')?.toString() ?? '';
-  const password = form.get('password')?.toString() ?? '';
-  const lang = form.get('lang')?.toString() ?? 'en';
-
-  if (!email || !password) {
-    return new Response(JSON.stringify({ error: 'Λείπουν στοιχεία.' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  // Αν λείπει/λάθος το ANON KEY στο Netlify, εδώ γυρνάει "Invalid API key"
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (error || !data.session) {
-    return new Response(JSON.stringify({ error: error?.message || 'Αποτυχία σύνδεσης.' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  // --- Γράψε ΚΑΙ τα δύο cookies σωστά (όχι array σε plain object)
-  const { access_token, refresh_token } = data.session;
-  const headers = new Headers({ 'Content-Type': 'application/json' });
-
-  // Netlify/HTTPS → καλό είναι να βάζουμε Secure
-  const baseFlags = 'Path=/; HttpOnly; SameSite=Lax; Secure';
-
-  headers.append('Set-Cookie', `sb-access-token=${access_token}; ${baseFlags}`);
-  headers.append('Set-Cookie', `sb-refresh-token=${refresh_token}; ${baseFlags}`);
-
-  const body = JSON.stringify({
-    success: true,
-    redirectTo: `/${lang}/admin/preview`,
+// — helpers —
+function json(body: any, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
   });
+}
 
-  return new Response(body, { status: 200, headers });
+async function readCredentials(req: Request): Promise<{ email: string; password: string } | null> {
+  const ct = (req.headers.get('content-type') || '').toLowerCase();
+
+  // 1) application/json
+  if (ct.includes('application/json')) {
+    const data = await req.json().catch(() => null);
+    if (!data) return null;
+    return {
+      email: typeof data.email === 'string' ? data.email.trim() : '',
+      password: typeof data.password === 'string' ? data.password : '',
+    };
+  }
+
+  // 2) form submissions (form-data ή x-www-form-urlencoded)
+  if (ct.includes('multipart/form-data') || ct.includes('application/x-www-form-urlencoded')) {
+    const form = await req.formData();
+    return {
+      email: String(form.get('email') ?? '').trim(),
+      password: String(form.get('password') ?? ''),
+    };
+  }
+
+  // 3) τίποτα από τα παραπάνω → δεν υποστηρίζεται
+  return null;
+}
+
+// — routes —
+export const GET: APIRoute = async (ctx) => {
+  try {
+    const supabase = createServerAuthClient(ctx);
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error) return json({ session: null, error: error.message }, 401);
+    return json({ session, error: null }, 200);
+  } catch (e: any) {
+    return json({ session: null, error: e?.message || 'Internal error' }, 500);
+  }
+};
+
+export const POST: APIRoute = async (ctx) => {
+  try {
+    const supabase = createServerAuthClient(ctx);
+
+    const creds = await readCredentials(ctx.request);
+    if (!creds) {
+      // Δείξε καθαρό μήνυμα για να ξέρουμε τι έστειλε ο client
+      return json({ user: null, error: 'Unsupported Media Type: send JSON or form-encoded body' }, 415);
+    }
+
+    const { email, password } = creds;
+    if (!email || !password) {
+      return json({ user: null, error: 'Missing email or password' }, 400);
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return json({ user: null, error: error.message }, 401);
+
+    // Τα auth cookies γράφτηκαν ήδη από τον adapter
+    return json({ user: data.user, error: null }, 200);
+  } catch (e: any) {
+    return json({ user: null, error: e?.message || 'Internal error' }, 500);
+  }
+};
+
+export const DELETE: APIRoute = async (ctx) => {
+  try {
+    const supabase = createServerAuthClient(ctx);
+    const { error } = await supabase.auth.signOut();
+    if (error) return json({ ok: false, error: error.message }, 500);
+    return json({ ok: true, error: null }, 200);
+  } catch (e: any) {
+    return json({ ok: false, error: e?.message || 'Internal error' }, 500);
+  }
 };
