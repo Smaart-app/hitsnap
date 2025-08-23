@@ -1,60 +1,79 @@
 ---
 import Layout from '../../../../layouts/Layout.astro';
 import EditorPage from '../../../../components/editor/EditorPage.astro';
-import { createServerClient } from '../../../../lib/createServerClientAstro';
 
-const { slug, lang } = Astro.params;
-const supabase = createServerClient(Astro.cookies);
+// FS-MODE: χρησιμοποιούμε backend adapter + cookie για auth
+import { getBackend } from '@/lib/backend';
+import { isFsMode } from '@/lib/isFsMode';
 
-const [
-  { data: { user }, error: userError },
-  { data: article, error: articleError },
-] = await Promise.all([
-  supabase.auth.getUser(),
-  supabase
-    .from("articles")
-    .select("*")
-    .eq("slug", slug)
-    .eq("lang", lang || 'el')
-    .maybeSingle(),
-]);
+export const prerender = false;
 
-if (articleError) {
-  return new Response(`❌ Σφάλμα Supabase: ${articleError.message}`, { status: 500 });
+const { slug, lang } = Astro.params as { slug: string; lang: string };
+const backend = getBackend();
+
+// --- Auth
+let user: { id: string; email?: string } | null = null;
+
+if (isFsMode()) {
+  // Σε FS mode θεωρούμε logged-in μόνο αν υπάρχει το demo cookie
+  const fsLogged = Astro.cookies.get('fs-auth')?.value === '1';
+  if (!fsLogged) {
+    return new Response('🔒 Απαιτείται είσοδος', { status: 401 });
+  }
+  user = { id: 'demo-user' };
+} else {
+  const session = await backend.auth.getSession();
+  if (!session.userId) {
+    return new Response('🔒 Απαιτείται είσοδος', { status: 401 });
+  }
+  user = { id: session.userId };
 }
 
-if (!article) {
-  return new Response(`📭 Δεν βρέθηκε άρθρο με slug: ${slug}`, { status: 404 });
-}
-
-if (!user) {
-  return new Response('🔒 Απαιτείται είσοδος', { status: 401 });
+// --- Φέρε άρθρο μέσω adapter (όχι Supabase)
+const fsArticle = await backend.articles.get(slug, lang || 'el');
+if (!fsArticle) {
+  return new Response(`📭 Δεν βρέθηκε άρθρο με slug: ${slug} (${lang})`, { status: 404 });
 }
 
 // ΔΙΟΡΘΩΣΗ ΗΜΕΡΟΜΗΝΙΑΣ για input type="datetime-local"
-function getLocalDatetimeString(dateStr) {
-  if (!dateStr) return "";
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(dateStr)) {
-    return dateStr;
-  }
+function getLocalDatetimeString(dateStr: string | undefined) {
+  if (!dateStr) return '';
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(dateStr)) return dateStr;
   try {
     const d = new Date(dateStr);
     const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const da = String(d.getDate()).padStart(2, "0");
-    const h = String(d.getHours()).padStart(2, "0");
-    const mi = String(d.getMinutes()).padStart(2, "0");
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const da = String(d.getDate()).padStart(2, '0');
+    const h = String(d.getHours()).padStart(2, '0');
+    const mi = String(d.getMinutes()).padStart(2, '0');
     return `${y}-${m}-${da}T${h}:${mi}`;
   } catch {
-    return "";
+    return '';
   }
 }
+
+// Map σε ΣΧΗΜΑ που περιμένει ο Editor σου (όπως πριν με Supabase)
 const fixedArticle = {
-  ...article,
-  publish_date: getLocalDatetimeString(article.publish_date),
+  id: fsArticle.id,
+  title: fsArticle.title,
+  slug: fsArticle.slug,
+  excerpt: fsArticle.excerpt ?? '',
+  content: fsArticle.body ?? '',
+  cover_image: fsArticle.coverImage ?? '',
+  lang: fsArticle.language ?? (lang || 'el'),
+  // published + publish_date όπως τα είχες:
+  // - draft => published: false
+  // - published/scheduled => published: true (ο ακριβής διαχωρισμός γίνεται από την ημερομηνία)
+  published: fsArticle.status !== 'draft',
+  publish_date: getLocalDatetimeString(fsArticle.publishDate),
+  translation_of: null, // FS mode δεν κρατά group id – αν θέλεις, το προσθέτουμε αργότερα
 };
 ---
 
-<Layout title={fixedArticle?.title ? `Επεξεργασία: ${fixedArticle.title}` : "Επεξεργασία άρθρου"} lang={lang} user={user}>
+<Layout
+  title={fixedArticle?.title ? `Επεξεργασία: ${fixedArticle.title}` : 'Επεξεργασία άρθρου'}
+  lang={lang}
+  user={user}
+>
   <EditorPage user={user} article={fixedArticle} />
 </Layout>

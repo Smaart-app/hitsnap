@@ -2,6 +2,7 @@
 import type { APIRoute } from 'astro';
 import { createServerClient } from '@supabase/ssr';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { isFsMode } from '@/lib/isFsMode';
 
 type CookiePair = { name: string; value: string };
 
@@ -56,25 +57,41 @@ function makeCookieAdapter(ctx: APIRoute['context']) {
   };
 }
 
-// Μικρο-έλεγχοι για να μη σκάμε σιωπηλά με λάθος URL/KEY
 function assertEnv(url: string | undefined, anon: string | undefined) {
   if (!url) throw new Error('Missing SUPABASE_URL / PUBLIC_SUPABASE_URL');
   if (!/^https:\/\/[a-z0-9-]+\.supabase\.co/i.test(url)) {
     throw new Error(`Suspicious SUPABASE_URL format: ${url}`);
   }
   if (!anon || anon.length < 20 || !anon.includes('.')) {
-    // anon/service keys είναι JWT-like (έχουν τελείες και είναι μεγάλα)
     throw new Error('PUBLIC_SUPABASE_ANON_KEY looks invalid/empty');
   }
 }
 
 export function createServerAuthClient(ctx: APIRoute['context']): SupabaseClient {
-  // Προτιμά server-only, fallback στο PUBLIC_
-  const url =
-    import.meta.env.SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
-  const anon =
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.SUPABASE_ANON_KEY;
+  // FS mode: σεβόμαστε το cookie fs-auth σε server-side render
+  if (isFsMode()) {
+    const hasFsAuth = ctx.cookies.get('fs-auth')?.value === '1';
+    const demoUser = hasFsAuth ? { id: 'demo-user', email: 'demo@local' } : null;
 
+    const mock = {
+      auth: {
+        // Να επιστρέφει user ΜΟΝΟ όταν υπάρχει fs-auth=1
+        getUser: async () => ({ data: { user: demoUser }, error: null }),
+        getSession: async () =>
+          ({ data: { session: demoUser ? { user: demoUser } : null }, error: null }),
+        signInWithPassword: async () => ({ data: { user: demoUser }, error: null }),
+        signOut: async () => ({ error: null }),
+      },
+      from: () => {
+        throw new Error('supabase.from(...) is not available in FS mode. Use backend adapter instead.');
+      },
+    };
+    return mock as unknown as SupabaseClient;
+  }
+
+  // Πραγματικό Supabase (όταν αλλάξεις PUBLIC_BACKEND=supabase)
+  const url = import.meta.env.SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
+  const anon = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.SUPABASE_ANON_KEY;
   assertEnv(url, anon);
 
   return createServerClient(url!, anon!, {

@@ -1,23 +1,63 @@
 ---
-import { createServerClient } from '@/lib/createServerClientAstro'
-import { serialize } from 'cookie'
+// src/pages/[lang]/logout.astro
+import { isFsMode } from '@/lib/isFsMode';
+import { createServerClient } from '@/lib/createServerClientAstro';
+import { serialize } from 'cookie';
 
-export const prerender = false
-
-const supabase = createServerClient(Astro.cookies)
-
-// logout από Supabase (server-side – δεν ρίχνει error αν δεν υπάρχει session)
-await supabase.auth.signOut()
+export const prerender = false;
 
 // πιάσε τη γλώσσα από το URL (π.χ. /el/logout -> el)
-const url = new URL(Astro.request.url)
-const rawSegment = url.pathname.split('/')[1]
-const lang = ['en', 'nl', 'el'].includes(rawSegment) ? rawSegment : 'en'
+const url = new URL(Astro.request.url);
+const rawSegment = url.pathname.split('/')[1];
+const lang = ['en', 'nl', 'el'].includes(rawSegment) ? rawSegment : 'en';
 
-// headers για redirect + καθάρισμα cookies
-const headers = new Headers()
-headers.set('Location', `/${lang}/login`)
+// Ετοιμάζουμε headers για redirect
+const headers = new Headers();
+headers.set('Location', `/${lang}/login`);
 
+// --- FS-MODE: demo logout με cookie ---------------------------------
+if (isFsMode()) {
+  // καθάρισε το demo session cookie
+  headers.append(
+    'Set-Cookie',
+    serialize('fs-auth', '', {
+      path: '/',
+      maxAge: 0,
+      httpOnly: false,
+      sameSite: 'Lax',
+    })
+  );
+
+  // προληπτικά καθάρισε και πιθανές supabase cookies αν υπήρχαν
+  headers.append(
+    'Set-Cookie',
+    serialize('sb-access-token', '', {
+      path: '/',
+      maxAge: 0,
+      httpOnly: true,
+      sameSite: 'Lax',
+    })
+  );
+  headers.append(
+    'Set-Cookie',
+    serialize('sb-refresh-token', '', {
+      path: '/',
+      maxAge: 0,
+      httpOnly: true,
+      sameSite: 'Lax',
+    })
+  );
+
+  return new Response(null, { status: 302, headers });
+}
+
+// --- REAL backend: κανονικό Supabase signOut -------------------------
+const supabase = createServerClient(Astro.cookies);
+
+// logout από Supabase (server-side – δεν ρίχνει error αν δεν υπάρχει session)
+await supabase.auth.signOut();
+
+// καθάρισε και τα σχετικά supabase cookies
 headers.append(
   'Set-Cookie',
   serialize('sb-access-token', '', {
@@ -26,7 +66,7 @@ headers.append(
     httpOnly: true,
     sameSite: 'Lax',
   })
-)
+);
 headers.append(
   'Set-Cookie',
   serialize('sb-refresh-token', '', {
@@ -35,7 +75,7 @@ headers.append(
     httpOnly: true,
     sameSite: 'Lax',
   })
-)
+);
 
-return new Response(null, { status: 302, headers })
+return new Response(null, { status: 302, headers });
 ---

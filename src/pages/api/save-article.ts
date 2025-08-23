@@ -1,36 +1,41 @@
 // src/pages/api/save-article.ts
 import type { APIRoute } from 'astro';
-import { createAdminClientNoCookies } from '@/lib/createAdminClientNoCookies';
+import { getBackend } from '@/lib/backend';
+import type { Article } from '@/lib/backend/types';
 
 export const prerender = false;
 
-// UUID v1–v5
-function isValidUUID(uuid: string) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid);
+async function parseBody(request: Request): Promise<Record<string, any>> {
+  const contentType = (request.headers.get('content-type') || '').toLowerCase();
+  if (contentType.includes('application/json')) return await request.json();
+  if (contentType.includes('multipart/form-data') || contentType.includes('application/x-www-form-urlencoded')) {
+    const form = await request.formData();
+    const data: Record<string, any> = {};
+    for (const [k, v] of form.entries()) data[k] = v;
+    return data;
+  }
+  throw new Error(`Unsupported Content-Type: ${contentType || '(none)'}`);
 }
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    // ---- Parse body με ασφάλεια για 3 περιπτώσεις
-    const contentType = (request.headers.get('content-type') || '').toLowerCase();
-    let data: any = {};
-
-    if (contentType.includes('application/json')) {
-      data = await request.json();
-    } else if (
-      contentType.includes('multipart/form-data') ||
-      contentType.includes('application/x-www-form-urlencoded')
-    ) {
-      const form = await request.formData();
-      for (const [k, v] of form.entries()) data[k] = v;
-    } else {
-      return new Response(
-        JSON.stringify({ article: null, error: `Unsupported Content-Type: ${contentType || '(none)'}` }),
-        { status: 415, headers: { 'Content-Type': 'application/json' } },
-      );
+    const backend = getBackend();
+    const session = await backend.auth.getSession();
+    if (!session.userId) {
+      return new Response(JSON.stringify({ article: null, error: 'Unauthorized' }), {
+        status: 401, headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    // ---- Πεδία
+    let data: any;
+    try {
+      data = await parseBody(request);
+    } catch (err: any) {
+      return new Response(JSON.stringify({ article: null, error: err?.message || 'Unsupported Content-Type' }), {
+        status: 415, headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const {
       slug = '',
       title = '',
@@ -40,56 +45,31 @@ export const POST: APIRoute = async ({ request }) => {
       lang = '',
       published = false,
       publish_date = new Date().toISOString(),
-      user_id = '',
-      translation_of = null,
     } = data;
 
-    // ---- Έλεγχοι
-    if (typeof slug !== 'string' || !slug.trim()) {
+    if (!slug || typeof slug !== 'string') {
       return new Response(JSON.stringify({ article: null, error: 'Missing slug' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        status: 400, headers: { 'Content-Type': 'application/json' },
       });
     }
-
     if (!lang || typeof lang !== 'string' || lang.trim().length < 2) {
       return new Response(JSON.stringify({ article: null, error: 'Λείπει ή είναι λάθος το lang code!' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        status: 400, headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    if (!title || typeof title !== 'string') {
+      return new Response(JSON.stringify({ article: null, error: 'Missing title' }), {
+        status: 400, headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    if (typeof content !== 'string') {
+      return new Response(JSON.stringify({ article: null, error: 'Missing content' }), {
+        status: 400, headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    if (
-      !user_id ||
-      typeof user_id !== 'string' ||
-      user_id.includes('{') ||
-      user_id.includes('}') ||
-      ['undefined', 'null', ''].includes(user_id.trim().toLowerCase()) ||
-      !isValidUUID(user_id.trim())
-    ) {
-      return new Response(
-        JSON.stringify({ article: null, error: 'Invalid or missing user_id (UUID)!' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } },
-      );
-    }
-
-    // ---- Supabase (admin)
-    const admin = createAdminClientNoCookies();
-
     // Μοναδικότητα ανά (slug, lang)
-    const { data: existing, error: slugError } = await admin
-      .from('articles')
-      .select('id')
-      .eq('slug', slug.trim())
-      .eq('lang', lang.trim())
-      .maybeSingle();
-
-    if (slugError) {
-      return new Response(
-        JSON.stringify({ article: null, error: `Error checking slug: ${slugError.message}` }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } },
-      );
-    }
+    const existing = await backend.articles.get(String(slug).trim(), String(lang).trim());
     if (existing) {
       return new Response(
         JSON.stringify({ article: null, error: 'Υπάρχει ήδη άρθρο με αυτό το slug και γλώσσα!' }),
@@ -97,35 +77,34 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // Εισαγωγή
-    const { error } = await admin.from('articles').insert([
-      {
-        title: String(title || '').trim(),
-        slug: String(slug).trim(),
-        excerpt: excerpt ? String(excerpt) : null,
-        content: String(content || ''),
-        cover_image: cover_image ? String(cover_image) : null,
-        lang: String(lang).trim(),
-        published: !!published,
-        publish_date: publish_date || new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        user_id: user_id.trim(),
-        translation_of: translation_of || null,
-      },
-    ]);
+    const nowIso = new Date().toISOString();
+    const publishIso = publish_date || nowIso;
 
-    if (error) {
-      return new Response(JSON.stringify({ article: null, error: error.message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    let status: Article['status'] = 'draft';
+    if (published) {
+      status = publishIso > nowIso ? 'scheduled' : 'published';
     }
 
-    return new Response(JSON.stringify({ article: { slug: slug.trim(), lang: String(lang).trim() }, error: null }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    const article: Article = {
+      id: String(slug).trim(),
+      slug: String(slug).trim(),
+      title: String(title || '').trim(),
+      language: String(lang).trim(),
+      excerpt: excerpt ? String(excerpt) : '',
+      coverImage: cover_image ? String(cover_image) : '',
+      body: String(content || ''),
+      publishDate: publishIso,
+      status,
+      tags: [],
+    };
+
+    const saved = await backend.articles.upsert(article);
+    return new Response(
+      JSON.stringify({ article: { slug: saved.slug, lang: saved.language }, error: null }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } },
+    );
   } catch (e: any) {
+    console.error('[save-article] error:', e);
     return new Response(
       JSON.stringify({ article: null, error: e?.message || 'Internal Server Error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } },

@@ -1,7 +1,7 @@
 // src/pages/api/login.ts
 import type { APIRoute } from 'astro';
-// Αν το helper σου έχει άλλο όνομα/μονοπάτι, άλλαξέ το εδώ:
 import { createServerAuthClient } from '@/lib/createServerAuthClient';
+import { isFsMode } from '@/lib/isFsMode';
 
 export const prerender = false;
 
@@ -21,7 +21,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     let lang = 'en';
 
     if (ctype.includes('application/json')) {
-      const body = await request.json().catch(() => ({} as any));
+      const body = (await request.json().catch(() => ({}))) as any;
       email = (body.email ?? '').toString().trim();
       password = (body.password ?? '').toString();
       lang = (body.lang ?? 'en').toString();
@@ -36,17 +36,42 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       return json({ success: false, error: 'Missing email or password' }, 400);
     }
 
-    // SSR Supabase client με cookies adapter
-    const supabase = createServerAuthClient({ cookies });
+    // =========================
+    // FS MODE (No-Backend Mode)
+    // =========================
+    if (isFsMode()) {
+      // Θέλουμε το header/Upload να σε "βλέπει": βάζουμε demo cookie ορατό από JS
+      cookies.set('fs-auth', '1', {
+        path: '/',
+        sameSite: 'lax',
+        httpOnly: false,             // να το βλέπει και ο browser (UserStatusWrapper)
+        secure: import.meta.env.PROD,
+        maxAge: 60 * 60 * 24 * 7,    // 7 μέρες
+      });
 
-    // Login με password (χρειάζεται anon key, ΟΧΙ service role)
+      return json(
+        {
+          success: true,
+          redirectTo: `/${lang}/admin/preview`,
+          user: 'demo-user',
+          mode: 'fs',
+        },
+        200
+      );
+    }
+
+    // =========================
+    // REAL MODE (Supabase)
+    // =========================
+    const supabase = createServerAuthClient({ cookies } as any);
+
+    // Login με password (χρειάζεται anon key)
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      // Πέρνα το κανονικό μήνυμα προς τα έξω
       return json({ success: false, error: error.message }, 401);
     }
 
@@ -56,6 +81,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         success: true,
         redirectTo: `/${lang}/admin/preview`,
         user: data?.user?.id ?? null,
+        mode: 'supabase',
       },
       200
     );

@@ -1,6 +1,12 @@
 ---
+// src/pages/[lang]/gallery/index.astro
 import Layout from '../../../layouts/Layout.astro';
 import { createServerClient } from '../../../lib/createServerClientAstro';
+import { isFsMode } from '@/lib/isFsMode';
+
+// Node APIs για να διαβάσουμε αρχεία σε FS mode
+import fs from 'node:fs';
+import path from 'node:path';
 
 export const prerender = false;
 
@@ -12,22 +18,58 @@ export async function getStaticPaths() {
   ];
 }
 
-const { lang } = Astro.params;
-const t = (en, el) => (lang === 'el' ? el : en);
+const { lang } = Astro.params as { lang: 'en' | 'el' | 'nl' };
+const fsMode = isFsMode();
 
-const title = t('Gallery', 'Gallery');
-const lead = t('Selected work — each frame tells a story.', 'Επιλεγμένη δουλειά — κάθε καρέ και μια ιστορία.');
+const t = (en: string, el: string, nl?: string) =>
+  lang === 'el' ? el : lang === 'nl' ? (nl ?? en) : en;
 
-const supabase = createServerClient(Astro.cookies);
-const { data: photos } = await supabase
-  .from('gallery_photos')
-  .select('*')
-  .eq('lang', lang)
-  .eq('published', true)
-  .order('sort_order', { ascending: true })
-  .order('created_at', { ascending: false });
+const title = t('Gallery', 'Gallery', 'Galerij');
+const lead = t(
+  'Selected work — each frame tells a story.',
+  'Επιλεγμένη δουλειά — κάθε καρέ και μια ιστορία.',
+  'Geselecteerd werk — elk frame vertelt een verhaal.'
+);
 
-function pubUrl(p) {
+// ----------------------
+// Φόρτωση φωτογραφιών
+// ----------------------
+let photos: Array<{ title?: string; caption?: string; album?: string; image_path?: string; src?: string }> = [];
+
+if (fsMode) {
+  // FS MODE: διαβάζουμε εικόνες από /public/assets/images
+  const DIR = path.join(process.cwd(), 'public', 'assets', 'images');
+  try {
+    const files = fs
+      .readdirSync(DIR)
+      .filter((f) => /\.(png|jpe?g|webp|gif|svg)$/i.test(f));
+
+    // Δημιουργούμε αντικείμενα που το template μπορεί να καταναλώσει
+    photos = files.map((f) => ({
+      src: `/assets/images/${f}`, // θα χρησιμοποιηθεί από το pubUrl()
+      title: '',
+      caption: '',
+      album: '',
+    }));
+  } catch {
+    photos = [];
+  }
+} else {
+  // REAL MODE: η παλιά σου ροή με Supabase
+  const supabase = createServerClient(Astro.cookies);
+  const { data } = await supabase
+    .from('gallery_photos')
+    .select('*')
+    .eq('lang', lang)
+    .eq('published', true)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false });
+  photos = data ?? [];
+}
+
+// Ενιαία συνάρτηση που επιστρέφει το public URL ανά mode
+function pubUrl(p: any) {
+  if (fsMode) return p?.src; // /assets/images/...
   const base = import.meta.env.PUBLIC_SUPABASE_URL;
   return `${base}/storage/v1/object/public/gallery/${p.image_path}`;
 }
@@ -39,17 +81,21 @@ function pubUrl(p) {
     <p class="text-zinc-400 mb-8">{lead}</p>
 
     {(!photos || photos.length === 0) ? (
-      <p class="text-zinc-500">{t('No photos yet.','Δεν υπάρχουν φωτογραφίες ακόμα.')}</p>
+      <p class="text-zinc-500">
+        {t('No photos yet.', 'Δεν υπάρχουν φωτογραφίες ακόμα.', 'Nog geen foto\'s.')}
+      </p>
     ) : (
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {photos!.map((p) => (
           <figure class="bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800">
             <img src={pubUrl(p)} alt={p.title || 'photo'} class="w-full h-64 object-cover" loading="lazy" />
-            <figcaption class="p-4 text-sm text-zinc-300">
-              <div class="font-medium">{p.title}</div>
-              {p.caption && <div class="text-zinc-400">{p.caption}</div>}
-              {p.album && <div class="text-zinc-500 text-xs mt-1">Album: {p.album}</div>}
-            </figcaption>
+            {(!fsMode && (p.title || p.caption || p.album)) && (
+              <figcaption class="p-4 text-sm text-zinc-300">
+                <div class="font-medium">{p.title}</div>
+                {p.caption && <div class="text-zinc-400">{p.caption}</div>}
+                {p.album && <div class="text-zinc-500 text-xs mt-1">Album: {p.album}</div>}
+              </figcaption>
+            )}
           </figure>
         ))}
       </div>

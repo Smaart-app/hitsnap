@@ -8,10 +8,13 @@ build/
 # Netlify build artifacts
 .netlify/
 
-# Environment variables
+# Environment variables (μην ανεβάζεις ποτέ .env)
 .env
 .env.local
 .env.*.local
+
+# FS-mode: τοπικά βοηθητικά αρχεία/βάσεις (μην ανέβουν)
+.local/
 
 # System/OS artifacts
 .DS_Store

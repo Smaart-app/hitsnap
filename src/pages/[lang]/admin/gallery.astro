@@ -1,6 +1,10 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 
+// FS-MODE: ανίχνευση & backend μόνο για real mode
+import { getBackend } from '@/lib/backend';
+import { isFsMode } from '@/lib/isFsMode';
+
 export const prerender = false;
 
 export async function getStaticPaths() {
@@ -11,7 +15,20 @@ export async function getStaticPaths() {
   ];
 }
 
-const { lang } = Astro.params;
+const { lang } = Astro.params as { lang: 'en' | 'el' | 'nl' };
+const backend = getBackend();
+const fsMode = isFsMode();
+
+// --- Auth guard
+let canUpload = true;
+if (fsMode) {
+  // FS mode: ΜΗΝ κάνεις redirect. Απλά δες αν υπάρχει το cookie.
+  canUpload = Astro.cookies.get('fs-auth')?.value === '1';
+} else {
+  // Real backend: αν δεν υπάρχει session, redirect όπως πριν.
+  const session = await backend.auth.getSession();
+  if (!session.userId) return Astro.redirect(`/${lang}/login`);
+}
 
 // i18n (EN default)
 const dict = {
@@ -26,6 +43,8 @@ const dict = {
     uploading: 'Uploading…',
     done: 'Done ✅',
     failed: 'Upload failed',
+    notLogged: 'You are not signed in (demo mode). Upload will fail until you sign in.',
+    signIn: 'Sign in',
   },
   nl: {
     pageTitle: 'Upload naar Galerij',
@@ -38,6 +57,8 @@ const dict = {
     uploading: 'Bezig met uploaden…',
     done: 'Klaar ✅',
     failed: 'Upload mislukt',
+    notLogged: 'Je bent niet ingelogd (demomodus). Uploaden mislukt totdat je inlogt.',
+    signIn: 'Inloggen',
   },
   el: {
     pageTitle: 'Ανέβασμα στο Gallery',
@@ -50,17 +71,33 @@ const dict = {
     uploading: 'Γίνεται ανέβασμα…',
     done: 'Έτοιμο ✅',
     failed: 'Το ανέβασμα απέτυχε',
+    notLogged: 'Δεν είσαι συνδεδεμένη (demo mode). Το ανέβασμα θα αποτυγχάνει μέχρι να κάνεις είσοδο.',
+    signIn: 'Είσοδος',
   },
 };
-const t = (key) => (dict[lang] ?? dict.en)[key];
+const t = (key: keyof typeof dict['en']) => (dict[lang as 'en'] ?? dict.en)[key];
 ---
 
 <Layout title={t('pageTitle')} lang={lang}>
   <section class="max-w-screen-lg mx-auto px-4 sm:px-6 py-10">
     <h1 class="text-3xl sm:text-4xl font-bold mb-6">{t('pageTitle')}</h1>
 
+    {fsMode && !canUpload && (
+      <div class="mb-4 rounded-lg border border-amber-400/60 bg-amber-50 text-amber-900 px-4 py-3 text-sm">
+        {t('notLogged')} ·
+        {' '}
+        <a class="underline" href={`/${lang}/login`}>{t('signIn')}</a>
+      </div>
+    )}
+
     <!-- Το action μένει για fallback χωρίς JS, αλλά ο client-script εμποδίζει την πλοήγηση -->
-    <form id="uploadForm" action="/api/upload-gallery" method="post" enctype="multipart/form-data" class="space-y-5">
+    <form
+      id="uploadForm"
+      action="/api/upload-gallery"
+      method="post"
+      enctype="multipart/form-data"
+      class="space-y-5"
+    >
       <div class="grid sm:grid-cols-2 gap-4">
         <label class="block">
           <span class="block text-sm mb-1">{t('title')}</span>
@@ -84,7 +121,14 @@ const t = (key) => (dict[lang] ?? dict.en)[key];
           <input type="file" name="file" accept="image/*" class="w-full" required />
         </label>
 
-        <button id="uploadBtn" type="submit" class="bg-[#50c7c2] text-white px-6 py-3 rounded-full text-sm font-medium hover:opacity-90 transition">
+        <button
+          id="uploadBtn"
+          type="submit"
+          class="bg-[#50c7c2] text-white px-6 py-3 rounded-full text-sm font-medium hover:opacity-90 transition disabled:opacity-60"
+          disabled={fsMode && !canUpload}
+          aria-disabled={fsMode && !canUpload}
+          title={fsMode && !canUpload ? t('notLogged') : ''}
+        >
           {t('upload')}
         </button>
       </div>
@@ -137,7 +181,7 @@ const t = (key) => (dict[lang] ?? dict.en)[key];
           return;
         }
 
-        // Επιτυχία — Δείξε την εικόνα με το publicUrl που ήδη γυρίζει το API
+        // Επιτυχία — δείξε την εικόνα
         if (status) status.textContent = STR.done;
         if (last) last.classList.remove('hidden');
 

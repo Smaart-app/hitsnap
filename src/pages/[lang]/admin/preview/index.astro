@@ -1,41 +1,59 @@
 ---
 import Layout from '../../../../layouts/Layout.astro';
-import { createServerClient } from '@/lib/createServerClientAstro';
+import { getBackend } from '@/lib/backend';
+import { isFsMode } from '@/lib/isFsMode';
 
 export const prerender = false;
 
-const supabase = createServerClient(Astro.cookies);
+const lang = (Astro.params?.lang as string) || 'en';
+const backend = getBackend();
 
-const { data: { user }, error } = await supabase.auth.getUser();
-
-const lang = Astro.params?.lang || 'en';
-
-if (!user) {
-  return Astro.redirect(`/${lang}/login`);
+// -- Auth: σε FS mode είσαι πάντα logged-in (demo). Αλλιώς έλεγχος session.
+let user: { id: string } | null = null;
+if (isFsMode()) {
+  user = { id: 'demo-user' };
+} else {
+  const session = await backend.auth.getSession();
+  if (!session.userId) {
+    return Astro.redirect(`/${lang}/login`);
+  }
+  user = { id: session.userId };
 }
 
-const { data: articles, error: articlesError } = await supabase
-  .from('articles')
-  .select('*')
-  .order('created_at', { ascending: false });
+// -- Φόρτωση άρθρων ΜΕΣΩ adapter (όχι supabase.from)
+const articles = await backend.articles.list({
+  language: lang,
+  includeDrafts: true, // να βλέπεις drafts/scheduled στην προεπισκόπηση
+});
 
-function getStatus(article) {
-  if (!article?.published) return 'draft';
-  if (new Date(article.publish_date) > new Date()) return 'scheduled';
+// === helpers ===
+function getStatus(a: any) {
+  // FS mode Article: { status: 'draft'|'scheduled'|'published', publishDate }
+  // Backends τύπου Supabase: είχε published + publish_date
+  const status = a.status ?? (a.published ? 'published' : 'draft');
+  const dateStr = a.publishDate ?? a.publish_date;
+  const date = dateStr ? new Date(dateStr) : null;
+
+  if (status === 'draft') return 'draft';
+  if (status === 'scheduled') {
+    if (date && date > new Date()) return 'scheduled';
+    return 'published';
+  }
+  if (status === 'published') return 'published';
+
+  // fallback για παλιό σχήμα
+  if (!a?.published) return 'draft';
+  if (date && date > new Date()) return 'scheduled';
   return 'published';
 }
 
-function getLangFlag(lang) {
-  return lang === 'en'
-    ? '🇬🇧'
-    : lang === 'nl'
-    ? '🇳🇱'
-    : lang === 'el'
-    ? '🇬🇷'
-    : lang === 'fr'
-    ? '🇫🇷'
-    : lang === 'de'
-    ? '🇩🇪'
+function getLangFlag(l: string) {
+  const v = (l || '').toLowerCase();
+  return v === 'en' ? '🇬🇧'
+    : v === 'nl' ? '🇳🇱'
+    : v === 'el' ? '🇬🇷'
+    : v === 'fr' ? '🇫🇷'
+    : v === 'de' ? '🇩🇪'
     : '';
 }
 ---
@@ -48,18 +66,22 @@ function getLangFlag(lang) {
       <p class="text-zinc-500 text-center">Δεν υπάρχουν άρθρα.</p>
     ) : (
       <div class="space-y-6">
-        {articles.map((article) => {
-          const lang = article.lang ?? 'el';
+        {articles.map((article: any) => {
+          const al = article.language ?? article.lang ?? lang;
+          const publishStr = article.publishDate ?? article.publish_date ?? null;
+          const publishHuman = publishStr
+            ? new Date(publishStr).toLocaleString('el-GR')
+            : '—';
+
           return (
             <div
               class="p-4 border rounded shadow-sm flex items-center justify-between"
-              key={article.id}
+              key={article.id ?? article.slug}
             >
               <div>
                 <h2 class="text-lg font-semibold">{article.title}</h2>
                 <p class="text-sm text-zinc-500">
-                  🗓️ {new Date(article.publish_date).toLocaleString('el-GR')} | 🏷️{' '}
-                  {getLangFlag(lang)} | 📌{' '}
+                  🗓️ {publishHuman} | 🏷️ {getLangFlag(al)} | 📌{' '}
                   {getStatus(article) === 'draft' && '📝 Πρόχειρο'}
                   {getStatus(article) === 'scheduled' && '⏳ Προγραμματισμένο'}
                   {getStatus(article) === 'published' && '✅ Δημοσιευμένο'}
@@ -74,13 +96,13 @@ slug: {article.slug}
                 {article.slug && (
                   <>
                     <a
-                      href={`/${lang}/blog/${article.slug}`}
+                      href={`/${al}/blog/${article.slug}`}
                       class="text-sm text-blue-600 hover:underline"
                     >
                       👁️ Προβολή
                     </a>
                     <a
-                      href={`/${lang}/admin/edit/${article.slug}`}
+                      href={`/${al}/admin/edit/${article.slug}`}
                       class="text-sm text-green-600 hover:underline"
                     >
                       ✏️ Επεξεργασία

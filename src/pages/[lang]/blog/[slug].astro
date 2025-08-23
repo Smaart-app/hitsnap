@@ -1,79 +1,79 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import Markdown from '../../../components/Markdown.astro';
-import { createServerClient } from '@/lib/createServerClientAstro';
+import { getBackend } from '@/lib/backend';
+import { isFsMode } from '@/lib/isFsMode';
 
 export const prerender = false;
 export const client = 'load';
 
-const { slug, lang } = Astro.params;
+const { slug, lang } = Astro.params as { slug: string; lang: string };
 
 if (!slug || !lang) {
-  return new Response(null, {
-    status: 404,
-    statusText: 'Invalid parameters'
-  });
+  return new Response(null, { status: 404, statusText: 'Invalid parameters' });
 }
 
-const supabase = createServerClient(Astro.cookies);
+const backend = getBackend();
 
-const {
-  data: { user },
-} = await supabase.auth.getUser();
+// user για κουμπί Edit
+let user: { id: string } | null = null;
+if (isFsMode()) {
+  user = { id: 'demo-user' };
+} else {
+  const s = await backend.auth.getSession();
+  user = s.userId ? { id: s.userId } : null;
+}
 
-const { data: articles } = await supabase
-  .from('articles')
-  .select('*')
-  .eq('slug', slug)
-  .eq('lang', lang)
-  .limit(1);
-
-let article = articles?.[0];
-
-if (!article) {
-  const altLang = lang === 'el' ? 'en' : 'el';
-
-  const { data: altArticles } = await supabase
-    .from('articles')
-    .select('slug')
-    .eq('slug', slug)
-    .eq('lang', altLang)
-    .eq('published', true)
-    .limit(1);
-
-  const alt = altArticles?.[0];
-
-  if (alt && alt.slug === slug) {
-    return Astro.redirect(`/${altLang}/blog/${alt.slug}`, 302);
-  }
-
+// άρθρο στη συγκεκριμένη γλώσσα
+const fsArticle = await backend.articles.get(slug, lang);
+if (!fsArticle) {
+  // αν δεν υπάρχει σε αυτή τη γλώσσα, αλλά υπάρχει άλλη, redirect εκεί
+  const langs = await backend.articles.listLanguages(slug);
+  const alt = langs.find((l) => l !== lang);
+  if (alt) return Astro.redirect(`/${alt}/blog/${slug}`, 302);
   return Astro.redirect(`/${lang}/blog`, 302);
 }
 
-let altArticle = null;
+// δημοσιότητα
+const nowIso = new Date().toISOString();
+const isVisible =
+  fsArticle.status === 'published' ||
+  (fsArticle.status === 'scheduled' && (fsArticle.publishDate ?? '') <= nowIso);
 
-if (article) {
-  const altLang = lang === 'el' ? 'en' : 'el';
-  const groupId = article.translation_of || article.id;
-
-  const { data: altArticles } = await supabase
-    .from('articles')
-    .select('slug, lang')
-    .or(`id.eq.${groupId},translation_of.eq.${groupId}`)
-    .eq('lang', altLang)
-    .eq('published', true)
-    .limit(1);
-
-  altArticle = altArticles?.[0];
+if (!isVisible) {
+  return Astro.redirect(`/${lang}/blog`, 302);
 }
 
+// map στα πεδία που περιμένει το template
+const article = {
+  id: fsArticle.id,
+  slug: fsArticle.slug,
+  title: fsArticle.title,
+  lang: fsArticle.language ?? lang,
+  excerpt: fsArticle.excerpt ?? '',
+  cover_image: fsArticle.coverImage ?? '',
+  publish_date: fsArticle.publishDate ?? '',
+  content: fsArticle.body ?? '',
+  published: fsArticle.status === 'published',
+};
+
+// εναλλακτική γλώσσα (αν υπάρχει)
+const langs = await backend.articles.listLanguages(slug);
+const altLang = langs.find((l) => l !== article.lang) || null;
+const altArticle = altLang ? { slug: article.slug, lang: altLang } : null;
 const hasAltVersion = !!altArticle;
 
 const pageTitle = article?.title ?? 'Unknown Article';
-const pageDescription = article?.excerpt ?? 'This article may have been moved or never existed.';
+const pageDescription =
+  article?.excerpt ?? 'This article may have been moved or never existed.';
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://hitsnap.app';
 const pageUrl = `${siteUrl}/${lang}/blog/${slug}`;
 const markdown = article?.content ?? '';
+
+function langName(l: string) {
+  const m: Record<string, string> = { el: 'Greek', en: 'English', nl: 'Dutch' };
+  return m[l] ?? l.toUpperCase();
+}
 ---
 
 <Layout
@@ -95,14 +95,13 @@ const markdown = article?.content ?? '';
 
   <section class="max-w-3xl mx-auto py-12 px-4">
     <article>
-      <h1 class="text-2xl sm:text-3xl font-bold text-black"
-          style="font-family: 'Playfair Display', serif;">
+      <h1 class="text-2xl sm:text-3xl font-bold text-black" style="font-family: 'Playfair Display', serif;">
         {article.title}
       </h1>
 
       {article.publish_date && (
         <p class="text-sm text-zinc-500">
-          {new Date(article.publish_date).toLocaleDateString(lang === "en" ? "en" : "el")}
+          {new Date(article.publish_date).toLocaleDateString(lang === 'en' ? 'en' : 'el')}
         </p>
       )}
 
@@ -119,7 +118,7 @@ const markdown = article?.content ?? '';
       </div>
     </article>
 
-    {hasAltVersion && (
+    {hasAltVersion && altArticle && (
       <div class="text-right mt-10 text-sm">
         <a
           class="text-[#50c7c2] hover:underline"
@@ -127,7 +126,9 @@ const markdown = article?.content ?? '';
           target="_self"
           data-force-reload
         >
-          {lang === 'el' ? 'Διαθέσιμο και στα Αγγλικά →' : 'Also available in Greek →'}
+          {lang === 'el'
+            ? `Διαθέσιμο και στα ${langName(altArticle.lang)} →`
+            : `Also available in ${langName(altArticle.lang)} →`}
         </a>
       </div>
     )}

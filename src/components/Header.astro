@@ -1,6 +1,8 @@
 ---
 import ThemeButton from './ThemeButton.tsx';
 import { siteConfig } from '@/content/config';
+// FS-MODE: ανίχνευση demo mode
+import { isFsMode } from '@/lib/isFsMode';
 
 /** ---------- Helpers ---------- */
 function splitTitle(title: string) {
@@ -19,9 +21,19 @@ type Labels = {
 };
 
 const lang: 'en'|'nl'|'el' = (Astro.props?.lang ?? 'en').toLowerCase();
-const user = Astro.props?.user ?? null;
-const isLoggedIn = !!user;
 const disableLangSwitch = Astro.props?.disableHeaderLangSwitch ?? false;
+
+// FS-MODE: αν είμαστε σε demo mode και υπάρχει cookie, θεώρησε logged-in
+const fsMode = isFsMode();
+const fsLogged = fsMode && (Astro.cookies?.get('fs-auth')?.value === '1');
+
+// Αν περάστηκε user από Layout/σελίδα, προέχει αυτός. Αλλιώς σε FS mode δίνουμε ένα demo user.
+const user =
+  (Astro.props?.user ?? null) ||
+  (fsLogged ? { email: 'demo@local' } : null);
+
+// Τελική σημαία login
+const isLoggedIn = !!user;
 
 /** UI labels (can be overridden by Layout/i18n) */
 const labels: Labels = {

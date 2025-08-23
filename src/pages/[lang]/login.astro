@@ -1,22 +1,45 @@
 ---
+// src/pages/[lang]/login.astro
 import Layout from '@layouts/Layout.astro';
 import LoginForm from '../../components/LoginForm.jsx';
+import { isFsMode } from '@/lib/isFsMode';
 import { createServerClient } from '@/lib/createServerClientAstro';
 
-const lang = Astro.params?.lang || 'en';
+export const prerender = false;
 
-const supabase = createServerClient(Astro.cookies);
+const lang = (Astro.params?.lang as string) || 'en';
+const fsMode = isFsMode();
 
-const { data: { session } } = await supabase.auth.getSession();
-
-if (session) {
-  return Astro.redirect(`/${lang}/admin/preview`);
+// FS-MODE: μην αγγίζεις Supabase στην server πλευρά, έλεγξε μόνο το demo cookie
+if (fsMode) {
+  const logged = Astro.cookies.get('fs-auth')?.value === '1';
+  if (logged) {
+    return Astro.redirect(`/${lang}/admin/preview`);
+  }
+} else {
+  // Real backend: κλασικός έλεγχος Supabase session
+  const supabase = createServerClient(Astro.cookies);
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    return Astro.redirect(`/${lang}/admin/preview`);
+  }
 }
+
+const pageTitle = lang === 'el' ? '🔐 Είσοδος' : '🔐 Sign In';
 ---
 
-<Layout title="🔐 Είσοδος" lang={lang}>
+<Layout title={pageTitle} lang={lang}>
   <main class="max-w-md mx-auto mt-24 p-6 bg-white rounded shadow">
-    <h1 class="text-2xl font-bold mb-4">🔐 Σύνδεση στο Admin</h1>
+    <h1 class="text-2xl font-bold mb-4">
+      {lang === 'el' ? '🔐 Σύνδεση στο Admin' : '🔐 Sign in to Admin'}
+    </h1>
+
+    {fsMode && (
+      <p class="text-sm text-zinc-600 mb-3">
+        Demo mode: η είσοδος γίνεται τοπικά. Η φόρμα θα σε συνδέσει χωρίς πραγματικό backend.
+      </p>
+    )}
+
     <LoginForm lang={lang} client:load />
   </main>
 </Layout>

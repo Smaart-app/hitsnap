@@ -2,24 +2,31 @@
 // src/pages/[lang]/blog/index.astro
 import Layout from '../../../layouts/Layout.astro';
 import ArticleCard from '../../../components/ArticleCard.jsx';
-import { createServerClient } from '@/lib/createServerClientAstro';
+import { getBackend } from '@/lib/backend';
 
 export const prerender = false;
 
-const { lang } = Astro.params;
-const supabase = createServerClient(Astro.cookies);
+const { lang } = Astro.params as { lang: string };
+const backend = getBackend();
 
-const now = new Date().toISOString();
+// Δημόσια λίστα: μόνο όσα είναι ορατά τώρα (όχι drafts, όχι future scheduled)
+const articlesFs = await backend.articles.list({
+  language: lang,
+  includeDrafts: false,
+});
 
-const { data: articlesRaw, error } = await supabase
-  .from('articles')
-  .select('*')
-  .eq('lang', lang)
-  .eq('published', true)
-  .lte('publish_date', now)
-  .order('publish_date', { ascending: false });
-
-const articles = Array.isArray(articlesRaw) ? articlesRaw : [];
+// Προσαρμογή στα πεδία που περιμένει το UI σου (cover_image κ.λπ.)
+const articles = (articlesFs ?? []).map((a) => ({
+  title: a.title,
+  excerpt: a.excerpt ?? '',
+  slug: a.slug,
+  // Το ArticleCard περιμένει cover_image
+  cover_image: a.coverImage ?? '',
+  // κρατάμε για συμβατότητα αν κάπου αλλού το χρησιμοποιήσεις
+  publish_date: a.publishDate,
+  published: a.status === 'published',
+  lang: a.language ?? lang,
+}));
 
 const pageTitle = lang === 'en' ? 'Articles | HitSnap' : 'Άρθρα | HitSnap';
 const pageDesc =
