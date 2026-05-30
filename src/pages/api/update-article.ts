@@ -1,132 +1,184 @@
+// src/pages/api/update-article.ts
 import type { APIRoute } from "astro";
-import { createServerClient } from "../../lib/createServerClientAstro";
+import { getBackend } from "@/lib/backend";
+import type { Article } from "@/lib/backend/types";
 
 export const prerender = false;
 
-// Basic UUID v4 validation
-function isValidUUID(uuid: string) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid);
+async function parseBody(request: Request): Promise<Record<string, any>> {
+  const contentType = (request.headers.get("content-type") || "").toLowerCase();
+
+  if (contentType.includes("application/json")) {
+    return await request.json();
+  }
+
+  if (
+    contentType.includes("multipart/form-data") ||
+    contentType.includes("application/x-www-form-urlencoded")
+  ) {
+    const form = await request.formData();
+    const data: Record<string, any> = {};
+
+    for (const [key, value] of form.entries()) {
+      data[key] = value;
+    }
+
+    return data;
+  }
+
+  throw new Error(`Unsupported Content-Type: ${contentType || "(none)"}`);
 }
 
-export const POST: APIRoute = async ({ request, cookies }) => {
+export const POST: APIRoute = async ({ request }) => {
   try {
-    console.log("[UPDATE-ARTICLE] HEADERS:", request.headers);
-    console.log("[UPDATE-ARTICLE] METHOD:", request.method);
+    const backend = getBackend();
 
-    let body: any;
+    const session = await backend.auth.getSession();
+    if (!session.userId) {
+      return new Response(
+        JSON.stringify({ article: null, error: "Unauthorized" }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    let data: Record<string, any>;
+
     try {
-      body = await request.json();
-    } catch (jsonErr) {
-      console.error("[UPDATE-ARTICLE] Failed to parse JSON body!", jsonErr);
+      data = await parseBody(request);
+    } catch (err: any) {
       return new Response(
-        JSON.stringify({ article: null, error: "Σφάλμα ανάγνωσης δεδομένων (μήπως δεν στέλνεις JSON;)" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        JSON.stringify({
+          article: null,
+          error: err?.message || "Unsupported Content-Type",
+        }),
+        {
+          status: 415,
+          headers: { "Content-Type": "application/json" },
+        }
       );
     }
-
-    if (!body || typeof body !== "object") {
-      console.error("[UPDATE-ARTICLE] Empty or invalid body:", body);
-      return new Response(
-        JSON.stringify({ article: null, error: "Δεν ελήφθησαν δεδομένα για ενημέρωση." }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    console.log("[UPDATE-ARTICLE] BODY RECEIVED:", body);
 
     let {
-      id,
-      title,
-      excerpt,
-      content,
-      cover_image,
-      lang,
-      published,
-      publish_date,
-    } = body;
+      id = "",
+      slug = "",
+      title = "",
+      excerpt = "",
+      content = "",
+      cover_image = "",
+      lang = "",
+      published = false,
+      publish_date = "",
+    } = data;
 
-    if (!id || typeof id !== "string" || !isValidUUID(id.trim())) {
-      console.error("[UPDATE-ARTICLE] No valid article ID sent!");
+    const cleanSlug = String(slug || id || "").trim();
+    const cleanLang = String(lang || "").trim();
+
+    if (!cleanSlug) {
       return new Response(
-        JSON.stringify({ article: null, error: "Missing or invalid article ID (UUID)" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        JSON.stringify({ article: null, error: "Missing slug" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
       );
     }
 
-    if (!lang || typeof lang !== "string" || lang.length < 2) {
+    if (!cleanLang || cleanLang.length < 2) {
       return new Response(
-        JSON.stringify({ article: null, error: "Λείπει ή είναι λάθος το lang code!" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        JSON.stringify({
+          article: null,
+          error: "Λείπει ή είναι λάθος το lang code!",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    if (!title || typeof title !== "string") {
+      return new Response(
+        JSON.stringify({ article: null, error: "Missing title" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    if (typeof content !== "string") {
+      return new Response(
+        JSON.stringify({ article: null, error: "Missing content" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
       );
     }
 
     if (typeof published === "string") {
       published = published === "true";
     }
+
     published = !!published;
 
-    const supabase = createServerClient(cookies);
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    const nowIso = new Date().toISOString();
+    const publishIso = publish_date
+      ? new Date(publish_date).toISOString()
+      : nowIso;
 
-    if (userError || !user || !user.id || !isValidUUID(user.id)) {
-      console.error("[UPDATE-ARTICLE] User not authenticated or missing/invalid UUID.");
-      return new Response(
-        JSON.stringify({ article: null, error: "Unauthorized or invalid user" }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
+    let status: Article["status"] = "draft";
+
+    if (published) {
+      status = publishIso > nowIso ? "scheduled" : "published";
     }
 
-    console.log("[UPDATE-ARTICLE] GOING TO UPDATE WITH:", {
-      id: id.trim(), user_id: user.id.trim(), title, excerpt, content, cover_image, lang, published, publish_date
-    });
+    const existing = await backend.articles.get(cleanSlug, cleanLang);
 
-    const { error, data } = await supabase
-      .from("articles")
-      .update({
-        title,
-        excerpt: excerpt || null,
-        content,
-        cover_image: cover_image || null,
-        lang,
-        published,
-        publish_date: publish_date || new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", id.trim())
-      .eq("user_id", user.id.trim())
-      .select();
+    const article: Article = {
+      id: existing?.id || String(id || cleanSlug).trim(),
+      slug: cleanSlug,
+      title: String(title).trim(),
+      language: cleanLang,
+      excerpt: excerpt ? String(excerpt) : "",
+      coverImage: cover_image ? String(cover_image).trim() : "",
+      body: String(content || ""),
+      publishDate: publishIso,
+      status,
+      tags: existing?.tags || [],
+    };
 
-    console.log("[UPDATE-ARTICLE] SUPABASE UPDATE RESULT:", { error, data });
+    const saved = await backend.articles.upsert(article);
 
-    if (error) {
-      return new Response(
-        JSON.stringify({ article: null, error: error.message }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
-    }
-    if (!data || data.length === 0) {
-      return new Response(
-        JSON.stringify({ article: null, error: "No article updated (wrong ID or no permission?)" }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    const updated = data[0];
     return new Response(
       JSON.stringify({
-        article: { id: updated.id, slug: updated.slug, lang: updated.lang },
+        article: {
+          id: saved.id,
+          slug: saved.slug,
+          lang: saved.language,
+        },
         error: null,
       }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
     );
-  } catch (e: any) {
-    console.error("[UPDATE-ARTICLE] Unhandled error:", e);
+  } catch (err: any) {
+    console.error("[update-article] error:", err);
+
     return new Response(
-      JSON.stringify({ article: null, error: e?.message || "Internal Server Error" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({
+        article: null,
+        error: err?.message || "Internal Server Error",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
     );
   }
 };
